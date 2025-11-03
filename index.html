@@ -1695,10 +1695,7 @@
             <div id="nai-test-result" style="display: none; margin-top: 20px;">
                 <div style="font-weight: bold; margin-bottom: 10px; color: #333;">生成结果：</div>
                 <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
-                    <img id="nai-result-image">
-                </div>
-                <div style="margin-top: 15px; text-align: center;">
-                    <button id="nai-download-btn" class="btn btn-secondary" style="width: auto;">下载图像</button>
+                    <img id="nai-result-image" class="naiimag-image" style="max-width: 100%; border-radius: 8px; cursor: pointer;" title="三击下载图片">
                 </div>
             </div>
             <div id="nai-test-error" style="display: none; margin-top: 15px; padding: 12px; background: #f8d7da; color: #721c24; border-radius: 6px; border: 1px solid #f5c6cb;"></div>
@@ -1756,7 +1753,7 @@
             </div>
         <button id="close-category-manager-btn" class="btn btn-primary" style="margin-top: 25px;">完成</button>
     </div>
-</div>
+    </div>
     <script src="script.js" defer></script>
 </body>
 

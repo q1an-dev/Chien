@@ -4887,6 +4887,29 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                 }
                 // --- End close panels ---
 
+                // 处理 NAI 重新生成按钮点击
+                if (e.target.closest('.nai-regenerate-btn')) {
+                    const button = e.target.closest('.nai-regenerate-btn');
+                    const wrapper = e.target.closest('.message-wrapper');
+                    
+                    if (wrapper && wrapper.dataset.id) {
+                        const messageId = wrapper.dataset.id;
+                        const chat = (currentChatType === 'private') 
+                            ? db.characters.find(c => c.id === currentChatId) 
+                            : db.groups.find(g => g.id === currentChatId);
+                        
+                        if (chat) {
+                            const message = chat.history.find(m => m.id === messageId);
+                            
+                            if (message && message.type === 'naiimag') {
+                                // 调用我们从 ephone 复制来的函数
+                                handleRegenerateNaiImage(message.timestamp, button);
+                            }
+                        }
+                    }
+                    return;
+                }
+
                 if (e.target && e.target.id === 'load-more-btn') {
                     loadMoreMessages();
                 } else if (isInMultiSelectMode) {
@@ -4966,6 +4989,7 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
             // 新增：绑定取消引用按钮事件
             document.getElementById('cancel-reply-btn').addEventListener('click', cancelQuoteReply);
         }
+
 
         function handleMessageLongPress(messageWrapper, x, y) {
             if (isInMultiSelectMode) return;
@@ -5068,6 +5092,7 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
     }
     // --- 引用功能函数结束 ---
 
+        // --- 升级后的编辑功能（支持普通文本和NAI图片）---
         function startMessageEdit(messageId) {
             exitMultiSelectMode();
             editingMessageId = messageId;
@@ -5075,57 +5100,142 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
             const message = chat.history.find(m => m.id === messageId);
             if (!message) return;
 
+            activeMessageTimestamp = message.timestamp; // 关键：设置全局时间戳
+
             const modal = document.getElementById('message-edit-modal');
             const textarea = document.getElementById('message-edit-textarea');
+            const modalTitle = modal ? modal.querySelector('h3') : null;
 
-            let contentToEdit = message.content;
-            const plainTextMatch = contentToEdit.match(/^\[.*?：([\s\S]*)\]$/);
-            if (plainTextMatch && plainTextMatch[1]) {
-                contentToEdit = plainTextMatch[1].trim();
+            if (!modal || !textarea) {
+                console.error('找不到编辑弹窗 (message-edit-modal)');
+                return;
             }
-            contentToEdit = contentToEdit.replace(/\[发送时间:.*?\]/g, '').trim();
+
+            if (message.type === 'naiimag') {
+                // --- 升级：如果是 NAI 消息 ---
+                // 1. 加载 prompt 到输入框
+                textarea.value = message.prompt || '';
+                // 2. 修改弹窗标题
+                if (modalTitle) modalTitle.textContent = '编辑 NAI 提示词';
+            } else {
+                // --- 原始：如果是普通文本/语音消息 ---
+                // 1. 加载 content 到输入框
+                let contentToEdit = message.content;
+                const plainTextMatch = contentToEdit.match(/^\[.*?：([\s\S]*)\]$/);
+                if (plainTextMatch && plainTextMatch[1]) {
+                    contentToEdit = plainTextMatch[1].trim();
+                }
+                contentToEdit = contentToEdit.replace(/\[发送时间:.*?\]/g, '').trim();
+                textarea.value = contentToEdit;
+                // 2. 恢复弹窗标题
+                if (modalTitle) modalTitle.textContent = '编辑消息';
+            }
             
-            textarea.value = contentToEdit;
+            // 3. 显示弹窗
             modal.classList.add('visible');
             textarea.focus();
         }
 
         async function saveMessageEdit() {
-            const newText = document.getElementById('message-edit-textarea').value.trim();
-            if (!newText || !editingMessageId) {
-                cancelMessageEdit();
+            const modal = document.getElementById('message-edit-modal');
+            const textarea = document.getElementById('message-edit-textarea');
+
+            if (!textarea || !activeMessageTimestamp) {
+                if (modal) modal.classList.remove('visible');
                 return;
             }
 
+            const newContent = textarea.value.trim(); // 这是用户输入的新内容
             const chat = (currentChatType === 'private') ? db.characters.find(c => c.id === currentChatId) : db.groups.find(g => g.id === currentChatId);
-            const messageIndex = chat.history.findIndex(m => m.id === editingMessageId);
-            if (messageIndex === -1) {
-                cancelMessageEdit();
-                return;
-            }
+            const message = chat.history.find(m => m.timestamp === activeMessageTimestamp);
+            
+            if (!message) return;
 
-            const oldContent = chat.history[messageIndex].content;
-            const prefixMatch = oldContent.match(/(\[.*?的消息：)[\s\S]+\]/);
-            let newContent;
+            // 找到对应的聊天气泡，准备更新UI
+            const messageWrapper = document.querySelector(`.message-wrapper[data-id="${message.id}"]`);
+            const bubbleElement = messageWrapper ? messageWrapper.querySelector('.message-bubble') : null;
 
-            if (prefixMatch && prefixMatch[1]) {
-                const prefix = prefixMatch[1];
-                newContent = `${prefix}${newText}]`;
+            if (message.type === 'naiimag') {
+                // --- 升级：NAI 消息的保存逻辑 ---
+                
+                if (message.prompt === newContent) {
+                    // 1. 用户没改 prompt，直接关闭弹窗
+                    if (modal) modal.classList.remove('visible');
+                    activeMessageTimestamp = null;
+                    return;
+                }
+
+                // 2. 用户改了 prompt，触发"重新生成"
+                console.log('NAI Prompt 已修改，开始重新生成...');
+                
+                // 3. 在聊天气泡里显示"加载中"
+                if (bubbleElement) {
+                    bubbleElement.innerHTML = `<div style="padding: 20px; text-align: center; color: #666;">🎨 正在重新生成...</div>`;
+                }
+
+                try {
+                    // 4. 调用核心生图函数
+                    const chatId = currentChatId;
+                    const result = await generateNaiImageFromPrompt(newContent, chatId); // 使用新 prompt
+
+                    // 5. 更新数据库中的消息
+                    message.prompt = newContent; // 保存新 prompt
+                    message.imageUrl = result.imageUrl;
+                    message.fullPrompt = result.fullPrompt;
+                    
+                    // 6. 在聊天气泡里渲染新图片
+                    if (bubbleElement) {
+                        bubbleElement.innerHTML = `
+                            <div class="nai-image-wrapper">
+                                <img src="${result.imageUrl}" class="realimag-image naiimag-image" alt="NovelAI Image" title="${result.fullPrompt}" loading="lazy" onerror="this.src='https://i.postimg.cc/1tH6ds9g/1752301200490.jpg';">
+                                <button class="nai-regenerate-btn" title="重新生成">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
+                            </div>`;
+                    }
+                    
+                    showToast("图片已根据新提示词重新生成！");
+                } catch (error) {
+                    console.error('NAI 重新生成失败:', error);
+                    if (bubbleElement) {
+                        bubbleElement.innerHTML = `<div style="padding: 20px; text-align: center; color: #ff3b30;">[NAI 重新生成失败: ${error.message}]</div>`;
+                    }
+                    showToast(`无法重新生成图片: ${error.message}`);
+                }
+                
             } else {
-                newContent = newText;
+                // --- 原始：普通文本消息的保存逻辑 ---
+                const oldContent = message.content;
+                const prefixMatch = oldContent.match(/(\[.*?的消息：)[\s\S]+\]/);
+                let finalContent;
+
+                if (prefixMatch && prefixMatch[1]) {
+                    const prefix = prefixMatch[1];
+                    finalContent = `${prefix}${newContent}]`;
+                } else {
+                    finalContent = newContent;
+                }
+
+                message.content = finalContent;
+                
+                // 更新 UI
+                if (bubbleElement && message.parts) {
+                    message.parts = [{type: 'text', text: finalContent}];
+                }
             }
 
-            chat.history[messageIndex].content = newContent;
-            if (chat.history[messageIndex].parts) {
-                chat.history[messageIndex].parts = [{type: 'text', text: newContent}];
-            }
-
+            // --- 通用：保存到数据库并关闭弹窗 ---
             await saveData();
             currentPage = 1;
             renderMessages(false, true);
             renderChatList();
-            
-            cancelMessageEdit();
+
+            if (modal) modal.classList.remove('visible');
+            activeMessageTimestamp = null;
+            editingMessageId = null;
         }
 
         function cancelMessageEdit() {
@@ -5408,27 +5518,31 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                 });
 
             } else if (message.type === 'naiimag') {
-                // ▼▼▼ 新增：NovelAI 图片渲染逻辑 ▼▼▼
-                // (来自 nai出图整体.html 第20部分)
+                // ▼▼▼ 新增：NovelAI 图片渲染逻辑（含重新生成按钮）▼▼▼
+                // 使用 ephone 的 HTML 结构，包含 wrapper 和 regenerate 按钮
 
-                // bubbleElement 在这里是消息的 *主要内容*
-                // 我们不再创建 .message-bubble，而是创建 .image-bubble
                 bubbleElement = document.createElement('div');
-                bubbleElement.className = 'image-bubble';
-                // 确保 NAI 图片也使用圆角和阴影样式
-                bubbleElement.style.borderRadius = 'var(--border-radius)';
-                bubbleElement.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                // 添加 ephone 的样式类
+                bubbleElement.className = 'message-bubble ' + (isSent ? 'sent' : 'received') + ' is-realimag'; 
 
-                // 添加 naiimag-image 类用于三击下载
-                bubbleElement.innerHTML = `<img src="${message.imageUrl}" class="naiimag-image" alt="NovelAI图片分享" loading="lazy" onerror="this.src='https://i.postimg.cc/Y96LPskq/o-o-2.jpg'; this.alt='图片加载失败';" title="${message.fullPrompt || message.prompt || 'NovelAI生成'}">`;
-
-                // 同样应用 sent/received 圆角
-                if (isSent) {
-                    bubbleElement.style.borderBottomRightRadius = '5px';
-                } else {
-                    bubbleElement.style.borderBottomLeftRadius = '5px';
-                }
-
+                // 使用 ephone 的 HTML 结构，包含 wrapper 和 regenerate 按钮
+                bubbleElement.innerHTML = `
+                    <div class="nai-image-wrapper">
+                        <img src="${message.imageUrl || 'https://i.postimg.cc/1tH6ds9g/1752301200490.jpg'}" 
+                             class="realimag-image naiimag-image" 
+                             alt="NovelAI Image" 
+                             title="${message.fullPrompt || message.prompt || 'NAI Image'}"
+                             onerror="this.src='https://i.postimg.cc/1tH6ds9g/1752301200490.jpg';"
+                             loading="lazy">
+                        
+                        <button class="nai-regenerate-btn" title="重新生成">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
                 // ▲▲▲ NovelAI 图片渲染逻辑结束 ▲▲▲
 
             } else if ((isSent && sentStickerMatch && stickerData) || (!isSent && receivedStickerMatch)) {
@@ -9901,51 +10015,52 @@ function renderForumPosts(posts) {
             let clickTimer = null;
             let lastClickedElement = null;
 
-            // 使用事件委托，监听 messageArea 上的点击
-            const messageAreaForDownload = document.getElementById('message-area');
-            if (messageAreaForDownload) {
-                messageAreaForDownload.addEventListener('click', function(e) {
-                    const target = e.target;
+            // 处理三击下载的通用函数
+            function handleTripleClick(e) {
+                const target = e.target;
 
-                    // 检查是否是 NAI 图片 (我们修改 createMessageBubbleElement 时添加了 .naiimag-image 类)
-                    if (target.tagName === 'IMG' && target.classList.contains('naiimag-image')) {
+                // 检查是否是 NAI 图片
+                if (target.tagName === 'IMG' && target.classList.contains('naiimag-image')) {
 
-                        if (target === lastClickedElement) {
-                            clickCount++;
-                        } else {
-                            clickCount = 1;
-                            lastClickedElement = target;
+                    if (target === lastClickedElement) {
+                        clickCount++;
+                    } else {
+                        clickCount = 1;
+                        lastClickedElement = target;
+                    }
+
+                    if (clickTimer) clearTimeout(clickTimer);
+
+                    if (clickCount === 3) {
+                        clickCount = 0;
+                        lastClickedElement = null;
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        console.log('🖼️ [NAI下载] 检测到三击NAI图片');
+                        const imageSrc = target.src;
+
+                        if (!imageSrc || imageSrc === 'about:blank' || imageSrc === '') {
+                            showToast('图片加载中，请稍后重试');
+                            return;
                         }
+                        const filename = generateFilename(target);
+                        downloadImage(imageSrc, filename);
 
-                        if (clickTimer) clearTimeout(clickTimer);
-
-                        if (clickCount === 3) {
+                    } else {
+                        clickTimer = setTimeout(() => {
                             clickCount = 0;
                             lastClickedElement = null;
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            console.log('🖼️ [NAI下载] 检测到三击NAI图片');
-                            const imageSrc = target.src;
-
-                            if (!imageSrc || imageSrc === 'about:blank') {
-                                showToast('图片加载中，请稍后重试');
-                                return;
-                            }
-                            const filename = generateFilename(target);
-                            downloadImage(imageSrc, filename);
-
-                        } else {
-                            clickTimer = setTimeout(() => {
-                                clickCount = 0;
-                                lastClickedElement = null;
-                            }, 500); // 500ms 内三次点击
-                        }
+                        }, 500); // 500ms 内三次点击
                     }
-                }, true); // 使用捕获阶段
+                }
             }
 
-            console.log('✅ [NAI下载] 三击下载功能已初始化');
+            // 使用事件委托，监听 document 上的点击（覆盖聊天消息和测试弹窗中的所有 NAI 图片）
+            // 这样可以确保无论图片在哪里，都能被三击下载功能识别
+            document.addEventListener('click', handleTripleClick, true); // 使用捕获阶段，提前拦截
+
+            console.log('✅ [NAI下载] 三击下载功能已初始化（支持聊天消息和测试弹窗）');
         })();
 
         function renderPeekSteps(data) {
@@ -10480,8 +10595,7 @@ function renderForumPosts(posts) {
         const closeNovelaiTestBtn = document.getElementById('close-novelai-test');
         const closeNaiTestBtnFooter = document.getElementById('close-nai-test-btn'); // 弹窗底部的关闭按钮
         const naiGenerateBtn = document.getElementById('nai-generate-btn');
-        const naiDownloadBtn = document.getElementById('nai-download-btn');
-        const naiResultImage = document.getElementById('nai-result-image'); // 获取图片元素
+        const naiResultImage = document.getElementById('nai-result-image'); // 获取图片元素（支持三击下载）
 
         if (novelaiTestBtn && novelaiTestModal && novelaiApiKeyInput) {
             novelaiTestBtn.addEventListener('click', () => {
@@ -10520,21 +10634,7 @@ function renderForumPosts(posts) {
             });
         }
 
-        if (naiDownloadBtn && naiResultImage) {
-            naiDownloadBtn.addEventListener('click', () => {
-                const imgSrc = naiResultImage.src;
-                if (!imgSrc || imgSrc === 'about:blank') {
-                    showToast('没有可下载的图片。');
-                    return;
-                }
-                const link = document.createElement('a');
-                link.href = imgSrc;
-                // 尝试从 prompt 生成文件名
-                const promptText = document.getElementById('nai-test-prompt').value.substring(0, 30).replace(/[^a-z0-9]/gi, '_');
-                link.download = `novelai_${promptText || 'generated'}_${Date.now()}.png`;
-                link.click();
-            });
-        }
+        // 删除下载按钮的事件监听器，改用三击下载功能（已在第9984行初始化）
 
         // --- 角色专属提示词弹窗的事件监听 ---
         const characterNaiPromptsModal = document.getElementById('character-nai-prompts-modal');
@@ -11042,10 +11142,16 @@ function renderForumPosts(posts) {
                 if (imageBlob) {
                     const imageUrl = URL.createObjectURL(imageBlob);
                     resultImage.onload = () => URL.revokeObjectURL(imageUrl); // 释放内存
+                    // 确保图片有 naiimag-image 类，以便三击下载功能识别
+                    resultImage.classList.add('naiimag-image');
                     resultImage.src = imageUrl;
+                    // 设置 title 以便生成文件名
+                    const promptText = document.getElementById('nai-test-prompt').value.trim();
+                    resultImage.title = promptText || 'NovelAI 测试生成';
+                    resultImage.alt = promptText || 'NovelAI Generated Image';
                     statusDiv.style.display = 'none';
                     resultDiv.style.display = 'block';
-                    console.log('✅ 图片显示成功！🎨');
+                    console.log('✅ 图片显示成功！🎨 (三击图片可下载)');
                 } else {
                     throw new Error('未能获取到有效的图片数据');
                 }
@@ -11348,5 +11454,88 @@ function renderForumPosts(posts) {
                 fullPrompt: finalPositivePrompt
             };
         }
+
+        // ========================================
+        // 🎨 高级消息编辑器功能 (ephone 移植，适配小章鱼)
+        // ========================================
+
+        /**
+         * 从AI提示词生成NAI图片（用于重新生成功能）
+         * @param {string} aiPrompt - AI提示词
+         * @param {string} chatId - 聊天ID
+         * @returns {Promise<object>} - 返回 { imageUrl, fullPrompt }
+         */
+        async function generateNaiImageFromPrompt(aiPrompt, chatId) {
+            // 适配：小章鱼使用 currentChatType 来判断类型
+            const chatType = currentChatType || 'private';
+            return await generateNovelAIImageForChat(aiPrompt, chatId, chatType, null);
+        }
+
+
+        /**
+         * 处理NAI图片重新生成（适配小章鱼项目）
+         * @param {number} timestamp - 消息时间戳
+         * @param {HTMLElement} buttonElement - 按钮元素
+         */
+        async function handleRegenerateNaiImage(timestamp, buttonElement) {
+            if (!currentChatId || !timestamp) return;
+
+            const chat = (currentChatType === 'private')
+                ? db.characters.find(c => c.id === currentChatId)
+                : db.groups.find(g => g.id === currentChatId);
+
+            if (!chat) return;
+
+            const msgIndex = chat.history.findIndex(m => m.timestamp === timestamp);
+            if (msgIndex === -1) return;
+
+            const message = chat.history[msgIndex];
+
+            const originalPrompt = message.prompt;
+
+            if (!originalPrompt) {
+                showToast("未找到该图片的原始提示词(prompt)。");
+                return;
+            }
+
+            // 显示加载状态
+            buttonElement.disabled = true;
+            buttonElement.classList.add('loading');
+            const bubble = buttonElement.closest('.message-bubble');
+            const imgElement = bubble ? bubble.querySelector('.naiimag-image, .realimag-image') : null;
+            if (imgElement) {
+                imgElement.style.opacity = '0.5';
+            }
+
+            try {
+                const generatedData = await generateNaiImageFromPrompt(originalPrompt, currentChatId);
+
+                // 更新数据
+                message.imageUrl = generatedData.imageUrl;
+                message.fullPrompt = generatedData.fullPrompt;
+
+                // 保存数据
+                await saveData();
+
+                // 更新UI
+                if (imgElement) {
+                    imgElement.src = generatedData.imageUrl;
+                    imgElement.title = generatedData.fullPrompt;
+                    imgElement.style.opacity = '1';
+                }
+
+                showToast("图片已重新生成！");
+            } catch (error) {
+                console.error("重新生成NAI图片失败:", error);
+                showToast(`无法重新生成图片: ${error.message}`);
+                if (imgElement) {
+                    imgElement.style.opacity = '1';
+                }
+            } finally {
+                buttonElement.disabled = false;
+                buttonElement.classList.remove('loading');
+            }
+        }
+
 
     });
