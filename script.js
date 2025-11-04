@@ -7063,6 +7063,27 @@ return `${seconds}秒`;
             const results = [];
             let i = 0;
 
+            // 辅助函数：检查文本是否为 NAI JSON 指令
+            const checkAndPushNaiJson = (text) => {
+                if (!text) return false;
+                const trimmedText = text.trim();
+                if ((trimmedText.startsWith('{') && trimmedText.endsWith('}')) || (trimmedText.startsWith('[') && trimmedText.endsWith(']'))) {
+                    try {
+                        const jsonData = JSON.parse(trimmedText);
+                        const commands = Array.isArray(jsonData) ? jsonData : [jsonData];
+                        if (commands.some(item => item && item.type === 'naiimag' && item.prompt)) {
+                            // 是 NAI JSON，直接推送原文
+                            results.push({ type: 'text', content: trimmedText });
+                            return true;
+                        }
+                    } catch (e) {
+                        // 不是有效的 JSON，将由后续逻辑处理
+                        return false;
+                    }
+                }
+                return false;
+            };
+
             while (i < responseData.length) {
                 const nextTagStart = responseData.indexOf('<', i);
                 const nextBracketStart = responseData.indexOf('[', i);
@@ -7078,14 +7099,23 @@ return `${seconds}秒`;
                 // If no special blocks left, the rest is plain text
                 if (firstSpecialIndex === -1) {
                     const text = responseData.substring(i).trim();
-                    if (text) results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                    // ▼▼▼ BUGFIX ▼▼▼
+                    if (text && !checkAndPushNaiJson(text)) {
+                        // 不是 NAI JSON，作为普通文本包装
+                        results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                    }
+                    // ▲▲▲ BUGFIX END ▲▲▲
                     break;
                 }
 
                 // If there's plain text before the special block, add it
                 if (firstSpecialIndex > i) {
                     const text = responseData.substring(i, firstSpecialIndex).trim();
-                    if (text) results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                    // ▼▼▼ BUGFIX ▼▼▼
+                    if (text && !checkAndPushNaiJson(text)) {
+                        results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                    }
+                    // ▲▲▲ BUGFIX END ▲▲▲
                 }
 
                 i = firstSpecialIndex;
@@ -7156,7 +7186,13 @@ return `${seconds}秒`;
                     endOfText = responseData.length;
                 }
                 const text = responseData.substring(i, endOfText).trim();
-                if (text) results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                
+                // ▼▼▼ BUGFIX ▼▼▼
+                if (text && !checkAndPushNaiJson(text)) {
+                    results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                }
+                // ▲▲▲ BUGFIX END ▲▲▲
+                
                 i = endOfText;
             }
             return results;
@@ -7593,63 +7629,21 @@ ${loadedModules.map(m => `
                 }
             }
             if (fullResponse) {
-                // ▼▼▼▼▼▼▼▼▼▼ 核心修改从这里开始 ▼▼▼▼▼▼▼▼▼▼
+                // ▼▼▼▼▼ 撤销上一个补丁，恢复到原始的 getMixedContent 调用 ▼▼▼▼▼
 
                 const trimmedResponse = fullResponse.trim();
                 let messages;
-                let naiJsonData = null; // 1. 声明一个变量来尝试保存解析后的JSON
 
-                // 2. 增加一个拦截器，检查AI的完整回复是不是一个纯JSON
-                if ((trimmedResponse.startsWith('{') && trimmedResponse.endsWith('}')) || (trimmedResponse.startsWith('[') && trimmedResponse.endsWith(']'))) {
-                    try {
-                        // 3. 尝试解析它
-                        naiJsonData = JSON.parse(trimmedResponse);
-                    } catch (e) {
-                        // 解析失败，说明它可能只是一个长得像JSON的普通文本，保持 naiJsonData = null
-                        naiJsonData = null;
-                    }
-                }
-
-                // 4. 如果成功解析出了JSON (naiJsonData 不为 null)
-                if (naiJsonData) {
-                    // 5. 无论它是一个对象还是一个数组，我们都把它统一转换成数组，方便处理
-                    const naiCommands = Array.isArray(naiJsonData) ? naiJsonData : [naiJsonData];
-
-                    // 6. 检查这个数组里是否 *至少包含一个* NAI生图指令
-                    const isNaiCommandList = naiCommands.some(item => item && item.type === 'naiimag' && item.prompt);
-
-                    if (isNaiCommandList) {
-                        // 7. 如果是，我们就"伪造"一个 messages 数组，让后续的循环逻辑能正确处理它
-                        // 我们把数组里的每个对象重新变回JSON字符串，这样后续的循环就能用 JSON.parse() 来解析它
-                        messages = naiCommands.map(command => {
-                            if (command && command.type === 'naiimag' && command.prompt) {
-                                return { type: 'text', content: JSON.stringify(command) };
-                            }
-                            // 如果数组里混杂了其他不是NAI指令的JSON，就原样丢回去
-                            return { type: 'text', content: `[unknown的消息：${JSON.stringify(command)}]` };
-                        });
-                    } else {
-                        // 8. 如果它是个JSON，但不是NAI指令，就还按老规矩办
-                        // 新增：判断回复是否可能是一个完整的HTML块
-                        if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
-                            // 如果是，则将其视为单个HTML消息，避免被错误切分
-                            messages = [{ type: 'html', content: trimmedResponse }];
-                        } else {
-                            // 否则，使用原有的逻辑来处理可能混合了多种格式的文本
-                            messages = getMixedContent(fullResponse).filter(item => item.content.trim() !== '');
-                        }
-                    }
+                // 新增：判断回复是否可能是一个完整的HTML块
+                if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
+                    // 如果是，则将其视为单个HTML消息，避免被错误切分
+                    messages = [{ type: 'html', content: trimmedResponse }];
                 } else {
-                    // 9. 如果它压根就不是JSON（比如普通的 "[...的消息：...]"），也按老规矩办
-                    // 新增：判断回复是否可能是一个完整的HTML块
-                    if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
-                        // 如果是，则将其视为单个HTML消息，避免被错误切分
-                        messages = [{ type: 'html', content: trimmedResponse }];
-                    } else {
-                        // 否则，使用原有的逻辑来处理可能混合了多种格式的文本
-                        messages = getMixedContent(fullResponse).filter(item => item.content.trim() !== '');
-                    }
+                    // 否则，使用原有的逻辑来处理可能混合了多种格式的文本
+                    messages = getMixedContent(fullResponse).filter(item => item.content.trim() !== '');
                 }
+
+                // ▲▲▲▲▲ 恢复完成 ▲▲▲▲▲
 
                 let firstMessageProcessed = false; // 用于标记是否是第一条消息
 
