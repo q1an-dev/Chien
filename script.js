@@ -308,7 +308,8 @@
         const globalSettingKeys = [
             'apiSettings', 'wallpaper', 'homeScreenMode', 'fontUrl', 'customIcons', 'stickerCategories',
             'apiPresets', 'bubbleCssPresets', 'myPersonaPresets', 'globalCss',
-            'globalCssPresets', 'homeSignature', 'forumPosts', 'forumBindings', 'pomodoroTasks', 'pomodoroSettings', 'insWidgetSettings', 'homeWidgetSettings'
+            'globalCssPresets', 'homeSignature', 'forumPosts', 'forumBindings', 'pomodoroTasks', 'pomodoroSettings', 'insWidgetSettings', 'homeWidgetSettings',
+            'naiGlobalPromptPresets' // ▼▼▼ 新增 ▼▼▼
         ];
         const appVersion = "1.2.0"; // Current app version
         const updateLog = [
@@ -371,6 +372,10 @@
                 avatar2: 'https://i.postimg.cc/GtbTnxhP/o-o-1.jpg',
                 bubble2: 'miss u.'
             },
+            // ▼▼▼ 新增：NAI 模块手册 (全局) ▼▼▼
+            naiPromptModules: [],
+            // ▼▼▼ 新增：NAI 全局提示词预设 ▼▼▼
+            naiGlobalPromptPresets: [],
         };
         let currentChatId = null, currentChatType = null, isGenerating = false, longPressTimer = null,
             isInMultiSelectMode = false, editingMessageId = null, currentPage = 1, currentTransferMessageId = null,
@@ -510,6 +515,7 @@
             groups: '&id',
             worldBooks: '&id',
             myStickers: '&id, category',
+            naiPromptModules: '&id, category', // ▼▼▼ 新增 ▼▼▼
             globalSettings: 'key'
         }).upgrade(async tx => {
             console.log("Upgrading database to version 2...");
@@ -560,6 +566,7 @@
                 await dexieDB.groups.bulkPut(db.groups);
                 await dexieDB.worldBooks.bulkPut(db.worldBooks);
                 await dexieDB.myStickers.bulkPut(db.myStickers);
+                await dexieDB.naiPromptModules.bulkPut(db.naiPromptModules); // ▼▼▼ 新增 ▼▼▼
 
                 const settingsPromises = globalSettingKeys.map(key => {
                     if (db[key] !== undefined) {
@@ -572,11 +579,13 @@
         };
 
         const loadData = async () => {
-            const [characters, groups, worldBooks, myStickers, settingsArray] = await Promise.all([
+            // ▼▼▼ 修改这行，添加 naiPromptModules ▼▼▼
+            const [characters, groups, worldBooks, myStickers, naiPromptModules, settingsArray] = await Promise.all([
                 dexieDB.characters.toArray(),
                 dexieDB.groups.toArray(),
                 dexieDB.worldBooks.toArray(),
                 dexieDB.myStickers.toArray(),
+                dexieDB.naiPromptModules.toArray(), // ▼▼▼ 新增 ▼▼▼
                 dexieDB.globalSettings.toArray()
             ]);
 
@@ -584,6 +593,7 @@
             db.groups = groups;
             db.worldBooks = worldBooks;
             db.myStickers = myStickers;
+            db.naiPromptModules = naiPromptModules; // ▼▼▼ 新增 ▼▼▼
 
             const settings = settingsArray.reduce((acc, { key, value }) => {
                 acc[key] = value;
@@ -608,7 +618,8 @@
                     pomodoroTasks: [],
                     pomodoroSettings: { boundCharId: null, userPersona: '', focusBackground: '', taskCardBackground: '', encouragementMinutes: 25, pokeLimit: 5, globalWorldBookIds: [] },
                     insWidgetSettings: { avatar1: 'https://i.postimg.cc/Y96LPskq/o-o-2.jpg', bubble1: 'love u.', avatar2: 'https://i.postimg.cc/GtbTnxhP/o-o-1.jpg', bubble2: 'miss u.' },
-                    homeWidgetSettings: defaultWidgetSettings
+                    homeWidgetSettings: defaultWidgetSettings,
+                    naiGlobalPromptPresets: [] // ▼▼▼ 新增 ▼▼▼
                 };
                 db[key] = settings[key] !== undefined ? settings[key] : (defaultValue[key] !== undefined ? JSON.parse(JSON.stringify(defaultValue[key])) : undefined);
             });
@@ -620,12 +631,20 @@
                 if (!c.worldBookIds) c.worldBookIds = [];
                 if (c.customBubbleCss === undefined) c.customBubbleCss = '';
                 if (c.useCustomBubbleCss === undefined) c.useCustomBubbleCss = false;
+                // ▼▼▼ 新增 ▼▼▼
+                if (!c.naiSettings) c.naiSettings = {}; // 用于存储 source
+                if (!c.naiModuleIds) c.naiModuleIds = []; // 用于存储勾选
+                // ▲▲▲ 新增结束 ▲▲▲
             });
             db.groups.forEach(g => {
                 if (g.isPinned === undefined) g.isPinned = false;
                 if (!g.worldBookIds) g.worldBookIds = [];
                 if (g.customBubbleCss === undefined) g.customBubbleCss = '';
                 if (g.useCustomBubbleCss === undefined) g.useCustomBubbleCss = false;
+                // ▼▼▼ 新增 ▼▼▼
+                if (!g.naiSettings) g.naiSettings = {}; // 用于存储 source
+                if (!g.naiModuleIds) g.naiModuleIds = []; // 用于存储勾选
+                // ▲▲▲ 新增结束 ▲▲▲
             });
             
             // Handle old localStorage data if it exists
@@ -1051,6 +1070,278 @@
                 `;
                 taskListContainer.appendChild(wrapper);
             });
+        }
+
+        // ==================================================================================================================
+        // =================================== 5. NAI 模块手册管理 (NAI Module Handbook) ===================================
+        // ==================================================================================================================
+       
+        /**
+         * (模块手册) 绑定所有模块管理器的事件
+         */
+        function setupNaiModuleSystem() {
+            const managerModal = document.getElementById('nai-module-manager-modal');
+            const editModal = document.getElementById('nai-module-edit-modal');
+            const createBtn = document.getElementById('create-nai-module-btn');
+            const saveSelectionBtn = document.getElementById('save-nai-module-selection-btn');
+            const closeManagerBtn = document.getElementById('close-nai-module-manager');
+            const editForm = document.getElementById('nai-module-edit-form');
+            const cancelEditBtn = document.getElementById('cancel-nai-module-edit-btn');
+            const moduleListContainer = document.getElementById('nai-module-list-container');
+
+            // 1. 关闭主弹窗
+            if (closeManagerBtn) {
+                closeManagerBtn.addEventListener('click', () => managerModal.classList.remove('visible'));
+            }
+            // 2. 创建新模块
+            if (createBtn) {
+                createBtn.addEventListener('click', handleCreateNaiModule);
+            }
+            // 3. 保存勾选
+            if (saveSelectionBtn) {
+                saveSelectionBtn.addEventListener('click', handleSaveNaiModuleSelection);
+            }
+            // 4. 关闭编辑弹窗
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', () => editModal.classList.remove('visible'));
+            }
+            // 5. 提交编辑表单
+            if (editForm) {
+                editForm.addEventListener('submit', handleSaveNaiModuleEdit);
+            }
+            // 6. 列表事件委托 (用于编辑/删除)
+            if (moduleListContainer) {
+                moduleListContainer.addEventListener('click', (e) => {
+                    // 检查是否是编辑按钮（优先检查按钮本身，然后检查按钮内的元素）
+                    const editBtn = e.target.closest('.nai-module-edit-btn') || 
+                                    (e.target.classList.contains('nai-module-edit-btn') ? e.target : null);
+                    if (editBtn) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const moduleId = editBtn.dataset.id || editBtn.getAttribute('data-id');
+                        if (moduleId) {
+                            openNaiModuleEditModal(moduleId);
+                        }
+                        return;
+                    }
+                    
+                    // 检查是否是删除按钮（优先检查按钮本身，然后检查按钮内的元素）
+                    const deleteBtn = e.target.closest('.nai-module-delete-btn') || 
+                                      (e.target.classList.contains('nai-module-delete-btn') ? e.target : null);
+                    if (deleteBtn) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const moduleId = deleteBtn.dataset.id || deleteBtn.getAttribute('data-id');
+                        if (moduleId) {
+                            handleDeleteNaiModule(moduleId);
+                        }
+                        return;
+                    }
+                    
+                    // 检查是否是复选框
+                    if (e.target.type === 'checkbox' || e.target.closest('input[type="checkbox"]')) {
+                        e.stopPropagation();
+                        return;
+                    }
+                });
+            }
+        }
+
+        /**
+         * (模块手册) 打开主管理弹窗，并根据当前聊天室设置勾选状态
+         */
+        function openNaiModuleManageModal() {
+            const modal = document.getElementById('nai-module-manager-modal');
+            if (!modal) return;
+            
+            // 1. 获取当前聊天的已选模块
+            const chat = (currentChatType === 'private')
+                ? db.characters.find(c => c.id === currentChatId)
+                : db.groups.find(g => g.id === currentChatId);
+            
+            if (!chat) return showToast('未找到当前聊天');
+            
+            const selectedModuleIds = new Set(chat.naiModuleIds || []);
+
+            // 2. 渲染列表
+            renderNaiModuleList(selectedModuleIds);
+            
+            // 3. 重置创建表单
+            document.getElementById('new-nai-module-name').value = '';
+            document.getElementById('new-nai-module-content').value = '';
+
+            // 4. 显示弹窗
+            modal.classList.add('visible');
+        }
+
+        /**
+         * (模块手册) 渲染全局模块列表到弹窗中
+         * @param {Set<string>} selectedModuleIds - 当前聊天已勾选的模块ID
+         */
+        function renderNaiModuleList(selectedModuleIds) {
+            const container = document.getElementById('nai-module-list-container');
+            if (!container) return;
+            
+            container.innerHTML = ''; // 清空
+            
+            if (!db.naiPromptModules || db.naiPromptModules.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #aaa;">暂无模块，请在上方创建</p>';
+                return;
+            }
+
+            // 直接渲染所有模块，不分类
+            db.naiPromptModules.forEach(module => {
+                const isChecked = selectedModuleIds.has(module.id);
+                const item = document.createElement('div');
+                item.className = 'nai-module-item';
+                item.innerHTML = `
+                    <input type="checkbox" class="nai-module-checkbox" value="${module.id}" ${isChecked ? 'checked' : ''}>
+                    <div class="nai-module-item-details">
+                        <div class="nai-module-item-name">${DOMPurify.sanitize(module.name)}</div>
+                    </div>
+                    <div class="nai-module-item-actions">
+                        <button type="button" class="btn btn-neutral btn-small nai-module-edit-btn" data-id="${module.id}">编辑</button>
+                        <button type="button" class="btn btn-danger btn-small nai-module-delete-btn" data-id="${module.id}">删除</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        /**
+         * (模块手册) 处理创建新模块
+         */
+        async function handleCreateNaiModule() {
+            const name = document.getElementById('new-nai-module-name').value.trim();
+            const content = document.getElementById('new-nai-module-content').value.trim();
+
+            if (!name || !content) {
+                return showToast('模块名称和内容不能为空');
+            }
+
+            const newModule = {
+                id: `nai_mod_${Date.now()}`,
+                name: name,
+                content: content
+            };
+
+            db.naiPromptModules.push(newModule);
+            await saveData();
+
+            // 重新渲染列表（保持勾选状态）
+            const chat = (currentChatType === 'private')
+                ? db.characters.find(c => c.id === currentChatId)
+                : db.groups.find(g => g.id === currentChatId);
+            const selectedModuleIds = new Set(chat.naiModuleIds || []);
+            renderNaiModuleList(selectedModuleIds);
+
+            // 清空输入框
+            document.getElementById('new-nai-module-name').value = '';
+            document.getElementById('new-nai-module-content').value = '';
+            showToast('新模块已添加到全局手册');
+        }
+
+        /**
+         * (模块手册) 打开编辑弹窗
+         * @param {string} moduleId - 模块ID
+         */
+        function openNaiModuleEditModal(moduleId) {
+            const module = db.naiPromptModules.find(m => m.id === moduleId);
+            if (!module) return showToast('找不到该模块');
+
+            document.getElementById('edit-nai-module-id').value = module.id;
+            document.getElementById('edit-nai-module-name').value = module.name;
+            document.getElementById('edit-nai-module-content').value = module.content;
+
+            document.getElementById('nai-module-edit-modal').classList.add('visible');
+        }
+
+        /**
+         * (模块手册) 保存编辑
+         */
+        async function handleSaveNaiModuleEdit(e) {
+            e.preventDefault();
+            const moduleId = document.getElementById('edit-nai-module-id').value;
+            const module = db.naiPromptModules.find(m => m.id === moduleId);
+            if (!module) return showToast('保存失败，找不到模块');
+
+            module.name = document.getElementById('edit-nai-module-name').value.trim();
+            module.content = document.getElementById('edit-nai-module-content').value.trim();
+
+            if (!module.name || !module.content) {
+                return showToast('模块名称和内容不能为空');
+            }
+
+            await saveData();
+            document.getElementById('nai-module-edit-modal').classList.remove('visible');
+            
+            // 重新渲染列表
+            const chat = (currentChatType === 'private')
+                ? db.characters.find(c => c.id === currentChatId)
+                : db.groups.find(g => g.id === currentChatId);
+            const selectedModuleIds = new Set(chat.naiModuleIds || []);
+            renderNaiModuleList(selectedModuleIds);
+            
+            showToast('模块已更新');
+        }
+
+        /**
+         * (模块手册) 删除模块
+         * @param {string} moduleId - 模块ID
+         */
+        async function handleDeleteNaiModule(moduleId) {
+            const module = db.naiPromptModules.find(m => m.id === moduleId);
+            if (!module) return;
+
+            if (confirm(`确定要从"全局手册"中删除模块 "${module.name}" 吗？\n此操作不可逆，且会从所有已挂载的聊天中移除它。`)) {
+                // 1. 从全局库删除
+                db.naiPromptModules = db.naiPromptModules.filter(m => m.id !== moduleId);
+                
+                // 2. 从所有角色中移除引用
+                db.characters.forEach(chat => {
+                    if (chat.naiModuleIds) {
+                        chat.naiModuleIds = chat.naiModuleIds.filter(id => id !== moduleId);
+                    }
+                });
+                
+                // 3. 从所有群聊中移除引用
+                db.groups.forEach(chat => {
+                    if (chat.naiModuleIds) {
+                        chat.naiModuleIds = chat.naiModuleIds.filter(id => id !== moduleId);
+                    }
+                });
+
+                await saveData();
+                
+                // 4. 重新渲染列表
+                const chat = (currentChatType === 'private')
+                    ? db.characters.find(c => c.id === currentChatId)
+                    : db.groups.find(g => g.id === currentChatId);
+                const selectedModuleIds = new Set(chat.naiModuleIds || []);
+                renderNaiModuleList(selectedModuleIds);
+                
+                showToast('模块已从全局手册删除');
+            }
+        }
+
+        /**
+         * (模块手册) 保存当前聊天的模块"挂载"
+         */
+        async function handleSaveNaiModuleSelection() {
+            const chat = (currentChatType === 'private')
+                ? db.characters.find(c => c.id === currentChatId)
+                : db.groups.find(g => g.id === currentChatId);
+            
+            if (!chat) return showToast('保存失败，未找到当前聊天');
+
+            const container = document.getElementById('nai-module-list-container');
+            const selectedIds = Array.from(container.querySelectorAll('.nai-module-checkbox:checked')).map(cb => cb.value);
+
+            chat.naiModuleIds = selectedIds;
+            await saveData();
+
+            document.getElementById('nai-module-manager-modal').classList.remove('visible');
+            showToast('当前聊天的挂载模块已保存！');
         }
 
         function setupPomodoroApp() {
@@ -1737,6 +2028,7 @@
             setupForumFeature();
             setupShareModal();
             setupStorageAnalysisScreen();
+            setupNaiModuleSystem(); // <-- 确认这行已添加
             setupPomodoroApp();
             setupPomodoroSettings();
             setupPomodoroGlobalSettings(); // NEW: Setup global settings
@@ -3146,7 +3438,7 @@
                const applyBtn = document.createElement('button');
                applyBtn.className = 'btn';
                applyBtn.textContent = '应用';
-               applyBtn.onclick = function(){ applyApiPreset(p.name); modal.style.display='none'; };
+               applyBtn.onclick = function(){ applyApiPreset(p.name); modal.classList.remove('visible'); };
 
                const renameBtn = document.createElement('button');
                renameBtn.className = 'btn';
@@ -3171,7 +3463,7 @@
                row.appendChild(left); row.appendChild(btns);
                list.appendChild(row);
            });
-           modal.style.display = 'flex';
+           modal.classList.add('visible');
        }
 
        function exportApiPresets() {
@@ -3195,7 +3487,178 @@
            };
            inp.click();
        }
-       
+
+       // ==================================================================================================================
+       // =================================== 4. NAI 全局提示词预设管理 (NAI Global Prompt Presets) ===================================
+       // ==================================================================================================================
+
+       /**
+        * (NAI 预设) 获取所有全局提示词预设
+        * @returns {Array}
+        */
+       function _getNaiPromptPresets() {
+           return db.naiGlobalPromptPresets || [];
+       }
+
+       /**
+        * (NAI 预设) 保存全局提示词预设
+        * @param {Array} arr - 预设数组
+        */
+       function _saveNaiPromptPresets(arr) {
+           db.naiGlobalPromptPresets = arr || [];
+           saveData();
+       }
+
+       /**
+        * (NAI 预设) 填充预设下拉框
+        */
+       function populateNaiPromptPresetSelect() {
+           const sel = document.getElementById('nai-global-prompt-preset-select');
+           if (!sel) return;
+           const presets = _getNaiPromptPresets();
+           sel.innerHTML = '<option value="">— 选择全局提示词预设 —</option>';
+           presets.forEach(p => {
+               const opt = document.createElement('option');
+               opt.value = p.name;
+               opt.textContent = p.name;
+               sel.appendChild(opt);
+           });
+       }
+
+       /**
+        * (NAI 预设) 将当前输入框内容另存为预设
+        */
+       function saveCurrentNaiPromptPreset() {
+           const positiveEl = document.getElementById('nai-default-positive');
+           const negativeEl = document.getElementById('nai-default-negative');
+           if (!positiveEl || !negativeEl) return showToast('找不到提示词输入框');
+
+           const positive = positiveEl.value.trim();
+           const negative = negativeEl.value.trim();
+
+           if (!positive && !negative) return showToast('正面和负面提示词均为空，无法保存');
+
+           let name = prompt('请输入预设名称（将覆盖同名预设）:');
+           if (!name) return;
+
+           const presets = _getNaiPromptPresets();
+           const idx = presets.findIndex(p => p.name === name);
+           const preset = { name, positive, negative };
+
+           if (idx >= 0) {
+               presets[idx] = preset;
+           } else {
+               presets.push(preset);
+           }
+           _saveNaiPromptPresets(presets);
+           populateNaiPromptPresetSelect();
+           showToast('全局提示词预设已保存');
+       }
+
+       /**
+        * (NAI 预设) 应用选定的预设到输入框
+        * @param {string} presetName - 预设名称
+        */
+       function applyNaiPromptPreset(presetName) {
+           const presets = _getNaiPromptPresets();
+           const p = presets.find(x => x.name === presetName);
+           if (!p) return showToast('未找到该预设');
+
+           const positiveEl = document.getElementById('nai-default-positive');
+           const negativeEl = document.getElementById('nai-default-negative');
+
+           if (positiveEl) positiveEl.value = p.positive || '';
+           if (negativeEl) negativeEl.value = p.negative || '';
+
+           // 关键：应用后，立即保存到 localStorage，使其成为"当前"设置
+           const settings = getNovelAISettings(); // 获取其他设置
+           settings.default_positive = p.positive || '';
+           settings.default_negative = p.negative || '';
+           localStorage.setItem('novelai-settings', JSON.stringify(settings));
+           // 同时更新单独存储的默认值
+           localStorage.setItem('nai-global-positive', p.positive || '');
+           localStorage.setItem('nai-global-negative', p.negative || '');
+
+           showToast('预设已应用并设为当前默认');
+       }
+
+       /**
+        * (NAI 预设) 打开预设管理弹窗
+        */
+       function openNaiPromptPresetManageModal() {
+           const modal = document.getElementById('nai-global-prompt-presets-modal');
+           const list = document.getElementById('nai-global-prompt-presets-list');
+           if (!modal || !list) return;
+
+           list.innerHTML = '';
+           const presets = _getNaiPromptPresets();
+           if (!presets.length) {
+               list.innerHTML = '<p style="color:#888;margin:6px 0;">暂无预设</p>';
+           }
+
+           presets.forEach((p, idx) => {
+               const row = document.createElement('div');
+               row.style.display = 'flex';
+               row.style.justifyContent = 'space-between';
+               row.style.alignItems = 'center';
+               row.style.padding = '8px 0';
+               row.style.borderBottom = '1px solid #f0f0f0';
+
+               const nameDiv = document.createElement('div');
+               nameDiv.style.flex = '1';
+               nameDiv.style.whiteSpace = 'nowrap';
+               nameDiv.style.overflow = 'hidden';
+               nameDiv.style.textOverflow = 'ellipsis';
+               nameDiv.textContent = p.name;
+               row.appendChild(nameDiv);
+
+               const btnWrap = document.createElement('div');
+               btnWrap.style.display = 'flex';
+               btnWrap.style.gap = '6px';
+
+               // ▼▼▼ BUG 修复：为按钮添加 btn-small 类，并移除行内样式 ▼▼▼
+               const applyBtn = document.createElement('button');
+               applyBtn.className = 'btn btn-primary btn-small'; // 修复
+               applyBtn.textContent = '应用';
+               applyBtn.onclick = function() {
+                   applyNaiPromptPreset(p.name);
+                   modal.classList.remove('visible');
+               };
+
+               const renameBtn = document.createElement('button');
+               renameBtn.className = 'btn btn-neutral btn-small'; // 修复
+               renameBtn.textContent = '重命名';
+               renameBtn.onclick = function() {
+                   const newName = prompt('输入新名称：', p.name);
+                   if (!newName || newName === p.name) return;
+                   _getNaiPromptPresets()[idx].name = newName;
+                   _saveNaiPromptPresets(db.naiGlobalPromptPresets);
+                   openNaiPromptPresetManageModal(); // 刷新列表
+                   populateNaiPromptPresetSelect(); // 刷新下拉框
+               };
+
+               const delBtn = document.createElement('button');
+               delBtn.className = 'btn btn-danger btn-small'; // 修复
+               delBtn.textContent = '删除';
+               // ▲▲▲ 修复结束 ▲▲▲
+               delBtn.onclick = function() {
+                   if (!confirm('确定删除预设 "' + p.name + '" ?')) return;
+                   _getNaiPromptPresets().splice(idx, 1);
+                   _saveNaiPromptPresets(db.naiGlobalPromptPresets);
+                   openNaiPromptPresetManageModal();
+                   populateNaiPromptPresetSelect();
+               };
+
+               btnWrap.appendChild(applyBtn);
+               btnWrap.appendChild(renameBtn);
+               btnWrap.appendChild(delBtn);
+               row.appendChild(btnWrap);
+               list.appendChild(row);
+           });
+
+           modal.classList.add('visible');
+       }
+
        // ==================================================================================================================
        // =================================== 2. 气泡CSS自定义预设管理 (BUBBLE CSS PRESET MANAGEMENT) ===================================
        // ==================================================================================================================
@@ -3305,7 +3768,7 @@
                applyBtn.className = 'btn btn-primary';
                applyBtn.style.padding = '6px 8px;border-radius:8px';
                applyBtn.textContent = '应用';
-               applyBtn.onclick = function(){ applyPresetToCurrentChat(p.name); modal.style.display = 'none'; };
+               applyBtn.onclick = function(){ applyPresetToCurrentChat(p.name); modal.classList.remove('visible'); };
 
                const renameBtn = document.createElement('button');
                renameBtn.className = 'btn';
@@ -3340,7 +3803,7 @@
                row.appendChild(btnWrap);
                list.appendChild(row);
            });
-           modal.style.display = 'flex';
+           modal.classList.add('visible');
        }
 
        // ==================================================================================================================
@@ -3403,7 +3866,8 @@
                        e.myAvatar = p.avatar || '';
                        await saveData();
                        (window.showToast && showToast('预设已应用并保存到当前聊天')) || console.log('预设已应用');
-                       if (typeof loadSettingsToSidebar === 'function') try{ loadSettingsToSidebar(); }catch(e){}
+                       // 注释掉 loadSettingsToSidebar，避免覆盖用户正在编辑的AI角色人设和头像
+                       // if (typeof loadSettingsToSidebar === 'function') try{ loadSettingsToSidebar(); }catch(e){}
                        if (typeof renderChatList === 'function') try{ renderChatList(); }catch(e){}
                    }
                } else {
@@ -3445,7 +3909,7 @@
                applyBtn.className = 'btn btn-primary';
                applyBtn.style.padding = '6px 8px;border-radius:8px';
                applyBtn.textContent = '应用';
-               applyBtn.onclick = function(){ applyMyPersonaPresetToCurrentChat(p.name); modal.style.display = 'none'; };
+               applyBtn.onclick = function(){ applyMyPersonaPresetToCurrentChat(p.name); modal.classList.remove('visible'); };
 
                const renameBtn = document.createElement('button');
                renameBtn.className = 'btn';
@@ -3482,7 +3946,7 @@
                list.appendChild(row);
            });
 
-           modal.style.display = 'flex';
+           modal.classList.add('visible');
        }
 
         function updateClock() {
@@ -4839,7 +5303,11 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                     memoryJournals: [],
                     journalWorldBookIds: [], // 新增
                     peekScreenSettings: { wallpaper: '', customIcons: {}, unlockAvatar: '' }, // 新增
- lastUserMessageTimestamp: null, // 新增：用于记录最后消息时间
+                    lastUserMessageTimestamp: null, // 新增：用于记录最后消息时间
+                    // ▼▼▼ 新增 ▼▼▼
+                    naiSettings: {}, // 用于存储 source
+                    naiModuleIds: [] // 用于存储勾选
+                    // ▲▲▲ 新增结束 ▲▲▲
                };
                 db.characters.push(newChar);
                 await saveData();
@@ -5039,6 +5507,46 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
         const message = chat.history.find(m => m.id === messageId);
         if (!message) return;
 
+        // ▼▼▼ 新增：NAI生图消息的特殊引用处理 (V4 - 截断Prompt) ▼▼▼
+        if (message.type === 'naiimag') {
+            // 1. 确定发送者名称
+            let senderName = '';
+            if (message.role === 'user') {
+                senderName = (currentChatType === 'private') ? chat.myName : chat.me.nickname;
+            } else {
+                if (currentChatType === 'private') {
+                    senderName = chat.remarkName;
+                } else {
+                    const sender = chat.members.find(m => m.id === message.senderId);
+                    senderName = sender ? sender.groupNickname : '群成员';
+                }
+            }
+            
+            // 2. 创建自定义的引用预览内容 (读取 prompt 字段并截断)
+            const promptText = message.prompt || '图片'; 
+            const truncatedPrompt = promptText.length > 50 ? promptText.substring(0, 50) + '...' : promptText;
+
+            // 3. 设置引用信息 (核心：引用内容是截断后的 Prompt)
+            currentQuoteInfo = {
+                id: message.id,
+                senderId: message.senderId || 'user_me', 
+                senderName: senderName,
+                content: truncatedPrompt // AI看到的引用上下文
+            };
+
+            // 4. 显示引用预览条 (您看到的预览)
+            const previewBar = document.getElementById('reply-preview-bar');
+            previewBar.querySelector('.reply-preview-name').textContent = `回复 ${senderName}`;
+            previewBar.querySelector('.reply-preview-text').textContent = currentQuoteInfo.content;
+            previewBar.classList.add('visible');
+            
+            messageInput.focus();
+            
+            // 5. 终止原函数，防止执行旧的、会导致崩溃的代码
+            return; 
+        }
+        // ▲▲▲ NAI生图消息处理结束 ▲▲▲
+
         let senderName = '';
         let senderId = '';
         if (message.role === 'user') {
@@ -5182,6 +5690,23 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                     message.prompt = newContent; // 保存新 prompt
                     message.imageUrl = result.imageUrl;
                     message.fullPrompt = result.fullPrompt;
+                    
+                    // ▼▼▼ 新增的修复：同步更新 content 字段 ▼▼▼
+                    let senderName = '';
+                    if (message.role === 'user') {
+                        // 是用户自己发的 !nai
+                        senderName = (currentChatType === 'private') ? chat.myName : chat.me.nickname;
+                    } else {
+                        // 是 AI 主动发的
+                        if (currentChatType === 'private') {
+                            senderName = chat.remarkName;
+                        } else {
+                            const sender = chat.members.find(m => m.id === message.senderId);
+                            senderName = sender ? sender.groupNickname : '群成员';
+                        }
+                    }
+                    message.content = `[${senderName}的消息：${newContent}]`;
+                    // ▲▲▲ 修复结束 ▲▲▲
                     
                     // 6. 在聊天气泡里渲染新图片
                     if (bubbleElement) {
@@ -6778,21 +7303,46 @@ return `${seconds}秒`;
            }
 
             prompt += `13. 你的输出格式必须严格遵循以下格式：${outputFormats}\n`;
-            // ▼▼▼ 新增：NAI 主动发图指令 (私聊) ▼▼▼
-            // (来自 nai出图整体.html Part 18)
+            // ▼▼▼ 将旧的 13.5 规则替换为新的 13.5 和 13.6 规则 ▼▼▼
             if (localStorage.getItem('novelai-enabled') === 'true') {
+                // 1. 获取当前角色挂载的模块 ID
+                const currentModuleIds = new Set(character.naiModuleIds || []);
+                // 2. 从全局模块库中筛选出已挂载的模块
+                const loadedModules = (db.naiPromptModules || []).filter(m => currentModuleIds.has(m.id));
+
+                if (loadedModules.length > 0) {
+                    prompt += `
+13.5. **(可选) NAI 模块手册**:
+你有一个"提示词模块手册"，你可以在主动生图时参考它。
+**规则**:
+1. 你首先要独立思考一个"创意描述"（你想画什么）。
+2. 通过**语义理解**检查下方"手册"中的规则，判断你的"创意描述"中是否涉及这些规则所描述的内容（这不是关键词匹配，而是语义理解）。
+3. **重要**：你可能同时匹配**多个**规则（例如：如果手册中同时有"男性角色"和"女性角色"两个模块，且创意描述中同时涉及两种内容，那么两个模块都应该匹配）。
+4. 对于所有匹配的规则，你必须将该规则的提示词原文**原封不动、一字不差地**使用：
+   - **画面描述类**（如角色数量、角色特征、场景等）：需要**语法融合**到你的创意描述中，避免冲突。
+   - **参数类**（如画质、五官、艺术家等）：可以直接追加。
+5. 最终生成的Prompt必须是英文的。
+
+**[你的可用模块手册]**:
+${loadedModules.map(m => `
+如果图片内容中有${DOMPurify.sanitize(m.name)}，则在生图时一定要加入提示词原文：
+${DOMPurify.sanitize(m.content)}
+`).join('\n---\n')}
+`;
+                } else {
+                    prompt += `
+13.5. **(可选) NAI 模块手册**: (你当前没有可用的提示词模块)\n`;
+                }
+
                 prompt += `
-13.5. **(可选) NovelAI真实图片分享**: 你可以在对话中主动发送一张图片。
-    - **格式**: \`{"type": "naiimag", "prompt": "详细的英文描述词..."}\`
-    - **【绝不能暴露是novelai生成的图片！】**
-    - **【重要】关于prompt的撰写**:
-      * 你可以根据当前对话上下文、你的角色人设、或你想表达的情感和氛围，来撰写详细而具体的prompt。
-      * prompt的详细程度由你根据具体情况自己决定。
-      * 专注于描述内容本身即可。
-    - **使用场景**：当你想要在私聊对话中直接给用户发送一张图片时使用。
-    - **注意**：这会直接在聊天记录中显示图片，而不是发布到动态。\n`;
+13.6. **(可选) NovelAI真实图片分享**:
+    * **格式**: \`{"type": "naiimag", "prompt": "你生成的最终Prompt..."}\`
+    * **【绝不能暴露是novelai生成的图片！】**
+    * **【重要】关于prompt的撰写**: 你必须遵循 \`13.5\` 规则，通过语义理解判断哪些规则匹配，然后使用匹配规则的提示词原文。Prompt必须是英文的。
+    * **使用场景**：当你想要在私聊对话中直接给用户发送一张图片时使用。
+    * **注意**：这会直接在聊天记录中显示图片，而不是发布到动态。\n`;
             }
-            // ▲▲▲ NAI 主动发图指令结束 ▲▲▲
+            // ▲▲▲ 替换结束 ▲▲▲
             prompt += `14. **对话节奏**: 你需要模拟真人的聊天习惯，你可以一次性生成多条短消息。每次要回复至少3-8条消息。并根据当前行为/心情/地点变化实时更新状态。\n`;
             prompt += `15. 不要主动结束对话，除非我明确提出。保持你的人设，自然地进行对话。`;
             return prompt;
@@ -6841,16 +7391,42 @@ return `${seconds}秒`;
                outputFormats += `\n   - **HTML消息**: \`<orange char="{成员真名}">{HTML内容}</orange>\`。这是一种特殊的、用于展示丰富样式的小卡片消息，你可以用它来创造更有趣的互动。注意要用成员的 **真名** 填充 \`char\` 属性。`;
            }
 
-           // ▼▼▼ 新增：NAI 主动发图指令 (群聊) ▼▼▼
-           // (来自 nai出图整体.html Part 18)
+           // ▼▼▼ 将旧的 NAI 指令 (if 块) 替换为新的代码块 ▼▼▼
            if (localStorage.getItem('novelai-enabled') === 'true') {
+               // 1. 获取当前群聊挂载的模块 ID
+               const currentModuleIds = new Set(group.naiModuleIds || []);
+               // 2. 从全局模块库中筛选出已挂载的模块
+               const loadedModules = (db.naiPromptModules || []).filter(m => currentModuleIds.has(m.id));
+
+               if (loadedModules.length > 0) {
+                   prompt += `\n   - **NAI 模块手册**:
+     - 你有一个"提示词模块手册"，你可以在主动生图时参考它。
+     - **规则**:
+       1. 你首先要独立思考一个"创意描述"（你想画什么）。
+       2. 通过**语义理解**检查下方"手册"中的规则，判断你的"创意描述"中是否涉及这些规则所描述的内容（这不是关键词匹配，而是语义理解）。
+       3. **重要**：你可能同时匹配**多个**规则（例如：如果手册中同时有"男性角色"和"女性角色"两个模块，且创意描述中同时涉及两种内容，那么两个模块都应该匹配）。
+       4. 对于所有匹配的规则，你必须将该规则的提示词原文**原封不动、一字不差地**使用：
+          - **画面描述类**（如角色数量、角色特征、场景等）：需要**语法融合**到你的创意描述中，避免冲突。
+          - **参数类**（如画质、五官、艺术家等）：可以直接追加。
+       5. 最终生成的Prompt必须是英文的。
+       
+     **[你的可用模块手册]**:
+${loadedModules.map(m => `
+     如果图片内容中有${DOMPurify.sanitize(m.name)}，则在生图时一定要加入提示词原文：
+     ${DOMPurify.sanitize(m.content)}
+`).join('\n     ---\n')}
+`;
+               } else {
+                   prompt += `\n   - **NAI 模块手册**: (你当前没有可用的提示词模块)\n`;
+               }
+
                outputFormats += `
-   - **NovelAI图片分享**: \`{"type": "naiimag", "name": "你的角色真名", "prompt": "详细的英文描述词..."}\`
+   - **NovelAI图片分享**: \`{"type": "naiimag", "name": "你的角色真名", "prompt": "你生成的最终Prompt..."}\`
      - 【禁止暴露这是novelai生成的图片!】
-     - 【重要】prompt撰写：你可以根据当前对话上下文、你的角色人设来撰写详细而具体的prompt。
+     - 【重要】prompt撰写：你必须遵循"NAI 模块手册"规则，通过语义理解判断哪些规则匹配，然后使用匹配规则的提示词原文。Prompt必须是英文的。
      - 【重要】name字段必须是你正在扮演的角色的 **真名**。`;
            }
-           // ▲▲▲ NAI 主动发图指令结束 ▲▲▲
+           // ▲▲▲ 替换结束 ▲▲▲
 
             prompt += `4. **你的输出格式 (极其重要)**: 你生成的每一条消息都 **必须** 严格遵循以下格式之一。每条消息占一行。请用成员的 **真名** 填充格式中的 \`{成员真名}\`。\n${outputFormats}\n\n`;
             prompt += `   - **重要**: 群聊不支持AI成员接收/退回转账或接收礼物的特殊指令，也不支持更新状态。你只需要通过普通消息来回应我发送的转账或礼物即可。\n\n`;
@@ -7138,7 +7714,10 @@ return `${seconds}秒`;
                                     fullPrompt: generatedData.fullPrompt, // 完整的组合prompt（包含角色专属提示词）
                                     timestamp: tempMessage.timestamp, // 使用占位消息的时间戳
                                     senderId: senderId,
-                                    isTemporary: false // 移除临时标记
+                                    isTemporary: false, // 移除临时标记
+                                    // ▼▼▼ 新增：修复AI主动生图时 content 缺失的Bug ▼▼▼
+                                    content: `[${senderName}的消息：${naiData.prompt}]`,
+                                    // ▲▲▲ 修复结束 ▲▲▲
                                 };
 
                                 // 4. 替换历史记录中的占位消息
@@ -8117,7 +8696,7 @@ function renderStickerGrid() {
                 row.appendChild(btnWrap);
                 list.appendChild(row);
             });
-            modal.style.display = 'flex';
+            modal.classList.add('visible');
         }
 
         // --- 世界书批量删除相关函数 ---
@@ -8449,9 +9028,14 @@ function renderStickerGrid() {
                         ${categoryBooks.map(book => {
                             const isChecked = selectedIds.includes(book.id);
                             return `
-                                <li class="world-book-select-item">
+                                <li class="world-book-select-item" data-book-id="${book.id}">
                                     <input type="checkbox" class="item-checkbox" id="${idPrefix}-${book.id}" value="${book.id}" ${isChecked ? 'checked' : ''}>
-                                    <label for="${idPrefix}-${book.id}">${book.name}</label>
+                                    <label for="${idPrefix}-${book.id}">${DOMPurify.sanitize(book.name)}</label>
+                                    
+                                    <div class="btn-group">
+                                        <button type="button" class="btn-action btn-action-edit" data-action="edit" data-book-id="${book.id}">编辑</button>
+                                        <button type="button" class="btn-action btn-action-delete" data-action="delete" data-book-id="${book.id}">删除</button>
+                                    </div>
                                 </li>
                             `;
                         }).join('')}
@@ -8459,6 +9043,79 @@ function renderStickerGrid() {
                 `;
                 container.appendChild(groupEl);
             });
+
+            // --- 新增：为弹窗内的 "编辑" 和 "删除" 按钮添加事件委托 ---
+            // 确保只添加一次监听器
+            if (!container._listenerAttached) {
+                container.addEventListener('click', async (e) => {
+                    const editBtn = e.target.closest('.btn-action-edit');
+                    const deleteBtn = e.target.closest('.btn-action-delete');
+
+                    // --- 处理 "编辑" 按钮 ---
+                    if (editBtn) {
+                        e.stopPropagation(); // 阻止触发li上的其他事件
+                        const bookId = editBtn.dataset.bookId;
+                        const book = db.worldBooks.find(wb => wb.id === bookId);
+                        
+                        if (book) {
+                            currentEditingWorldBookId = book.id;
+                            worldBookIdInput.value = book.id;
+                            worldBookNameInput.value = book.name;
+                            worldBookContentInput.value = book.content;
+                            document.getElementById('world-book-category').value = book.category || '';
+                            const positionRadio = document.querySelector(`input[name="world-book-position"][value="${book.position}"]`);
+                            if (positionRadio) positionRadio.checked = true;
+                            
+                            // 关闭当前的世界书选择弹窗
+                            const modal = container.closest('.modal-overlay');
+                            if (modal) modal.classList.remove('visible');
+                            
+                            // 跳转到编辑界面
+                            switchScreen('edit-world-book-screen');
+                        }
+                    }
+
+                    // --- 处理 "删除" 按钮 (已修复"闪退"Bug) ---
+                    if (deleteBtn) {
+                        e.stopPropagation(); // 阻止触发li上的其他事件
+                        const bookId = deleteBtn.dataset.bookId;
+                        const book = db.worldBooks.find(wb => wb.id === bookId);
+                        
+                        if (book && confirm(`确定要删除世界书条目"${book.name}"吗？\n此操作不可恢复，且会从所有角色的关联中移除。`)) {
+                            // 1. 从数据库和内存中删除
+                            await dexieDB.worldBooks.delete(bookId);
+                            db.worldBooks = db.worldBooks.filter(wb => wb.id !== bookId);
+                            
+                            // 2. 从所有角色和群聊的关联中移除
+                            db.characters.forEach(char => {
+                                if (char.worldBookIds) char.worldBookIds = char.worldBookIds.filter(id => id !== bookId);
+                            });
+                            db.groups.forEach(group => {
+                                if (group.worldBookIds) group.worldBookIds = group.worldBookIds.filter(id => id !== bookId);
+                            });
+                            // 3. 从论坛绑定中移除
+                            if (db.forumBindings && db.forumBindings.worldBookIds) {
+                                db.forumBindings.worldBookIds = db.forumBindings.worldBookIds.filter(id => id !== bookId);
+                            }
+                            
+                            await saveData();
+                            
+                            // 4. 重新渲染当前弹窗的列表
+                            // (我们需要获取当前选中的ID，以保持状态)
+                            const currentSelectedIds = Array.from(container.querySelectorAll('.item-checkbox:checked')).map(cb => cb.value);
+                            renderCategorizedWorldBookList(container, db.worldBooks, currentSelectedIds, idPrefix);
+                            
+                            // 5. 重新渲染主界面的世界书列表（以便关闭弹窗后数据同步）
+                            if (typeof renderWorldBookList === 'function') {
+                                renderWorldBookList();
+                            }
+                            showToast('条目已删除');
+                        }
+                    }
+                });
+                container._listenerAttached = true; // 标记已添加监听器
+            }
+            // --- 新增代码结束 ---
 
             // Add event listeners
             container.querySelectorAll('.world-book-category-header').forEach(header => {
@@ -8633,6 +9290,15 @@ function renderStickerGrid() {
                 worldBookSelectionModal.classList.remove('visible');
                 showToast('世界书关联已更新');
             });
+            
+            // ▼▼▼ 新增：绑定"NAI 模块手册"按钮 (私聊) ▼▼▼
+            const openNaiManagerBtn = document.getElementById('open-nai-module-manager-btn');
+            if (openNaiManagerBtn) {
+                openNaiManagerBtn.addEventListener('click', () => {
+                    openNaiModuleManageModal();
+                });
+            }
+            // ▲▲▲ 新增结束 ▲▲▲
         }
 
         function loadSettingsToSidebar() {
@@ -8658,20 +9324,6 @@ function renderStickerGrid() {
                 populateMyPersonaSelect();
             }
 
-            // --- 新增 NAI 相关加载 ---
-            const naiSettingsGroup = document.getElementById('nai-character-settings-group');
-            const novelaiEnabled = localStorage.getItem('novelai-enabled') === 'true';
-
-            if (naiSettingsGroup) {
-                naiSettingsGroup.style.display = novelaiEnabled ? 'block' : 'none';
-                if (novelaiEnabled) {
-                    const character = db.characters.find(e => e.id === currentChatId);
-                    const source = character?.naiSettings?.promptSource || 'system';
-                    const radio = document.querySelector(`input[name="nai-prompt-source"][value="${source}"]`);
-                    if (radio) radio.checked = true;
-                }
-            }
-            // --- NAI 相关加载结束 ---
         }
 
         async function saveSettingsFromSidebar() {
@@ -8773,6 +9425,36 @@ function renderStickerGrid() {
     await saveData();
     showToast('API设置已保存！')
 })
+        
+        // ▼▼▼ 新增：绑定 NAI 全局预设按钮事件 ▼▼▼
+        const naiPresetSelect = document.getElementById('nai-global-prompt-preset-select');
+        const naiPresetApplyBtn = document.getElementById('nai-global-prompt-apply-preset');
+        const naiPresetSaveBtn = document.getElementById('nai-global-prompt-save-preset');
+        const naiPresetManageBtn = document.getElementById('nai-global-prompt-manage-presets');
+        const naiPresetCloseModalBtn = document.getElementById('nai-global-prompt-close-modal');
+
+        if (naiPresetApplyBtn && naiPresetSelect) {
+            naiPresetApplyBtn.addEventListener('click', () => {
+                if (naiPresetSelect.value) {
+                    applyNaiPromptPreset(naiPresetSelect.value);
+                } else {
+                    showToast('请先选择一个预设');
+                }
+            });
+        }
+        if (naiPresetSaveBtn) {
+            naiPresetSaveBtn.addEventListener('click', saveCurrentNaiPromptPreset);
+        }
+        if (naiPresetManageBtn) {
+            naiPresetManageBtn.addEventListener('click', openNaiPromptPresetManageModal);
+        }
+        if (naiPresetCloseModalBtn) {
+            naiPresetCloseModalBtn.addEventListener('click', () => {
+                const modal = document.getElementById('nai-global-prompt-presets-modal');
+                if (modal) modal.classList.remove('visible');
+            });
+        }
+        // ▲▲▲ 新增结束 ▲▲▲
         }
        function setupPresetFeatures() {
            // API Presets
@@ -8787,7 +9469,10 @@ function renderStickerGrid() {
            if (saveBtn) saveBtn.addEventListener('click', saveCurrentApiAsPreset);
            if (manageBtn) manageBtn.addEventListener('click', openApiManageModal);
            if (applyBtn) applyBtn.addEventListener('click', function(){ const v=select.value; if(!v) return (window.showToast&&showToast('请选择预设'))||alert('请选择预设'); applyApiPreset(v); });
-           if (modalClose) modalClose.addEventListener('click', function(){ document.getElementById('api-presets-modal').style.display='none'; });
+           if (modalClose) modalClose.addEventListener('click', function(){ 
+               const modal = document.getElementById('api-presets-modal');
+               if (modal) modal.classList.remove('visible');
+           });
            if (importBtn) importBtn.addEventListener('click', importApiPresets);
            if (exportBtn) exportBtn.addEventListener('click', exportApiPresets);
            
@@ -8811,7 +9496,8 @@ function renderStickerGrid() {
            if (bubbleSaveBtn) bubbleSaveBtn.addEventListener('click', saveCurrentTextareaAsPreset);
            if (bubbleManageBtn) bubbleManageBtn.addEventListener('click', openManagePresetsModal);
            if (bubbleModalClose) bubbleModalClose.addEventListener('click', () => {
-               document.getElementById('bubble-presets-modal').style.display = 'none';
+               const modal = document.getElementById('bubble-presets-modal');
+               if (modal) modal.classList.remove('visible');
            });
 
            // --- 新增代码开始 ---
@@ -8834,12 +9520,16 @@ function renderStickerGrid() {
            if (personaSaveBtn) personaSaveBtn.addEventListener('click', saveCurrentMyPersonaAsPreset);
            if (personaManageBtn) personaManageBtn.addEventListener('click', openManageMyPersonaModal);
            if (personaApplyBtn) personaApplyBtn.addEventListener('click', function(){ const v = personaSelect.value; if(!v) return (window.showToast && showToast('请选择要应用的预设')) || alert('请选择要应用的预设'); applyMyPersonaPresetToCurrentChat(v); });
-           if (personaModalClose) personaModalClose.addEventListener('click', function(){ document.getElementById('mypersona-presets-modal').style.display='none'; });
+           if (personaModalClose) personaModalClose.addEventListener('click', function(){ 
+               const modal = document.getElementById('mypersona-presets-modal');
+               if (modal) modal.classList.remove('visible');
+           });
 
            // Global CSS Presets
            const globalCssModalClose = document.getElementById('global-css-close-modal');
            if (globalCssModalClose) globalCssModalClose.addEventListener('click', () => {
-               document.getElementById('global-css-presets-modal').style.display = 'none';
+               const modal = document.getElementById('global-css-presets-modal');
+               if (modal) modal.classList.remove('visible');
            });
        }
 
@@ -9139,6 +9829,15 @@ function renderStickerGrid() {
                 renderCategorizedWorldBookList(worldBookSelectionList, db.worldBooks, group.worldBookIds || [], 'wb-select-group');
                 worldBookSelectionModal.classList.add('visible');
             });
+
+            // ▼▼▼ 新增：绑定"NAI 模块手册"按钮 (群聊) ▼▼▼
+            const openGroupNaiManagerBtn = document.getElementById('open-group-nai-module-manager-btn');
+            if (openGroupNaiManagerBtn) {
+                openGroupNaiManagerBtn.addEventListener('click', () => {
+                    openNaiModuleManageModal();
+                });
+            }
+            // ▲▲▲ 新增结束 ▲▲▲
         }
 
         function renderMemberSelectionList() {
@@ -9184,21 +9883,6 @@ function renderStickerGrid() {
             const theme = colorThemes[group.theme || 'white_pink'];
             updateBubbleCssPreview(groupPreviewBox, group.customBubbleCss, !group.useCustomBubbleCss, theme);
             populateBubblePresetSelect('group-bubble-preset-select');
-
-            // --- 新增 NAI 相关加载 ---
-            const groupNaiSettingsGroup = document.getElementById('group-nai-settings-group');
-            const novelaiEnabled = localStorage.getItem('novelai-enabled') === 'true';
-
-            if (groupNaiSettingsGroup) {
-                groupNaiSettingsGroup.style.display = novelaiEnabled ? 'block' : 'none';
-                if (novelaiEnabled) {
-                    const currentGroup = db.groups.find(g => g.id === currentChatId);
-                    const source = currentGroup?.naiSettings?.promptSource || 'system';
-                    const radio = document.querySelector(`input[name="group-nai-prompt-source"][value="${source}"]`);
-                    if (radio) radio.checked = true;
-                }
-            }
-            // --- NAI 相关加载结束 ---
         }
 
         function renderGroupMembersInSettings(group) {
@@ -9408,11 +10092,15 @@ function renderStickerGrid() {
                 if (!db.pomodoroSettings) db.pomodoroSettings = { boundCharId: null, userPersona: '', focusBackground: '', taskCardBackground: '', encouragementMinutes: 25, pokeLimit: 5, globalWorldBookIds: [] };
                 if (!db.insWidgetSettings) db.insWidgetSettings = { avatar1: 'https://i.postimg.cc/Y96LPskq/o-o-2.jpg', bubble1: 'love u.', avatar2: 'https://i.postimg.cc/GtbTnxhP/o-o-1.jpg', bubble2: 'miss u.' };
                 if (!db.homeWidgetSettings) db.homeWidgetSettings = JSON.parse(JSON.stringify(defaultWidgetSettings));
+                // ▼▼▼ 新增 ▼▼▼
+                if (!db.naiPromptModules) db.naiPromptModules = [];
+                if (!db.naiGlobalPromptPresets) db.naiGlobalPromptPresets = [];
+                // ▲▲▲ 新增结束 ▲▲▲
 
 
                 // 4. Call the new saveData function which handles the new DB schema
                 showToast('正在写入新数据...');
-                await saveData(db);
+                await saveData();
 
                 const duration = Date.now() - startTime;
                 const message = `导入完成 (耗时${duration}ms)`;
@@ -10723,39 +11411,6 @@ function renderForumPosts(posts) {
             });
         }
 
-        // --- 角色/群聊设置侧边栏中提示词来源的事件监听 ---
-        function handlePromptSourceChange(event) {
-            const chat = (currentChatType === 'private')
-                ? db.characters.find(c => c.id === currentChatId)
-                : db.groups.find(g => g.id === currentChatId);
-            if (!chat) return;
-
-            const source = event.target.value; // 'system' or 'character'
-
-            // 确保 naiSettings 对象存在
-            if (!chat.naiSettings) {
-                chat.naiSettings = {};
-            }
-            chat.naiSettings.promptSource = source;
-
-            saveData(); // 立即保存来源选择
-
-            console.log(`🔄 ${currentChatType === 'private' ? '角色' : '群聊'} [${chat.id}] NAI提示词来源切换为: ${source}`);
-        }
-
-        // 监听私聊的 Radio 按钮组
-        const naiPromptSourceRadios = document.querySelectorAll('input[name="nai-prompt-source"]');
-        naiPromptSourceRadios.forEach(radio => {
-            radio.addEventListener('change', handlePromptSourceChange);
-        });
-
-        // 监听群聊的 Radio 按钮组
-        const groupNaiPromptSourceRadios = document.querySelectorAll('input[name="group-nai-prompt-source"]');
-        groupNaiPromptSourceRadios.forEach(radio => {
-            radio.addEventListener('change', handlePromptSourceChange);
-        });
-
-
         // --- NovelAI 设置相关函数 (加载/保存/重置) ---
 
         // 获取 NovelAI 设置 (合并默认值与 localStorage)
@@ -10770,8 +11425,9 @@ function renderForumPosts(posts) {
                 quality_toggle: true,
                 smea: true,
                 smea_dyn: false,
-                default_positive: 'masterpiece, best quality, 1girl, beautiful, detailed face, detailed eyes, long hair, anime style',
-                default_negative: 'lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry',
+                // ▼▼▼ 用下面两行替换它们 ▼▼▼
+                default_positive: localStorage.getItem('nai-global-positive') || 'masterpiece, best quality, 1girl, beautiful, detailed face, detailed eyes, long hair, anime style',
+                default_negative: localStorage.getItem('nai-global-negative') || 'lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry',
                 cors_proxy: 'https://corsproxy.io/?',
                 custom_proxy_url: ''
             };
@@ -10823,6 +11479,8 @@ function renderForumPosts(posts) {
             // 根据 CORS 代理选择显示/隐藏自定义输入框
             const customProxyGroup = document.getElementById('nai-custom-proxy-group');
             customProxyGroup.style.display = settings.cors_proxy === 'custom' ? 'block' : 'none';
+        
+            populateNaiPromptPresetSelect(); // ▼▼▼ 新增：填充预设下拉框 ▼▼▼
         }
 
         // 从 NovelAI 设置弹窗保存设置
@@ -10848,12 +11506,21 @@ function renderForumPosts(posts) {
                 custom_proxy_url: document.getElementById('nai-custom-proxy-url').value.trim()
             };
 
+            // ▼▼▼ 新增：保存当前设置为"默认" ▼▼▼
+            localStorage.setItem('nai-global-positive', settings.default_positive);
+            localStorage.setItem('nai-global-negative', settings.default_negative);
+            // ▲▲▲ 新增结束 ▲▲▲
+
             localStorage.setItem('novelai-settings', JSON.stringify(settings));
         }
 
         // 恢复默认设置
         function resetNovelAISettings() {
             localStorage.removeItem('novelai-settings');
+            // ▼▼▼ 新增：清除已保存的默认值 ▼▼▼
+            localStorage.removeItem('nai-global-positive');
+            localStorage.removeItem('nai-global-negative');
+            // ▲▲▲ 新增结束 ▲▲▲
             // 恢复默认设置后，需要重新加载默认值到弹窗中
             loadNovelAISettings();
         }
@@ -11537,5 +12204,42 @@ function renderForumPosts(posts) {
             }
         }
 
+        // --- 新增：补上缺失的备份提示函数 ---
+        function promptForBackupIfNeeded(triggerType) {
+            // 这个函数是可选的，如果不想用，可以保持为空。
+            // 但为了防止 "not defined" 错误，函数本身必须存在。
+            
+            // 简单的示例逻辑：
+            const now = Date.now();
+            let lastPromptTime = 0;
+            try {
+                lastPromptTime = parseInt(localStorage.getItem('lastBackupPromptTime') || '0', 10);
+            } catch (e) {
+                lastPromptTime = 0;
+            }
+
+            // 24小时内只提示一次
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+            if (now - lastPromptTime < twentyFourHours) {
+                return;
+            }
+
+            let message = '';
+            if (triggerType === 'new_char') {
+                message = '创建新角色成功！记得定期在"教程"页面备份数据哦。';
+            } else if (triggerType === 'history_milestone') {
+                message = '聊天记录又多了不少呢，是个备份数据的好时机！';
+            }
+
+            if (message) {
+                // 使用 showToast 来提示
+                // 我们用一个简单的 toast，因为它不会打断用户流程
+                if (typeof showToast === 'function') {
+                    showToast(message);
+                }
+                localStorage.setItem('lastBackupPromptTime', now.toString());
+            }
+        }
+        // --- 函数添加结束 ---
 
     });

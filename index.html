@@ -490,29 +490,14 @@
                 </div>
                 <div class="form-group"><label for="setting-chat-bg-upload" class="btn btn-primary">更换聊天背景</label><input
                         type="file" id="setting-chat-bg-upload" accept="image/*" style="display:none;"></div>
-                <div class="form-group" id="nai-character-settings-group">
-        <hr style="opacity: 0.2; margin: 20px 0;">
-        <label style="font-weight: 600; color: var(--accent-color);">NAI出图设置</label>
-        <p style="font-size: 12px; color: #666; margin-top: 5px;">
-            为当前角色配置专属的NovelAI出图提示词
-        </p>
-
-        <div style="margin-top: 15px;">
-            <label style="font-weight: 500;">提示词来源</label>
-            <div style="display: flex; gap: 15px; margin-top: 10px;">
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="radio" name="nai-prompt-source" value="system" checked>
-                    <span>使用系统设置</span>
-                </label>
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="radio" name="nai-prompt-source" value="character">
-                    <span>使用当前角色配置</span>
-                </label>
-            </div>
-        </div>
-
-        <button type="button" id="character-nai-prompts-btn" class="btn btn-secondary" style="width: 100%; margin-top: 15px;">配置角色专属提示词</button> </div>
-
+                <div class="form-group" id="nai-module-handbook-group">
+                    <hr style="opacity: 0.2; margin: 20px 0;">
+                    <label style="font-weight: 600; color: var(--accent-color);">NAI 模块手册</label>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        管理并选择当前角色在AI主动生图时可参考的提示词模块（"模块手册"）。
+                    </p>
+                    <button type="button" id="open-nai-module-manager-btn" class="btn btn-secondary" style="width: 100%; margin-top: 15px;">管理并挂载模块</button> 
+                </div>
                 <button type="submit" class="btn btn-primary">保存设置</button>
             </form>
             <hr style="border:none; border-top:1px solid #eee; margin: 20px 0;">
@@ -622,28 +607,14 @@
                                                                                                   accept="image/*"
                                                                                                   style="display:none;">
                 </div>
-                <div class="form-group" id="group-nai-settings-group">
-        <hr style="opacity: 0.2; margin: 20px 0;">
-        <label style="font-weight: 600; color: var(--accent-color);">NAI出图设置</label>
-        <p style="font-size: 12px; color: #666; margin-top: 5px;">
-            为当前群聊配置专属的NovelAI出图提示词 (对所有AI成员生效)
-        </p>
-
-        <div style="margin-top: 15px;">
-            <label style="font-weight: 500;">提示词来源</label>
-            <div style="display: flex; gap: 15px; margin-top: 10px;">
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="radio" name="group-nai-prompt-source" value="system" checked>
-                    <span>使用系统设置</span>
-                </label>
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="radio" name="group-nai-prompt-source" value="character">
-                    <span>使用当前群聊配置</span>
-                </label>
-            </div>
-        </div>
-
-        <button type="button" id="group-character-nai-prompts-btn" class="btn btn-secondary" style="width: 100%; margin-top: 15px;">配置群聊专属提示词</button> </div>
+                <div class="form-group" id="group-nai-module-handbook-group">
+                    <hr style="opacity: 0.2; margin: 20px 0;">
+                    <label style="font-weight: 600; color: var(--accent-color);">NAI 模块手册</label>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        管理并选择当前群聊在AI主动生图时可参考的提示词模块（"模块手册"）。
+                    </p>
+                    <button type="button" id="open-group-nai-module-manager-btn" class="btn btn-secondary" style="width: 100%; margin-top: 15px;">管理并挂载模块</button> 
+                </div>
                 <button type="submit" class="btn btn-primary">保存设置</button>
             </form>
             <hr style="border:none; border-top:1px solid #eee; margin: 20px 0;">
@@ -1493,26 +1464,7 @@
             object-fit: contain;
         }
 
-        /* 角色/群聊设置侧边栏单选按钮 */
-        #nai-character-settings-group input[type="radio"],
-        #group-nai-settings-group input[type="radio"] {
-            width: auto;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        #nai-character-settings-group label,
-        #group-nai-settings-group label {
-            margin-bottom: 0;
-        }
-
-        /* --- NovelAI 修复 (v3) --- */
-
-        /* 修复：确保从侧边栏打开的弹窗层级高于侧边栏 (z-index: 101) */
-        #character-nai-prompts-modal {
-            z-index: 102;
-        }
-
-        /* 修复：设置弹窗中的复选框布局 */
+        /* NovelAI 设置弹窗中的复选框布局 */
         .nai-settings-checkbox-group {
             display: flex;
             flex-direction: column;
@@ -1540,6 +1492,7 @@
             height: 18px;
             margin: 0;
         }
+
     </style>
 
 
@@ -1646,6 +1599,20 @@
                 <label>默认负面提示词</label>
                 <textarea id="nai-default-negative" rows="3" class="form-group" placeholder="lowres, bad anatomy, bad hands, text, error...">lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry</textarea>
             </div>
+
+            <div id="nai-global-prompt-presets-control" style="margin:12px 0;padding:12px;border-radius:8px;border:1px solid var(--border-color, #eee);background:var(--panel-bg, #fff);box-shadow:var(--panel-shadow, none);">
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:center;">
+                    <label style="min-width:80px;color:var(--muted,#666);flex-shrink:0;">全局预设：</label>
+                    <select id="nai-global-prompt-preset-select" style="flex:1;min-width:0;padding:8px;border-radius:6px;border:1px solid #ddd;">
+                        <option value="">— 选择全局提示词预设 —</option>
+                    </select>
+                    <button type="button" id="nai-global-prompt-apply-preset" class="btn btn-primary" style="flex-shrink:0;padding:6px 10px;">应用</button>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                    <button type="button" id="nai-global-prompt-save-preset" class="btn" style="flex-shrink:0;padding:6px 10px;">另存为</button>
+                    <button type="button" id="nai-global-prompt-manage-presets" class="btn" style="flex-shrink:0;padding:6px 10px;">管理</button>
+                </div>
+            </div>
             <div class="form-group" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
                 <label>🌐 CORS 代理设置</label>
                 <select id="nai-cors-proxy" class="form-group">
@@ -1706,37 +1673,6 @@
         </div>
     </div>
 </div>
-<div id="character-nai-prompts-modal" class="modal-overlay">
-    <div class="modal-window">
-        <h3 style="text-align: center; color: var(--primary-color);">角色专属NAI提示词配置</h3>
-        <span class="nai-modal-close-btn" id="close-character-nai-prompts">&times;</span>
-
-        <div class="nai-modal-content">
-            <p style="font-size: 13px; color: #666; margin-bottom: 20px; background-color: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-color);">
-                💡 这里配置的提示词仅用于当前角色的NAI出图。
-            </p>
-            <div class="form-group">
-                <label for="character-nai-positive" style="font-weight: 600;">
-                    正面提示词 (Positive Prompt)
-                </label>
-                <textarea id="character-nai-positive" rows="4" class="form-group" placeholder="例如: masterpiece, best quality, 1girl, beautiful..."></textarea>
-                <small>描述你希望生成的图像风格，可填入画师串</small>
-            </div>
-            <div class="form-group">
-                <label for="character-nai-negative" style="font-weight: 600;">
-                    负面提示词 (Negative Prompt)
-                </label>
-                <textarea id="character-nai-negative" rows="4" class="form-group" placeholder="例如: lowres, bad anatomy, bad hands..."></textarea>
-                <small>描述你希望避免的元素</small>
-            </div>
-        </div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button id="reset-character-nai-prompts-btn" class="btn btn-neutral" style="flex: 1;">清空配置</button>
-            <button id="save-character-nai-prompts-btn" class="btn btn-primary" style="flex: 1;">保存</button>
-        </div>
-    </div>
-</div>
 
 <!-- 分类管理弹窗 -->
 <div id="sticker-category-manager-modal" class="modal-overlay">
@@ -1754,6 +1690,61 @@
         <button id="close-category-manager-btn" class="btn btn-primary" style="margin-top: 25px;">完成</button>
     </div>
     </div>
+
+<div id="nai-module-manager-modal" class="modal-overlay">
+    <div class="modal-window" style="max-width: 400px; width: 90%; max-height: 90vh; display: flex; flex-direction: column; position: relative;">
+        <h3 style="text-align: center; color: var(--primary-color); margin: 0 0 15px 0; flex-shrink: 0;">NAI 模块手册</h3>
+        <span class="nai-modal-close-btn" id="close-nai-module-manager">&times;</span>
+
+        <div class="nai-modal-content" style="flex: 1; overflow-y: auto; padding-right: 5px;">
+            <div class="form-group" style="background: #fdfdfd; padding: 15px; border-radius: 10px; border: 1px solid #f0f0f0; margin-bottom: 20px;">
+                <label for="new-nai-module-name" style="font-weight: 600; color: var(--secondary-color);">创建新模块</label>
+                <input type="text" id="new-nai-module-name" class="form-group" placeholder="模块名称 (例如: 女性, 角色A, 场景)" style="margin-bottom: 10px;">
+                <textarea id="new-nai-module-content" rows="3" class="form-group" placeholder="模块内容 (提示词, 英文逗号隔开...)" style="margin-bottom: 10px;"></textarea>
+                <button type="button" id="create-nai-module-btn" class="btn btn-primary" style="width: 100%;">添加至全局手册</button>
+            </div>
+            
+            <div class="form-group">
+                <label style="font-weight: 600; color: var(--secondary-color);">挂载模块 (为当前聊天勾选)</label>
+                <div id="nai-module-list-container" style="max-height: 40vh; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; padding: 10px; background: #fff;">
+                    <p style="text-align: center; color: #aaa;">暂无模块，请在上方创建</p>
+                </div>
+            </div>
+        </div>
+        
+        <button id="save-nai-module-selection-btn" class="btn btn-primary" style="margin-top: 15px; flex-shrink: 0;">保存挂载</button>
+    </div>
+</div>
+
+<div id="nai-module-edit-modal" class="modal-overlay">
+    <div class="modal-window">
+        <h3>编辑模块</h3>
+        <form id="nai-module-edit-form">
+            <input type="hidden" id="edit-nai-module-id">
+            <div class="form-group">
+                <label for="edit-nai-module-name">模块名称</label>
+                <input type="text" id="edit-nai-module-name" class="form-group" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-nai-module-content">模块内容 (提示词)</label>
+                <textarea id="edit-nai-module-content" rows="5" class="form-group" required></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">保存</button>
+                <button type="button" id="cancel-nai-module-edit-btn" class="btn btn-neutral" style="flex: 1;">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="nai-global-prompt-presets-modal" class="modal-overlay">
+    <div class="modal-window" style="max-width:520px;background:var(--panel-bg,#fff);padding:14px;border-radius:10px;box-shadow:0 12px 36px rgba(10,10,20,0.12);position:relative;">
+        <h3 style="margin:0 0 10px 0;font-size:16px;">管理全局提示词预设</h3>
+        <span class="nai-modal-close-btn" id="nai-global-prompt-close-modal">&times;</span>
+        <div id="nai-global-prompt-presets-list" style="max-height:340px; overflow:auto; margin-bottom:12px;">
+        </div>
+    </div>
+</div>
+
     <script src="script.js" defer></script>
 </body>
 
