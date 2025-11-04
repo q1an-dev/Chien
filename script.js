@@ -7597,14 +7597,58 @@ ${loadedModules.map(m => `
 
                 const trimmedResponse = fullResponse.trim();
                 let messages;
+                let naiJsonData = null; // 1. 声明一个变量来尝试保存解析后的JSON
 
-                // 新增：判断回复是否可能是一个完整的HTML块
-                if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
-                    // 如果是，则将其视为单个HTML消息，避免被错误切分
-                    messages = [{ type: 'html', content: trimmedResponse }];
+                // 2. 增加一个拦截器，检查AI的完整回复是不是一个纯JSON
+                if ((trimmedResponse.startsWith('{') && trimmedResponse.endsWith('}')) || (trimmedResponse.startsWith('[') && trimmedResponse.endsWith(']'))) {
+                    try {
+                        // 3. 尝试解析它
+                        naiJsonData = JSON.parse(trimmedResponse);
+                    } catch (e) {
+                        // 解析失败，说明它可能只是一个长得像JSON的普通文本，保持 naiJsonData = null
+                        naiJsonData = null;
+                    }
+                }
+
+                // 4. 如果成功解析出了JSON (naiJsonData 不为 null)
+                if (naiJsonData) {
+                    // 5. 无论它是一个对象还是一个数组，我们都把它统一转换成数组，方便处理
+                    const naiCommands = Array.isArray(naiJsonData) ? naiJsonData : [naiJsonData];
+
+                    // 6. 检查这个数组里是否 *至少包含一个* NAI生图指令
+                    const isNaiCommandList = naiCommands.some(item => item && item.type === 'naiimag' && item.prompt);
+
+                    if (isNaiCommandList) {
+                        // 7. 如果是，我们就"伪造"一个 messages 数组，让后续的循环逻辑能正确处理它
+                        // 我们把数组里的每个对象重新变回JSON字符串，这样后续的循环就能用 JSON.parse() 来解析它
+                        messages = naiCommands.map(command => {
+                            if (command && command.type === 'naiimag' && command.prompt) {
+                                return { type: 'text', content: JSON.stringify(command) };
+                            }
+                            // 如果数组里混杂了其他不是NAI指令的JSON，就原样丢回去
+                            return { type: 'text', content: `[unknown的消息：${JSON.stringify(command)}]` };
+                        });
+                    } else {
+                        // 8. 如果它是个JSON，但不是NAI指令，就还按老规矩办
+                        // 新增：判断回复是否可能是一个完整的HTML块
+                        if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
+                            // 如果是，则将其视为单个HTML消息，避免被错误切分
+                            messages = [{ type: 'html', content: trimmedResponse }];
+                        } else {
+                            // 否则，使用原有的逻辑来处理可能混合了多种格式的文本
+                            messages = getMixedContent(fullResponse).filter(item => item.content.trim() !== '');
+                        }
+                    }
                 } else {
-                    // 否则，使用原有的逻辑来处理可能混合了多种格式的文本
-                    messages = getMixedContent(fullResponse).filter(item => item.content.trim() !== '');
+                    // 9. 如果它压根就不是JSON（比如普通的 "[...的消息：...]"），也按老规矩办
+                    // 新增：判断回复是否可能是一个完整的HTML块
+                    if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
+                        // 如果是，则将其视为单个HTML消息，避免被错误切分
+                        messages = [{ type: 'html', content: trimmedResponse }];
+                    } else {
+                        // 否则，使用原有的逻辑来处理可能混合了多种格式的文本
+                        messages = getMixedContent(fullResponse).filter(item => item.content.trim() !== '');
+                    }
                 }
 
                 let firstMessageProcessed = false; // 用于标记是否是第一条消息
@@ -7641,14 +7685,31 @@ ${loadedModules.map(m => `
                     }
 
                     // 如果上述方法都失败，回退到原有的检查方式（兼容旧代码）
-                    if (!naiData && localStorage.getItem('novelai-enabled') === 'true' && itemContent.startsWith('{') && itemContent.endsWith('}')) {
-                        try {
-                            const parsed = JSON.parse(itemContent);
-                            if (parsed.type === 'naiimag' && parsed.prompt) {
-                                naiData = parsed;
+                    if (!naiData && localStorage.getItem('novelai-enabled') === 'true') {
+                        // 检查对象格式：{"type": "naiimag", ...}
+                        if (itemContent.startsWith('{') && itemContent.endsWith('}')) {
+                            try {
+                                const parsed = JSON.parse(itemContent);
+                                if (parsed.type === 'naiimag' && parsed.prompt) {
+                                    naiData = parsed;
+                                }
+                            } catch (e) {
+                                // JSON 解析失败，naiData 保持 null
                             }
-                        } catch (e) {
-                            // JSON 解析失败，naiData 保持 null
+                        }
+                        // 检查数组格式：[{"type": "naiimag", ...}]
+                        else if (itemContent.startsWith('[') && itemContent.endsWith(']')) {
+                            try {
+                                const parsed = JSON.parse(itemContent);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    const firstItem = parsed[0];
+                                    if (firstItem && firstItem.type === 'naiimag' && firstItem.prompt) {
+                                        naiData = firstItem;
+                                    }
+                                }
+                            } catch (e) {
+                                // JSON 解析失败，naiData 保持 null
+                            }
                         }
                     }
 
