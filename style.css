@@ -5407,6 +5407,8 @@ border-top: none;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    /* 移除固定高度，让模块自然堆叠，由父容器 .nai-modal-content 处理滚动 */
+    min-height: 0; /* 确保flex子元素可以收缩 */
 }
 
 /* 模块分类标题样式已移除 - 不再需要分类显示 */

@@ -7358,6 +7358,7 @@ return `${seconds}秒`;
    - **画面描述类**（如角色数量、角色特征、场景等）：需要**语法融合**到你的创意描述中，避免冲突。
    - **参数类**（如画质、五官、艺术家等）：可以直接追加。
 5. 最终生成的Prompt必须是英文的。
+6. **【禁止】** 你的最终Prompt中 **绝不能** 包含任何**具体的人名**（例如：Alice, Bob, 小明）。允许使用 \`Artist:\` 标签（例如：\`Artist:zoh\`）。
 
 **[你的可用模块手册]**:
 ${loadedModules.map(m => `
@@ -7367,16 +7368,20 @@ ${DOMPurify.sanitize(m.content)}
 `;
                 } else {
                     prompt += `
-13.5. **(可选) NAI 模块手册**: (你当前没有可用的提示词模块)\n`;
+13.5. **(可选) NAI 模块手册**: (你当前没有可用的提示词模块)
+6. **【禁止】** 你的最终Prompt中 **绝不能** 包含任何**具体的人名**（例如：Alice, Bob, 小明）。允许使用 \`Artist:\` 标签（例如：\`Artist:zoh\`）。
+`;
                 }
 
                 prompt += `
 13.6. **(可选) NovelAI真实图片分享**:
     * **格式**: \`{"type": "naiimag", "prompt": "你生成的最终Prompt..."}\`
     * **【绝不能暴露是novelai生成的图片！】**
+    * **【重要】** 你的回复 **绝不能** 是一个纯文本的 NAI 提示词 (e.g., "masterpiece, 1girl...")。所有非 NAI 图片的回复都必须使用 13.a) 格式。
     * **【重要】关于prompt的撰写**: 你必须遵循 \`13.5\` 规则，通过语义理解判断哪些规则匹配，然后使用匹配规则的提示词原文。Prompt必须是英文的。
     * **使用场景**：当你想要在私聊对话中直接给用户发送一张图片时使用。
-    * **注意**：这会直接在聊天记录中显示图片，而不是发布到动态。\n`;
+    * **注意**：这会直接在聊天记录中显示图片，而不是发布到动态。
+`;
             }
             // ▲▲▲ 替换结束 ▲▲▲
             prompt += `14. **对话节奏**: 你需要模拟真人的聊天习惯，你可以一次性生成多条短消息。每次要回复至少3-8条消息。并根据当前行为/心情/地点变化实时更新状态。\n`;
@@ -7445,6 +7450,7 @@ ${DOMPurify.sanitize(m.content)}
           - **画面描述类**（如角色数量、角色特征、场景等）：需要**语法融合**到你的创意描述中，避免冲突。
           - **参数类**（如画质、五官、艺术家等）：可以直接追加。
        5. 最终生成的Prompt必须是英文的。
+       6. **【禁止】** 你的最终Prompt中 **绝不能** 包含任何**具体的人名**（例如：Alice, Bob, 小明）。允许使用 \`Artist:\` 标签（例如：\`Artist:zoh\`）。
        
      **[你的可用模块手册]**:
 ${loadedModules.map(m => `
@@ -7453,12 +7459,15 @@ ${loadedModules.map(m => `
 `).join('\n     ---\n')}
 `;
                } else {
-                   prompt += `\n   - **NAI 模块手册**: (你当前没有可用的提示词模块)\n`;
+                   prompt += `\n   - **NAI 模块手册**: (你当前没有可用的提示词模块)
+     - **【禁止】** 你的最终Prompt中 **绝不能** 包含任何**具体的人名**（例如：Alice, Bob, 小明）。允许使用 \`Artist:\` 标签（例如：\`Artist:zoh\`）。
+`;
                }
 
                outputFormats += `
    - **NovelAI图片分享**: \`{"type": "naiimag", "name": "你的角色真名", "prompt": "你生成的最终Prompt..."}\`
      - 【禁止暴露这是novelai生成的图片!】
+     - 【重要】你的回复 **绝不能** 是一个纯文本的 NAI 提示词。所有非 NAI 图片的回复都必须使用 4.a) 格式。
      - 【重要】prompt撰写：你必须遵循"NAI 模块手册"规则，通过语义理解判断哪些规则匹配，然后使用匹配规则的提示词原文。Prompt必须是英文的。
      - 【重要】name字段必须是你正在扮演的角色的 **真名**。`;
            }
@@ -7662,19 +7671,39 @@ ${loadedModules.map(m => `
                     let naiData = null;
                     if (item.type === 'text' && itemContent.includes('"type": "naiimag"')) {
                         try {
-                            // 尝试解析这个JSON
+                            // 1. 尝试直接解析裸JSON
                             naiData = JSON.parse(itemContent);
                         } catch (e) {
-                            // 如果不是一个完整的JSON对象，尝试从内容中提取JSON部分
-                            const jsonMatch = itemContent.match(/\{[^{}]*"type"\s*:\s*"naiimag"[^{}]*\}/);
-                            if (jsonMatch) {
+                            // 2. 尝试从 [消息：...] 包装中提取JSON
+                            //    这个正则会查找 {...} 或 [...] 块
+                            const jsonMatch = itemContent.match(/:\s*(\{[\s\S]*\}|\[[\s\S]*\])\s*\]?$/);
+                            if (jsonMatch && jsonMatch[1]) {
                                 try {
-                                    naiData = JSON.parse(jsonMatch[0]);
+                                    naiData = JSON.parse(jsonMatch[1]);
                                 } catch (e2) {
-                                    // JSON解析失败，naiData 保持 null
-                                    console.warn("NAI：检测到 'naiimag' 文本，但JSON解析失败。", e2);
+                                    console.warn("NAI：在消息包装中找到JSON，但解析失败。", e2, itemContent);
+                                    naiData = null;
+                                }
+                            } else {
+                                // 3. 备用方案：查找字符串中任何位置的JSON (兼容旧的错误格式)
+                                const fallbackMatch = itemContent.match(/\{[^{}]*"type"\s*:\s*"naiimag"[^{}]*\}/);
+                                if (fallbackMatch) {
+                                    try {
+                                        naiData = JSON.parse(fallbackMatch[0]);
+                                    } catch (e3) {
+                                        console.warn("NAI：在字符串中找到JSON，但解析失败。", e3, itemContent);
+                                        naiData = null;
+                                    }
                                 }
                             }
+                        }
+
+                        // 确保解析出的是合法的 NAI 指令 (单个对象或数组中的第一个)
+                        if (Array.isArray(naiData) && naiData.length > 0) {
+                            naiData = naiData[0];
+                        }
+                        if (!naiData || naiData.type !== 'naiimag' || !naiData.prompt) {
+                            naiData = null;
                         }
                     }
 
@@ -11908,35 +11937,12 @@ function renderForumPosts(posts) {
             const systemPrompts = {
                 positive: systemSettings.default_positive,
                 negative: systemSettings.default_negative,
-                source: 'system'
+                source: 'system' // 统一返回 'system'
             };
 
-            // 2. 查找当前聊天对象
-            const chat = (chatType === 'private')
-                ? db.characters.find(c => c.id === chatId)
-                : db.groups.find(g => g.id === chatId);
-
-            if (!chat) {
-                console.warn('NAI提示词：未找到聊天对象，使用系统默认。');
-                return systemPrompts;
-            }
-
-            // 3. 检查角色的专属配置
-            const naiSettings = chat.naiSettings || {};
-
-            // 4. 判断使用哪个配置
-            if (naiSettings.promptSource === 'character') {
-                console.log('✅ NAI提示词：使用角色/群聊专属配置');
-                return {
-                    positive: naiSettings.positivePrompt || '', // 使用角色专属配置，为空则为空
-                    negative: naiSettings.negativePrompt || '', // 使用角色专属配置，为空则为空
-                    source: 'character'
-                };
-            } else {
-                // 默认或明确选择 'system'
-                console.log('✅ NAI提示词：使用系统默认配置');
-                return systemPrompts;
-            }
+            // 2. 移除所有角色专属逻辑，直接返回系统配置
+            console.log('✅ NAI提示词：已全局统一，使用系统默认配置');
+            return systemPrompts;
         }
 
         /**
