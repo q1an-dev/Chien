@@ -132,7 +132,7 @@
         }
 
         // --- Initial HTML Injection ---
-        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form"><div class="form-group"><label for="api-provider">API 服务商</label><select id="api-provider" name="provider"><option value="newapi">NewAPI (自定义)</option><option value="deepseek">DeepSeek</option><option value="claude">Claude</option><option value="gemini">Gemini</option></select></div><div class="form-group"><label for="api-url">API 地址（后缀不用添加/v1）</label><input type="url" id="api-url" name="url" placeholder="选择服务商可自动填写" required></div><div class="form-group"><label for="api-key">密钥 (Key)</label><input type="password" id="api-key" name="key" placeholder="请输入你的API密钥" required></div><button type="button" class="btn btn-secondary" id="fetch-models-btn"><span class="btn-text">点击拉取模型</span><div class="spinner"></div></button><div class="form-group"><label for="api-model">选择模型</label><select id="api-model" name="model" required><option value="">请先拉取模型列表</option></select></div><div class.blade.php="form-group" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #fce4ec; border-radius: 10px; background-color: #fff8fa;">
+        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form"><div class="form-group"><label for="api-provider">API 服务商</label><select id="api-provider" name="provider"><option value="newapi">NewAPI (自定义)</option><option value="deepseek">DeepSeek</option><option value="claude">Claude</option><option value="gemini">Gemini</option></select></div><div class="form-group"><label for="api-url">API 地址（后缀不用添加/v1）</label><input type="url" id="api-url" name="url" placeholder="选择服务商可自动填写" required></div><div class="form-group"><label for="api-key">密钥 (Key)</label><input type="password" id="api-key" name="key" placeholder="请输入你的API密钥" required></div><button type="button" class="btn btn-secondary" id="fetch-models-btn"><span class="btn-text">点击拉取模型</span><div class="spinner"></div></button><div class="form-group"><label for="api-model">选择模型</label><select id="api-model" name="model" required><option value="">请先拉取模型列表</option></select></div><div class="form-group" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #fce4ec; border-radius: 10px; background-color: #fff8fa;">
     <label for="time-perception-switch" style="margin-bottom: 0; color: var(--secondary-color); font-weight: 600;">时间感知加强</label>
     <input type="checkbox" id="time-perception-switch" style="width: auto; height: 20px; width: 20px;">
 </div>
@@ -1986,6 +1986,12 @@
                 if (navLink) {
                     e.preventDefault();
                     const target = navLink.getAttribute('data-target');
+
+                    // 这些由 setupHomeScreen() 中的特定监听器处理，这里忽略
+                    if (target === 'world-book-screen' || target === 'customize-screen' || target === 'tutorial-screen') {
+                        return;
+                    }
+                    
                     if (target === 'music-screen' || target === 'diary-screen' || target === 'piggy-bank-screen') {
                         showToast('该应用正在开发中，敬请期待！');
                         return;
@@ -3413,6 +3419,11 @@
            const modal = document.getElementById('api-presets-modal');
            const list = document.getElementById('api-presets-list');
            if (!modal || !list) return;
+           
+           // 显示模态框
+           modal.style.display = 'flex';
+           modal.classList.add('visible');
+           
            list.innerHTML = '';
            const presets = _getApiPresets();
            if (!presets.length) {
@@ -3436,12 +3447,12 @@
                btns.style.gap = '6px';
 
                const applyBtn = document.createElement('button');
-               applyBtn.className = 'btn';
+               applyBtn.className = 'btn btn-primary btn-xsmall';
                applyBtn.textContent = '应用';
-               applyBtn.onclick = function(){ applyApiPreset(p.name); modal.classList.remove('visible'); };
+               applyBtn.onclick = function(){ applyApiPreset(p.name); modal.classList.remove('visible'); modal.style.display = 'none'; };
 
                const renameBtn = document.createElement('button');
-               renameBtn.className = 'btn';
+               renameBtn.className = 'btn btn-xsmall';
                renameBtn.textContent = '重命名';
                renameBtn.onclick = function(){
                    const newName = prompt('输入新名称：', p.name);
@@ -3454,7 +3465,7 @@
                };
 
                const delBtn = document.createElement('button');
-               delBtn.className = 'btn';
+               delBtn.className = 'btn btn-danger btn-xsmall';
                delBtn.textContent = '删除';
                delBtn.onclick = function(){ if(!confirm('确定删除 "'+p.name+'" ?')) return; const all=_getApiPresets(); all.splice(idx,1); _saveApiPresets(all); openApiManageModal(); populateApiSelect(); };
 
@@ -3742,6 +3753,11 @@
            const modal = document.getElementById('bubble-presets-modal');
            const list = document.getElementById('bubble-presets-list');
            if (!modal || !list) return;
+           
+           // 显示模态框
+           modal.style.display = 'flex';
+           modal.classList.add('visible');
+           
            list.innerHTML = '';
            const presets = _getBubblePresets();
            if (!presets.length) list.innerHTML = '<p style="color:#888;margin:6px 0;">暂无预设</p>';
@@ -3765,14 +3781,12 @@
                btnWrap.style.gap = '6px';
 
                const applyBtn = document.createElement('button');
-               applyBtn.className = 'btn btn-primary';
-               applyBtn.style.padding = '6px 8px;border-radius:8px';
+               applyBtn.className = 'btn btn-primary btn-xsmall';
                applyBtn.textContent = '应用';
-               applyBtn.onclick = function(){ applyPresetToCurrentChat(p.name); modal.classList.remove('visible'); };
+               applyBtn.onclick = function(){ applyPresetToCurrentChat(p.name); modal.classList.remove('visible'); modal.style.display = 'none'; };
 
                const renameBtn = document.createElement('button');
-               renameBtn.className = 'btn';
-               renameBtn.style.padding = '6px 8px;border-radius:8px';
+               renameBtn.className = 'btn btn-xsmall';
                renameBtn.textContent = '重命名';
                renameBtn.onclick = function(){
                    const newName = prompt('输入新名称：', p.name);
@@ -3785,7 +3799,7 @@
                };
 
                const delBtn = document.createElement('button');
-               delBtn.className = 'btn btn-danger';
+               delBtn.className = 'btn btn-danger btn-xsmall';
                delBtn.style.padding = '6px 8px;border-radius:8px';
                delBtn.textContent = '删除';
                delBtn.onclick = function(){
@@ -3882,6 +3896,11 @@
            const modal = document.getElementById('mypersona-presets-modal');
            const list = document.getElementById('mypersona-presets-list');
            if (!modal || !list) return;
+           
+           // 显示模态框
+           modal.style.display = 'flex';
+           modal.classList.add('visible');
+           
            list.innerHTML = '';
            const presets = _getMyPersonaPresets();
            if (!presets.length) list.innerHTML = '<p style="color:#888;margin:6px 0;">暂无预设</p>';
@@ -3906,14 +3925,12 @@
                btnWrap.style.gap = '6px';
 
                const applyBtn = document.createElement('button');
-               applyBtn.className = 'btn btn-primary';
-               applyBtn.style.padding = '6px 8px;border-radius:8px';
+               applyBtn.className = 'btn btn-primary btn-xsmall';
                applyBtn.textContent = '应用';
-               applyBtn.onclick = function(){ applyMyPersonaPresetToCurrentChat(p.name); modal.classList.remove('visible'); };
+               applyBtn.onclick = function(){ applyMyPersonaPresetToCurrentChat(p.name); modal.classList.remove('visible'); modal.style.display = 'none'; };
 
                const renameBtn = document.createElement('button');
-               renameBtn.className = 'btn';
-               renameBtn.style.padding = '6px 8px;border-radius:8px';
+               renameBtn.className = 'btn btn-xsmall';
                renameBtn.textContent = '重命名';
                renameBtn.onclick = function(){
                    const newName = prompt('输入新名称：', p.name);
@@ -3926,8 +3943,7 @@
                };
 
                const deleteBtn = document.createElement('button');
-               deleteBtn.className = 'btn';
-               deleteBtn.style.padding = '6px 8px;border-radius:8px;color:#e53935';
+               deleteBtn.className = 'btn btn-danger btn-xsmall';
                deleteBtn.textContent = '删除';
                deleteBtn.onclick = function(){
                    if (!confirm('确认删除该预设？')) return;
@@ -4366,9 +4382,21 @@
                 e.preventDefault();
                 applyHomeScreenMode('night');
             });
-            document.querySelector('[data-target="world-book-screen"]').addEventListener('click', renderWorldBookList);
-            document.querySelector('[data-target="customize-screen"]').addEventListener('click', renderCustomizeForm);
-            document.querySelector('[data-target="tutorial-screen"]').addEventListener('click', renderTutorialContent);
+            document.querySelector('[data-target="world-book-screen"]').addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止默认行为
+                renderWorldBookList();
+                switchScreen('world-book-screen'); // 切换屏幕
+            });
+            document.querySelector('[data-target="customize-screen"]').addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止默认行为
+                renderCustomizeForm();
+                switchScreen('customize-screen'); // 切换屏幕
+            });
+            document.querySelector('[data-target="tutorial-screen"]').addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止默认行为
+                renderTutorialContent();
+                switchScreen('tutorial-screen'); // 切换屏幕
+            });
             updateBatteryStatus();
 
             const homeWidgetContainer = homeScreen.querySelector('.home-widget-container');
@@ -4708,10 +4736,11 @@
                     <span class="collapsible-arrow">▼</span>
                 </div>
                 <div class="collapsible-content">
-                    <p style="font-size: 14px; color: #666; margin-bottom: 20px; text-align: center;">主屏幕上的小组件内容可以直接点击编辑，失焦后自动保存。<br>中央头像则是在主屏幕点击后弹窗更换。</p>
-                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px;">
-                         <button type="button" id="reset-widget-btn" class="btn btn-neutral btn-small">恢复默认</button>
-                    </div>
+                    <p style="font-size: 13px; color: #555; margin-bottom: 20px; text-align: left; line-height: 1.6;">
+                        - <strong>主屏幕上的小组件内容</strong>可以直接点击编辑，失焦后自动保存。<br>
+                        - <strong>中央头像</strong>则是在主屏幕点击后弹窗更换。
+                    </p>
+                    <button type="button" id="reset-widget-btn" class="btn btn-neutral" style="margin-top: 10px; width: 100%;">恢复默认</button>
                 </div>
             </div>
             `;
@@ -4727,20 +4756,20 @@
                 <div class="collapsible-content">
                     <div class="form-group">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <label for="global-beautification-css" style="font-weight: bold; font-size: 1.1em; color: var(--primary-color); margin-bottom: 0;">全局美化CSS代码</label>
+                            <label for="global-beautification-css" style="font-weight: bold; font-size: 14px; color: var(--primary-color); margin-bottom: 0;">全局美化CSS代码</label>
                             <button type="button" id="apply-global-css-now-btn" class="btn btn-primary btn-small">立即应用</button>
                         </div>
                         <textarea id="global-beautification-css" class="form-group" rows="8" placeholder="在此输入CSS代码... 您的创造力没有边界！"></textarea>
                     </div>
                     <div class="panel panel-sm" style="padding:12px;border-radius:10px;border:1px solid var(--border-color,#e8e8ef);background:var(--panel-bg,#fff);box-shadow:var(--panel-shadow,0 4px 12px rgba(20,20,30,0.04));margin:10px 0;">
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                            <label for="global-css-preset-select" style="width:auto;color:var(--muted,#667);font-size:13px; font-weight: bold;">全局样式预设库</label>
+                            <label for="global-css-preset-select" style="width:auto;color:var(--muted,#667);font-size:12px; font-weight: bold;">全局样式预设库</label>
                             <select id="global-css-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">-- 选择预设 --</option></select>
                         </div>
                         <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;justify-content: flex-end;">
-                            <button type="button" id="global-css-apply-btn" class="btn btn-primary" style="padding:7px 10px;border-radius:8px;">应用预设</button>
-                            <button type="button" id="global-css-save-btn" class="btn" style="padding:7px 10px;border-radius:8px;">存为预设</button>
-                            <button type="button" id="global-css-manage-btn" class="btn" style="padding:7px 10px;border-radius:8px;">管理</button>
+                            <button type="button" id="global-css-apply-btn" class="btn btn-primary btn-xsmall">应用预设</button>
+                            <button type="button" id="global-css-save-btn" class="btn btn-xsmall">存为预设</button>
+                            <button type="button" id="global-css-manage-btn" class="btn btn-xsmall">管理</button>
                         </div>
                     </div>
                 </div>
@@ -4770,12 +4799,13 @@
                 if (!tutorialContent) return;
     
                 const updateSection = document.createElement('div');
-                updateSection.className = 'tutorial-item'; // Use tutorial-item class, default open
+                updateSection.className = 'tutorial-item'; // Use tutorial-item class, default closed
     
                 let notesHtml = '';
                 updateLog.forEach((log, index) => {
+                    const isLast = index === updateLog.length - 1; // 判断是否为最后一项
                     notesHtml += `
-                        <div style="margin-bottom: 15px; ${index < updateLog.length - 1 ? 'padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;' : ''}">
+                        <div style="margin-bottom: ${isLast ? '0' : '15px'}; ${!isLast ? 'padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;' : ''}">
                             <h4 style="font-size: 15px; color: #333; margin: 0 0 5px 0;">版本 ${log.version} (${log.date})</h4>
                             <ul style="padding-left: 20px; margin: 0; list-style-type: '› ';">
                                 ${log.notes.map(note => `<li style="margin-bottom: 5px; color: #666;">${note}</li>`).join('')}
@@ -4786,7 +4816,7 @@
     
                 updateSection.innerHTML = `
                     <div class="tutorial-header">更新日志</div>
-                    <div class="tutorial-content" style="padding-top: 15px;">
+                    <div class="tutorial-content">
                         ${notesHtml}
                     </div>
                 `;
@@ -4892,7 +4922,7 @@
             if (!tutorialContent) return;
 
             const updateSection = document.createElement('div');
-            updateSection.className = 'tutorial-item'; // Use tutorial-item class, default open
+            updateSection.className = 'tutorial-item'; // Use tutorial-item class, default closed
 
             let notesHtml = '';
             updateLog.forEach((log, index) => {
@@ -4908,7 +4938,7 @@
 
             updateSection.innerHTML = `
                 <div class="tutorial-header">更新日志</div>
-                <div class="tutorial-content" style="padding-top: 15px;">
+                <div class="tutorial-content">
                     ${notesHtml}
                 </div>
             `;
@@ -4974,6 +5004,7 @@
 
             const backupDataBtn = document.createElement('button');
             backupDataBtn.className = 'btn btn-primary';
+            backupDataBtn.style.fontFamily = 'var(--font-family)';
             backupDataBtn.textContent = '备份数据';
             backupDataBtn.disabled = loadingBtn
 
@@ -5017,6 +5048,7 @@
             });
             const importDataBtn = document.createElement('label');
             importDataBtn.className = 'btn btn-neutral';
+            importDataBtn.style.fontFamily = 'var(--font-family)';
             importDataBtn.textContent = '导入数据';
             importDataBtn.style.marginTop = '15px'
             importDataBtn.style.display = 'block'
@@ -7638,21 +7670,28 @@ ${loadedModules.map(m => `
                 }
             }
             if (fullResponse) {
-                // ▼▼▼▼▼ 撤销上一个补丁，恢复到原始的 getMixedContent 调用 ▼▼▼▼▼
-
+                // ▼▼▼▼▼ 修复AI消息截断Bug (V2 - 最终方案) ▼▼▼▼▼
+                // 不再使用 simple .split('\n')，因为它会错误地分割列表 (1.\n2.)。
+                // 我们使用正则表达式，只在消息头（如 [xxx的消息： 或 {...）之前分割。
                 const trimmedResponse = fullResponse.trim();
-                let messages;
 
-                // 新增：判断回复是否可能是一个完整的HTML块
-                if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
-                    // 如果是，则将其视为单个HTML消息，避免被错误切分
-                    messages = [{ type: 'html', content: trimmedResponse }];
-                } else {
-                    // 否则，使用原有的逻辑来处理可能混合了多种格式的文本
-                    messages = getMixedContent(fullResponse).filter(item => item.content.trim() !== '');
-                }
+                // 这个Regex会查找 [xxx： 或 {..."type": 开头的地方，并在它们前面分割。
+                // (split on a positive lookahead for [anything_with_colon:] or {anything_with_"type":)
+                // 修复：增加了对 <...char="..."> (HTML) 和 NAI JSON 的更精确匹配
+                const messageParts = trimmedResponse.split(
+                    /(?=\[(?:.*?的消息：|.*?发送的表情包：|.*?的语音：|.*?发来的照片\/视频：|.*?的转账：|.*?送来的礼物：|.*?撤回了上一条消息：)|<[a-z][a-z0-9]*\s+char="|{\s*"type":\s*"naiimag")/
+                ).filter(part => part.trim() !== ''); // 分割并移除空字符串
 
-                // ▲▲▲▲▲ 恢复完成 ▲▲▲▲▲
+                let messages = messageParts.map(part => {
+                    const content = part.trim();
+                    if (content.startsWith('<') && content.includes('char=')) {
+                        const charMatch = content.match(/<[a-z][a-z0-9]*\s+char="([^"]*)"/i);
+                        return { type: 'html', content: content, char: charMatch ? charMatch[1] : null };
+                    }
+                    return { type: 'text', content: content, char: null }; // NAI JSON 也会被归为 'text'，后续逻辑会解析
+                });
+                
+                // ▲▲▲▲▲ 修复结束 ▲▲▲▲▲
 
                 let firstMessageProcessed = false; // 用于标记是否是第一条消息
 
@@ -8726,6 +8765,11 @@ function renderStickerGrid() {
             const modal = document.getElementById('global-css-presets-modal');
             const list = document.getElementById('global-css-presets-list');
             if (!modal || !list) return;
+            
+            // 显示模态框
+            modal.style.display = 'flex';
+            modal.classList.add('visible');
+            
             list.innerHTML = '';
             const presets = db.globalCssPresets || [];
             if (!presets.length) list.innerHTML = '<p style="color:#888;margin:6px 0;">暂无预设</p>';
@@ -8750,9 +8794,17 @@ function renderStickerGrid() {
                 btnWrap.style.display = 'flex';
                 btnWrap.style.gap = '6px';
 
+                const applyBtn = document.createElement('button');
+                applyBtn.className = 'btn btn-primary btn-xsmall';
+                applyBtn.textContent = '应用';
+                applyBtn.onclick = function() {
+                    applyGlobalCssPreset(p.name);
+                    modal.classList.remove('visible');
+                    modal.style.display = 'none';
+                };
+
                 const renameBtn = document.createElement('button');
-                renameBtn.className = 'btn';
-                renameBtn.style.padding = '6px 8px';
+                renameBtn.className = 'btn btn-xsmall';
                 renameBtn.textContent = '重命名';
                 renameBtn.onclick = function() {
                     const newName = prompt('输入新名称：', p.name);
@@ -8764,8 +8816,7 @@ function renderStickerGrid() {
                 };
 
                 const delBtn = document.createElement('button');
-                delBtn.className = 'btn btn-danger';
-                delBtn.style.padding = '6px 8px';
+                delBtn.className = 'btn btn-danger btn-xsmall';
                 delBtn.textContent = '删除';
                 delBtn.onclick = function() {
                     if (!confirm('确定删除预设 "' + p.name + '" ?')) return;
@@ -9555,7 +9606,10 @@ function renderStickerGrid() {
            if (applyBtn) applyBtn.addEventListener('click', function(){ const v=select.value; if(!v) return (window.showToast&&showToast('请选择预设'))||alert('请选择预设'); applyApiPreset(v); });
            if (modalClose) modalClose.addEventListener('click', function(){ 
                const modal = document.getElementById('api-presets-modal');
-               if (modal) modal.classList.remove('visible');
+               if (modal) {
+                   modal.classList.remove('visible');
+                   modal.style.display = 'none';
+               }
            });
            if (importBtn) importBtn.addEventListener('click', importApiPresets);
            if (exportBtn) exportBtn.addEventListener('click', exportApiPresets);
@@ -9565,6 +9619,13 @@ function renderStickerGrid() {
            const bubbleSaveBtn = document.getElementById('save-preset-btn');
            const bubbleManageBtn = document.getElementById('manage-presets-btn');
            const bubbleModalClose = document.getElementById('close-presets-modal');
+           if (bubbleModalClose) bubbleModalClose.addEventListener('click', function(){ 
+               const modal = document.getElementById('bubble-presets-modal');
+               if (modal) {
+                   modal.classList.remove('visible');
+                   modal.style.display = 'none';
+               }
+           });
 
            // --- 新增代码开始 ---
            const groupBubbleApplyBtn = document.getElementById('group-apply-preset-btn');
@@ -9606,14 +9667,20 @@ function renderStickerGrid() {
            if (personaApplyBtn) personaApplyBtn.addEventListener('click', function(){ const v = personaSelect.value; if(!v) return (window.showToast && showToast('请选择要应用的预设')) || alert('请选择要应用的预设'); applyMyPersonaPresetToCurrentChat(v); });
            if (personaModalClose) personaModalClose.addEventListener('click', function(){ 
                const modal = document.getElementById('mypersona-presets-modal');
-               if (modal) modal.classList.remove('visible');
+               if (modal) {
+                   modal.classList.remove('visible');
+                   modal.style.display = 'none';
+               }
            });
 
            // Global CSS Presets
            const globalCssModalClose = document.getElementById('global-css-close-modal');
            if (globalCssModalClose) globalCssModalClose.addEventListener('click', () => {
                const modal = document.getElementById('global-css-presets-modal');
-               if (modal) modal.classList.remove('visible');
+               if (modal) {
+                   modal.classList.remove('visible');
+                   modal.style.display = 'none';
+               }
            });
        }
 
