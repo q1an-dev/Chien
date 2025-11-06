@@ -4931,6 +4931,18 @@
 
 
         function setupTutorialApp() {
+            const tutorialContentArea = document.getElementById('tutorial-content-area');
+            // 检查是否已经绑定过，防止重复
+            if (tutorialContentArea && !tutorialContentArea._listenerAttached) {
+                tutorialContentArea.addEventListener('click', (e) => {
+                    const header = e.target.closest('.tutorial-header');
+                    if (header) {
+                        header.parentElement.classList.toggle('open');
+                    }
+                });
+                // 添加一个标志位，表示已经绑定过了
+                tutorialContentArea._listenerAttached = true;
+            }
             renderTutorialContent();
         }
 
@@ -6424,7 +6436,7 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                 if (message.content.match(updateStatusRegex)) {
                     character.status = message.content.match(updateStatusRegex)[1];
                     chatRoomStatusText.textContent = character.status;
-                    await dexieDB.groups.put(group);
+                    await dexieDB.characters.put(character);
                     return;
                 }
                 if (message.content.match(giftReceivedRegex) && message.role === 'assistant') {
@@ -6437,7 +6449,7 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                         if (giftCardOnScreen) {
                             giftCardOnScreen.classList.add('received');
                         }
-                        await dexieDB.groups.put(group);
+                        await dexieDB.characters.put(character);
                     }
                     return;
                 }
@@ -6456,7 +6468,7 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                             const statusElem = transferCardOnScreen.querySelector('.transfer-status');
                             if (statusElem) statusElem.textContent = statusToSet === 'received' ? '已收款' : '已退回';
                         }
-                        await dexieDB.groups.put(group);
+                        await dexieDB.characters.put(character);
                     }
                 } else {
                     const bubbleElement = createMessageBubbleElement(message);
@@ -9263,45 +9275,60 @@ function renderStickerGrid() {
             });
 
             // 长按删除世界书条目逻辑
+            // 使用统一的处理函数，避免重复触发
+            function handleWorldBookDelete(bookId, bookName) {
+                // 如果正在确认删除，直接返回
+                if (isWorldBookDeleteConfirming) return;
+                
+                // 设置标志位，防止重复触发
+                isWorldBookDeleteConfirming = true;
+                
+                // 清除所有可能运行的长按timer
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+                
+                if (confirm(`确定要删除世界书条目"${bookName}"吗？此操作不可恢复。`)) {
+                    deleteWorldBookById(bookId);
+                } else {
+                    // 如果用户取消，立即重置标志位
+                    setTimeout(() => {
+                        isWorldBookDeleteConfirming = false;
+                    }, 100);
+                }
+            }
+            
             worldBookListContainer.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 const item = e.target.closest('.world-book-item');
                 if (item && !e.target.closest('.action-btn')) {
-                    // 如果正在确认删除，不再触发新的删除
-                    if (isWorldBookDeleteConfirming) return;
                     const bookId = item.dataset.id;
                     const book = db.worldBooks.find(wb => wb.id === bookId);
                     if (book) {
-                        // 设置标志位，防止重复触发
-                        isWorldBookDeleteConfirming = true;
-                        if (confirm(`确定要删除世界书条目"${book.name}"吗？此操作不可恢复。`)) {
-                            deleteWorldBookById(bookId);
-                        } else {
-                            // 如果用户取消，立即重置标志位
-                            isWorldBookDeleteConfirming = false;
-                        }
+                        handleWorldBookDelete(bookId, book.name);
                     }
                 }
             });
+            
             worldBookListContainer.addEventListener('touchstart', (e) => {
                 const item = e.target.closest('.world-book-item');
                 if (!item || e.target.closest('.action-btn')) return;
                 // 如果正在确认删除，不再触发新的长按
                 if (isWorldBookDeleteConfirming) return;
+                
+                // 先清除之前的timer（防止多次touchstart导致多个timer）
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                }
+                
                 longPressTimer = setTimeout(() => {
-                    // 清除timer，防止重复触发
+                    // 清除timer引用
                     longPressTimer = null;
                     const bookId = item.dataset.id;
                     const book = db.worldBooks.find(wb => wb.id === bookId);
                     if (book) {
-                        // 设置标志位，防止重复触发
-                        isWorldBookDeleteConfirming = true;
-                        if (confirm(`确定要删除世界书条目"${book.name}"吗？此操作不可恢复。`)) {
-                            deleteWorldBookById(bookId);
-                        } else {
-                            // 如果用户取消，立即重置标志位
-                            isWorldBookDeleteConfirming = false;
-                        }
+                        handleWorldBookDelete(bookId, book.name);
                     }
                 }, 500);
             });
@@ -13195,13 +13222,6 @@ function renderForumPosts(posts) {
         function renderTutorialContent() {
             const tutorialContentArea = document.getElementById('tutorial-content-area');
             if (!tutorialContentArea) return;
-
-            tutorialContentArea.addEventListener('click', (e) => {
-                const header = e.target.closest('.tutorial-header');
-                if (header) {
-                    header.parentElement.classList.toggle('open');
-                }
-            });
 
             const tutorials = [
                 {title: '写在前面', imageUrls: ['https://i.postimg.cc/7PgyMG9S/image.jpg']},
