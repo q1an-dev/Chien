@@ -383,7 +383,7 @@
             currentJournalDetailId = null,
             currentQuoteInfo = null, // 新增：用于存储引用信息
             currentGroupAction = {type: null, recipients: []},
-            worldBookLongPressActive = false; // 标记长按删除是否已激活，用于忽略后续的click事件
+            isWorldBookDeleteConfirming = false; // 防止重复触发删除确认弹窗
         let currentPomodoroTask = null, pomodoroInterval = null, pomodoroRemainingSeconds = 0, pomodoroCurrentSessionSeconds = 0, isPomodoroPaused = true, pomodoroPokeCount = 0, pomodoroIsInterrupted = false, currentPomodoroSettingsContext = null, pomodoroSessionHistory = [];
         let isStickerManageMode = false;
         let selectedStickerIds = new Set();
@@ -9267,68 +9267,48 @@ function renderStickerGrid() {
                 e.preventDefault();
                 const item = e.target.closest('.world-book-item');
                 if (item && !e.target.closest('.action-btn')) {
+                    // 如果正在确认删除，不再触发新的删除
+                    if (isWorldBookDeleteConfirming) return;
                     const bookId = item.dataset.id;
                     const book = db.worldBooks.find(wb => wb.id === bookId);
-                    if (book && confirm(`确定要删除世界书条目"${book.name}"吗？此操作不可恢复。`)) {
-                        deleteWorldBookById(bookId);
+                    if (book) {
+                        // 设置标志位，防止重复触发
+                        isWorldBookDeleteConfirming = true;
+                        if (confirm(`确定要删除世界书条目"${book.name}"吗？此操作不可恢复。`)) {
+                            deleteWorldBookById(bookId);
+                        } else {
+                            // 如果用户取消，立即重置标志位
+                            isWorldBookDeleteConfirming = false;
+                        }
                     }
                 }
             });
             worldBookListContainer.addEventListener('touchstart', (e) => {
                 const item = e.target.closest('.world-book-item');
                 if (!item || e.target.closest('.action-btn')) return;
-                // 防止在多选模式下触发长按删除
-                if (isInWorldBookMultiSelectMode) return;
-                // 重置长按标志
-                worldBookLongPressActive = false;
+                // 如果正在确认删除，不再触发新的长按
+                if (isWorldBookDeleteConfirming) return;
                 longPressTimer = setTimeout(() => {
+                    // 清除timer，防止重复触发
+                    longPressTimer = null;
                     const bookId = item.dataset.id;
                     const book = db.worldBooks.find(wb => wb.id === bookId);
                     if (book) {
-                        // 先清除定时器引用，避免被touchend清除
-                        longPressTimer = null;
-                        // 标记长按已激活，用于忽略后续的click事件
-                        worldBookLongPressActive = true;
+                        // 设置标志位，防止重复触发
+                        isWorldBookDeleteConfirming = true;
                         if (confirm(`确定要删除世界书条目"${book.name}"吗？此操作不可恢复。`)) {
                             deleteWorldBookById(bookId);
+                        } else {
+                            // 如果用户取消，立即重置标志位
+                            isWorldBookDeleteConfirming = false;
                         }
-                        // 延迟重置标志，确保后续的click事件被忽略
-                        setTimeout(() => {
-                            worldBookLongPressActive = false;
-                        }, 300);
                     }
                 }, 500);
             });
-            worldBookListContainer.addEventListener('mouseup', () => {
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-            });
-            worldBookListContainer.addEventListener('mouseleave', () => {
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-            });
-            worldBookListContainer.addEventListener('touchend', (e) => {
-                // 只有在定时器还在运行时才清除，避免干扰已经触发的确认弹窗
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                    // 如果长按未激活，重置标志
-                    if (!worldBookLongPressActive) {
-                        worldBookLongPressActive = false;
-                    }
-                }
-            });
-            worldBookListContainer.addEventListener('touchmove', (e) => {
-                // 移动时清除定时器
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-            });
+            worldBookListContainer.addEventListener('mouseup', () => clearTimeout(longPressTimer));
+            worldBookListContainer.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
+            worldBookListContainer.addEventListener('touchend', () => clearTimeout(longPressTimer));
+            worldBookListContainer.addEventListener('touchmove', () => clearTimeout(longPressTimer));
             
             // ========== 动作表功能（改为下拉框） ==========
             // 点击"更多"按钮，弹出下拉框
@@ -9707,10 +9687,6 @@ function renderStickerGrid() {
                 }
                 
                 // 再检查是否是条目的点击（编辑）
-                // 如果长按删除已激活，忽略点击事件（避免与长按删除冲突）
-                if (worldBookLongPressActive) {
-                    return;
-                }
                 const worldBookItem = e.target.closest('.world-book-item');
                 if (worldBookItem && !e.target.closest('.action-btn')) {
                     const bookId = worldBookItem.dataset.id;
@@ -9754,6 +9730,14 @@ function renderStickerGrid() {
 
         // 删除世界书条目的辅助函数
         async function deleteWorldBookById(bookId) {
+            // 清除所有可能运行的长按timer
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            // 重置标志位
+            isWorldBookDeleteConfirming = false;
+            
             await dexieDB.worldBooks.delete(bookId);
             db.worldBooks = db.worldBooks.filter(wb => wb.id !== bookId);
             db.characters.forEach(char => {
