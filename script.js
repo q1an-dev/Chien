@@ -132,7 +132,27 @@
         }
 
         // --- Initial HTML Injection ---
-        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form"><div class="form-group"><label for="api-provider">API 服务商</label><select id="api-provider" name="provider"><option value="newapi">NewAPI (自定义)</option><option value="deepseek">DeepSeek</option><option value="claude">Claude</option><option value="gemini">Gemini</option></select></div><div class="form-group"><label for="api-url">API 地址（后缀不用添加/v1）</label><input type="url" id="api-url" name="url" placeholder="选择服务商可自动填写" required></div><div class="form-group"><label for="api-key">密钥 (Key)</label><input type="password" id="api-key" name="key" placeholder="请输入你的API密钥" required></div><button type="button" class="btn btn-secondary" id="fetch-models-btn"><span class="btn-text">点击拉取模型</span><div class="spinner"></div></button><div class="form-group"><label for="api-model">选择模型</label><select id="api-model" name="model" required><option value="">请先拉取模型列表</option></select></div><div class="form-group" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #fce4ec; border-radius: 10px; background-color: #fff8fa;">
+        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form">
+        <div class="form-group">
+            <label for="api-preset-select">API预设</label>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <select id="api-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;">
+                    <option value="">— 选择预设 —</option>
+                </select>
+                <button type="button" id="api-save-preset" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button>
+                <button type="button" id="api-manage-presets" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button>
+            </div>
+        </div>
+            <div id="api-presets-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;">
+                <div style="width:640px;max-width:94%;background:var(--panel-bg,#fff);padding:16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+                    <h3 style="margin:0 0 12px 0;">API 预设管理</h3>
+                    <div id="api-presets-list" style="max-height:360px;overflow:auto;border:1px solid #f0f0f0;padding:8px;border-radius:6px;"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+                        <button id="api-close-modal" class="btn btn-primary">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div><div class="form-group"><label for="api-provider">API 服务商</label><select id="api-provider" name="provider"><option value="newapi">NewAPI (自定义)</option><option value="deepseek">DeepSeek</option><option value="claude">Claude</option><option value="gemini">Gemini</option></select></div><div class="form-group"><label for="api-url">API 地址（后缀不用添加/v1）</label><input type="url" id="api-url" name="url" placeholder="选择服务商可自动填写" required></div><div class="form-group"><label for="api-key">密钥 (Key)</label><input type="password" id="api-key" name="key" placeholder="请输入你的API密钥" required></div><button type="button" class="btn btn-secondary" id="fetch-models-btn"><span class="btn-text">点击拉取模型</span><div class="spinner"></div></button><div class="form-group"><label for="api-model">选择模型</label><select id="api-model" name="model" required><option value="">请先拉取模型列表</option></select></div><div class="form-group" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #fce4ec; border-radius: 10px; background-color: #fff8fa;">
     <label for="time-perception-switch" style="margin-bottom: 0; color: var(--secondary-color); font-weight: 600;">时间感知加强</label>
     <input type="checkbox" id="time-perception-switch" style="width: auto; height: 20px; width: 20px;">
 </div>
@@ -142,22 +162,22 @@
         <label for="novelai-switch" style="margin-bottom: 0; display: block; color: var(--secondary-color); font-weight: 600;">
             启用 NovelAI 图像生成
         </label>
-        <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 5px; margin-bottom: 5px;">
+        <p style="font-size: 13px; font-weight: normal; color: #666; margin-top: 8px; margin-bottom: 5px; line-height: 1.5;">
             开启后可使用NovelAI官方API生成高质量动漫风格图像（必开🔮）
         </p>
-        <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 5px; margin-bottom: 5px;">
+        <p style="font-size: 13px; font-weight: normal; color: #666; margin-top: 8px; margin-bottom: 5px; line-height: 1.5;">
             1. 三击下载图片，下面可测试模型或关键词画师串
         </p>
-        <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 5px; margin-bottom: 5px;">
+        <p style="font-size: 13px; font-weight: normal; color: #666; margin-top: 8px; margin-bottom: 5px; line-height: 1.5;">
             2. 429是novel的访问频繁错误，等待几秒重新即可
         </p>
-        <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 5px; margin-bottom: 5px;">
+        <p style="font-size: 13px; font-weight: normal; color: #666; margin-top: 8px; margin-bottom: 5px; line-height: 1.5;">
             3. 403是多人共号限制，限制oplus免费出小图但可扣点数
         </p>
-        <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 5px; margin-bottom: 5px;">
+        <p style="font-size: 13px; font-weight: normal; color: #666; margin-top: 8px; margin-bottom: 5px; line-height: 1.5;">
             4. 403也会因为没开🔮报错，实在不行可更换出图尺寸
         </p>
-        <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 5px; margin-bottom: 0;">
+        <p style="font-size: 13px; font-weight: normal; color: #666; margin-top: 8px; margin-bottom: 0; line-height: 1.5;">
             5. 401是key没权限，检查key是否正确
         </p>
     </div>
@@ -176,7 +196,7 @@
             <option value="nai-diffusion-3">NAI Diffusion Anime V3（旧版）</option>
             <option value="nai-diffusion-furry-3">NAI Diffusion Furry V3（旧旧版）</option>
         </select>
-        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+        <p style="font-size: 13px; color: #666; margin-top: 8px; line-height: 1.5;">
             💡 必须有oplus订阅的apikey才可以使用！
         </p>
     </div>
@@ -187,7 +207,7 @@
             <input type="password" id="novelai-api-key" name="novelai_api_key" placeholder="pst-xxxxxxxxxxxxxxxx" style="padding-right: 40px;">
             <span id="novelai-key-toggle">🧐</span>
         </div>
-        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+        <p style="font-size: 13px; color: #666; margin-top: 8px; line-height: 1.5;">
             💡 在 <a href="https://novelai.net" target="_blank" style="color: var(--primary-color);">NovelAI官网</a> 获取API Key
         </p>
     </div>
@@ -201,9 +221,9 @@
         </button>
     </div>
 </div>
-<button type="submit" class="btn btn-primary" id="save-btn"><span class="btn-text">保 存</span><div class="spinner"></div></button></form><div class="api-presets-embedded" style="margin-top:12px;"><div id="api-presets-control" style="margin:12px 0;padding:12px;border-radius:8px;border:1px solid var(--border-color, #eee);background:var(--panel-bg, #fff);box-shadow:var(--panel-shadow, none);"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><label style="min-width:86px;color:var(--muted,#666);">API 预设：</label><select id="api-preset-select" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd;"><option value="">— 选择 API 预设 —</option></select><button id="api-apply-preset" class="btn btn-primary" style="margin-left:8px;padding:6px 10px;">应用</button></div><div style="display:flex;gap:8px;align-items:center;"><button id="api-save-preset" class="btn" style="padding:6px 10px;">另存为</button><button id="api-manage-presets" class="btn" style="padding:6px 10px;">管理</button><div style="flex:1"></div><button id="api-import-presets" class="btn" style="padding:6px 10px;">导入</button><button id="api-export-presets" class="btn" style="padding:6px 10px;">导出</button></div></div><div id="api-presets-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;"><div style="width:640px;max-width:94%;background:var(--panel-bg,#fff);padding:16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);"><h3 style="margin:0 0 12px 0;">API 预设管理</h3><div id="api-presets-list" style="max-height:360px;overflow:auto;border:1px solid #f0f0f0;padding:8px;border-radius:6px;"></div><div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;"><button id="api-close-modal" class="btn btn-primary">关闭</button></div></div></div></div></main>`;
+<button type="submit" class="btn btn-primary" id="save-btn"><span class="btn-text">保 存</span><div class="spinner"></div></button></form></main>`;
         document.getElementById('wallpaper-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">更换壁纸</h1></div><div class="placeholder"></div></header><main class="content"><div class="wallpaper-preview" id="wallpaper-preview"><span>当前壁纸预览</span></div><input type="file" id="wallpaper-upload" accept="image/*" style="display: none;"><label for="wallpaper-upload" class="btn btn-primary">从相册选择新壁纸</label></main>`;
-        document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-preset-select">字体预设</label><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><select id="font-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;"><option value="">— 选择预设 —</option></select><button type="button" id="font-apply-preset" class="btn btn-primary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">应用</button></div></div><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><div style="display:flex;gap:8px;align-items:center;margin-bottom:15px;"><button type="submit" class="btn btn-primary" style="flex:1;min-width:0;margin:0;">保存</button><button type="button" id="font-save-preset" class="btn btn-secondary" style="flex:1;min-width:0;width:auto;margin:0;">另存为</button><button type="button" id="font-manage-presets" class="btn btn-neutral" style="flex:1;min-width:0;width:auto;margin:0;">管理</button></div><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 0;">恢复默认字体</button></form></main>`;
+        document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-preset-select">字体预设</label><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><select id="font-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;"><option value="">— 选择预设 —</option></select><button type="button" id="font-save-preset" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button><button type="button" id="font-manage-presets" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button></div></div><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">保存并应用</button><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 0;">恢复默认字体</button></form></main>`;
         document.getElementById('customize-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">主屏幕自定义</h1></div><div class="placeholder"></div></header><main class="content"><form id="customize-form"></form></main>`;
         document.getElementById('tutorial-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">教程</h1></div><div class="placeholder"></div></header><main class="content" id="tutorial-content-area"></main>`;
 
@@ -3411,7 +3431,7 @@
                    modelEl.value = p.data.model;
                }
 
-               (window.showToast && showToast('已应用 API 预设')) || console.log('已应用 API 预设');
+               showToast('预设已应用到输入框，请点击"保存"以生效');
            } catch(e) {
                console.error('applyApiPreset error', e);
            }
@@ -3479,28 +3499,7 @@
            modal.classList.add('visible');
        }
 
-       function exportApiPresets() {
-           const presets = _getApiPresets();
-           const blob = new Blob([JSON.stringify(presets, null, 2)], {type: 'application/json'});
-           const url = URL.createObjectURL(blob);
-           const a = document.createElement('a');
-           a.href = url; a.download = 'api_presets.json'; document.body.appendChild(a); a.click(); a.remove();
-           URL.revokeObjectURL(url);
-       }
-       function importApiPresets() {
-           const inp = document.createElement('input');
-           inp.type = 'file';
-           inp.accept = 'application/json';
-           inp.onchange = function(e){
-               const f = e.target.files[0];
-               if (!f) return;
-               const r = new FileReader();
-               r.onload = function(){ try { const data = JSON.parse(r.result); if (Array.isArray(data)) { _saveApiPresets(data); populateApiSelect(); openApiManageModal(); } else alert('文件格式不正确'); } catch(e){ alert('导入失败：'+e.message); } };
-               r.readAsText(f);
-           };
-           inp.click();
-       }
-
+   
        // ==================================================================================================================
        // =================================== 4. NAI 全局提示词预设管理 (NAI Global Prompt Presets) ===================================
        // ==================================================================================================================
@@ -3592,7 +3591,7 @@
            // localStorage.setItem('nai-global-positive', p.positive || ''); // <-- 移除
            // localStorage.setItem('nai-global-negative', p.negative || ''); // <-- 移除
 
-           showToast(`已将 "${presetName}" 填入提示词框`);
+           showToast(`已预览 "${presetName}"，点击最下方的"保存设置"以生效`);
        }
 
        /**
@@ -3634,7 +3633,7 @@
                applyBtn.className = 'btn btn-primary btn-small'; // 修复
                applyBtn.textContent = '应用';
                applyBtn.onclick = function() {
-                   applyNaiPromptPreset(p.name);
+                   applyNaiPromptPreset(p.name); // 这会填充输入框并显示新提示
                    modal.classList.remove('visible');
                };
 
@@ -3700,36 +3699,46 @@
            const presets = _getBubblePresets();
            const preset = presets.find(p => p.name === presetName);
            if (!preset) { (window.showToast && showToast('未找到该预设')) || alert('未找到该预设'); return; }
-           
+
+           // [修改] 自动查找私聊或群聊的控件
            const textarea = document.getElementById('setting-custom-bubble-css') || document.getElementById('setting-group-custom-bubble-css');
+           const checkbox = document.getElementById('setting-use-custom-css') || document.getElementById('setting-group-use-custom-css');
+           const previewBox = document.getElementById('private-bubble-css-preview') || document.getElementById('group-bubble-css-preview');
+
            if (textarea) textarea.value = preset.css;
 
-           try {
-               const chat = (currentChatType === 'private') ? db.characters.find(c => c.id === currentChatId) : db.groups.find(g => g.id === currentChatId);
-               if (chat) {
-                   chat.customBubbleCss = preset.css;
-                   chat.useCustomBubbleCss = true;
-                   if (currentChatType === 'private') {
-                       document.getElementById('setting-use-custom-css').checked = true;
-                       document.getElementById('setting-custom-bubble-css').disabled = false;
-                   } else {
-                       document.getElementById('setting-group-use-custom-css').checked = true;
-                       document.getElementById('setting-group-custom-bubble-css').disabled = false;
-                   }
-               }
-           } catch(e){
-               console.warn('applyPresetToCurrentChat: cannot write to db object', e);
+           // [新增] 选中预设时，自动勾选 "自定义气泡样式" 并启用输入框
+           if (checkbox) {
+               checkbox.checked = true;
+           }
+           if (textarea) {
+               textarea.disabled = false;
            }
 
            try {
-               updateCustomBubbleStyle(window.currentChatId || null, preset.css, true);
-               const previewBox = document.getElementById('private-bubble-css-preview') || document.getElementById('group-bubble-css-preview');
-               if (previewBox) {
-                   const themeKey = (currentChatType === 'private' ? db.characters.find(c => c.id === currentChatId).theme : db.groups.find(g => g.id === currentChatId).theme) || 'white_pink';
-                   updateBubbleCssPreview(previewBox, preset.css, false, colorThemes[themeKey]);
+               const chat = (currentChatType === 'private') ? db.characters.find(c => c.id === currentChatId) : db.groups.find(g => g.id === currentChatId);
+
+               if (chat && previewBox) {
+                   let themeKey = 'white_pink'; // 默认值
+
+                   // [BUG 修复] 必须根据 currentChatType 来安全地获取 themeKey
+                   if (currentChatType === 'private') {
+                       const themeSelect = document.getElementById('setting-theme-color');
+                       if (themeSelect) themeKey = themeSelect.value;
+                   } else if (currentChatType === 'group') {
+                       const groupThemeSelect = document.getElementById('setting-group-theme-color');
+                       if (groupThemeSelect) themeKey = groupThemeSelect.value;
+                   }
+
+                   const theme = colorThemes[themeKey] || colorThemes['white_pink'];
+
+                   // 更新预览
+                   updateBubbleCssPreview(previewBox, preset.css, false, theme);
                }
-               (window.showToast && showToast('预设已应用到当前聊天并保存')) || alert('预设已应用（若页面支持）');
-               await saveData();
+
+               // [已删除] await saveData();
+
+               (window.showToast && showToast(`已预览 "${presetName}"，请保存设置`)) || console.log('预设已预览');
            } catch(e){
                console.error('applyPresetToCurrentChat error', e);
            }
@@ -3869,29 +3878,17 @@
            const p = presets.find(x => x.name === presetName);
            if (!p) { (window.showToast && showToast('未找到该预设')) || alert('未找到该预设'); return; }
 
-           const personaEl = document.getElementById('setting-my-persona');
-           const avatarEl = document.getElementById('setting-my-avatar-preview');
+           // [修改] 自动查找私聊或群聊的控件
+           const personaEl = document.getElementById('setting-my-persona') || document.getElementById('setting-group-my-persona');
+           const avatarEl = document.getElementById('setting-my-avatar-preview') || document.getElementById('setting-group-my-avatar-preview');
+
            if (personaEl) personaEl.value = p.persona || '';
            if (avatarEl) avatarEl.src = p.avatar || '';
 
-           try {
-               if (currentChatType === 'private') {
-                   const e = db.characters.find(c => c.id === currentChatId);
-                   if (e) {
-                       e.myPersona = p.persona || '';
-                       e.myAvatar = p.avatar || '';
-                       await saveData();
-                       (window.showToast && showToast('预设已应用并保存到当前聊天')) || console.log('预设已应用');
-                       // 注释掉 loadSettingsToSidebar，避免覆盖用户正在编辑的AI角色人设和头像
-                       // if (typeof loadSettingsToSidebar === 'function') try{ loadSettingsToSidebar(); }catch(e){}
-                       if (typeof renderChatList === 'function') try{ renderChatList(); }catch(e){}
-                   }
-               } else {
-                   (window.showToast && showToast('预设已应用到界面（未检测到当前聊天保存入口）')) || console.log('预设已应用到界面');
-               }
-           } catch(err) {
-               console.error('applyMyPersonaPresetToCurrentChat error', err);
-           }
+           // [新增] 提示用户
+           (window.showToast && showToast(`已预览 "${presetName}"，请保存设置`)) || console.log('预设已预览');
+
+           // [已删除] 所有 try/catch 和 saveData() 逻辑
        }
 
        function openManageMyPersonaModal() {
@@ -4763,30 +4760,28 @@
                 </div>
                 <div class="collapsible-content">
                     
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="global-css-preset-select" style="font-size: 14px; margin-left: 0; color: var(--primary-color); font-weight: bold; margin-bottom: 12px;">全局样式预设库</label>
-                        <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="form-group" style="margin-bottom: 20px; margin-top: 15px;">
+                        <label for="global-css-preset-select" style="font-size: 14px; margin-left: 0; color: var(--primary-color); font-weight: bold; margin-bottom: 10px;">全局样式预设库</label>
+                        <div style="display:flex;align-items:flex-end;gap:10px;">
                             <select id="global-css-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;">
                                 <option value="">— 选择预设 —</option>
                             </select>
-                            <button type="button" id="global-css-apply-btn" class="btn btn-primary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">应用</button>
+                            <button type="button" id="global-css-save-btn" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button>
+                            <button type="button" id="global-css-manage-btn" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button>
                         </div>
                     </div>
-                    
-                    <div class="form-group" style="margin-top: 0px; margin-bottom: 15px;">
-                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-start;">
-                            <button type="button" id="global-css-save-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">另存</button>
-                            <button type="button" id="global-css-manage-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">管理</button>
-                            <button type="button" id="global-css-import-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">导入</button>
-                            <button type="button" id="global-css-export-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">导出</button>
-                        </div>
-                    </div>
-                    
+
                     <div class="form-group" style="margin-top: 0px;">
                         <label for="global-beautification-css" style="font-weight: bold; font-size: 14px; color: var(--primary-color); margin-bottom: 10px;">全局美化CSS代码</label>
-                        <textarea id="global-beautification-css" class="form-group" rows="8" placeholder="在此输入CSS代码... 您的创造力没有边界！"></textarea>
-                        <button type="button" id="apply-global-css-now-btn" class="btn btn-primary" style="margin-top: 10px; width: 100%;">保存</button>
+                        <textarea id="global-beautification-css" class="form-group" rows="8" placeholder="在此输入CSS代码... 您的创造力没有边界！" style="margin-bottom: 20px;"></textarea>
                     </div>
+
+                    <div style="display:flex;gap:15px;align-items:center;margin-top:0;margin-bottom:20px;">
+                        <button type="button" id="global-css-import-btn" class="btn btn-neutral" style="flex:1;min-width:0;margin:0;">导入</button>
+                        <button type="button" id="global-css-export-btn" class="btn btn-neutral" style="flex:1;min-width:0;margin:0;">导出</button>
+                    </div>
+
+                    <button type="button" id="apply-global-css-now-btn" class="btn btn-primary" style="margin-top: 0; margin-bottom: 15px;">保存并应用</button>
                 </div>
             </div>
             `;
@@ -4794,6 +4789,29 @@
 
             // 填充预设下拉框
             populateGlobalCssPresetSelect();
+
+            // [新增] 辅助函数，用于应用预设到输入框和实时预览
+            const applyGlobalCssPreset = (presetName) => {
+                const globalCssTextarea = document.getElementById('global-beautification-css');
+                const preset = (db.globalCssPresets || []).find(p => p.name === presetName);
+                if (preset && globalCssTextarea) {
+                    globalCssTextarea.value = preset.css;
+                    applyGlobalCss(preset.css); // [新增] 实时预览
+                    showToast(`已预览 "${presetName}"`);
+                } else if (presetName === '') {
+                    // 如果用户选回 "— 选择预设 —"
+                    globalCssTextarea.value = '';
+                    applyGlobalCss(db.globalCss); // 恢复到已保存的 CSS
+                }
+            };
+
+            // [新增] 为 CSS 预设下拉框添加 'change' 事件监听器
+            const globalCssPresetSelect = document.getElementById('global-css-preset-select');
+            if (globalCssPresetSelect) {
+                globalCssPresetSelect.addEventListener('change', () => {
+                    applyGlobalCssPreset(globalCssPresetSelect.value);
+                });
+            }
 
             // --- 新增：为所有折叠标题添加一个点击事件监听器 ---
             customizeForm.querySelectorAll('.collapsible-header').forEach(header => {
@@ -4878,22 +4896,6 @@
                     applyGlobalCss(newCss);
                     await saveData();
                     showToast('全局样式已应用');
-                });
-            }
-            const globalCssApplyBtn = document.getElementById('global-css-apply-btn');
-            if (globalCssApplyBtn) {
-                globalCssApplyBtn.addEventListener('click', () => {
-                    const select = document.getElementById('global-css-preset-select');
-                    const presetName = select.value;
-                    if (!presetName) return showToast('请选择一个预设');
-                    const preset = db.globalCssPresets.find(p => p.name === presetName);
-                    if (preset) {
-                        globalCssTextarea.value = preset.css;
-                        // db.globalCss = preset.css; // <-- 移除保存
-                        // applyGlobalCss(preset.css); // <-- 移除应用
-                        // saveData(); // <-- 移除保存
-                        showToast(`已将 "${presetName}" 填入CSS框，请点击"立即应用"保存`);
-                    }
                 });
             }
             const globalCssSaveBtn = document.getElementById('global-css-save-btn');
@@ -8421,6 +8423,79 @@ ${loadedModules.map(m => `
             const newCategoryInput = document.getElementById('new-category-name-input');
             const categoryListContainer = document.getElementById('existing-categories-list');
 
+            // (v-v-v 新增：为分类管理弹窗添加事件委托 v-v-v)
+            categoryListContainer.addEventListener('click', async (e) => {
+                const deleteBtn = e.target.closest('.category-delete-btn');
+                const editBtn = e.target.closest('.category-edit-btn');
+
+                // --- 处理删除按钮 ---
+                if (deleteBtn) {
+                    e.stopPropagation();
+                    const nameToDelete = deleteBtn.dataset.category;
+                    if (!nameToDelete || nameToDelete === '全部' || nameToDelete === '未分类') return;
+
+                    if (confirm(`确定要删除分类 "${nameToDelete}" 吗？\n该分类下的表情将被移动到 "未分类"。`)) {
+                        // 1. 从分类列表删除
+                        db.stickerCategories = db.stickerCategories.filter(cat => cat !== nameToDelete);
+
+                        // 2. 将所有表情包归类到"未分类"
+                        db.myStickers.forEach(sticker => {
+                            if (sticker.category === nameToDelete) {
+                                sticker.category = '未分类';
+                            }
+                        });
+
+                        await saveData();
+                        renderCategoryList(); // 重新渲染列表
+                        showToast(`分类 "${nameToDelete}" 已删除`);
+                    }
+                    return; // (^-^-^ 处理完毕 ^-^-^)
+                }
+
+                // --- 处理编辑按钮 ---
+                if (editBtn) {
+                    e.stopPropagation();
+                    const oldName = editBtn.dataset.category;
+                    if (!oldName || oldName === '全部' || oldName === '未分类') return;
+
+                    const newName = prompt(`请输入新的分类名称：`, oldName);
+
+                    // 检查新名称
+                    if (!newName || newName.trim() === '') {
+                        showToast('操作取消：名称不能为空');
+                        return;
+                    }
+                    if (newName.trim() === oldName) {
+                        return; // 名称未改变
+                    }
+                    if (db.stickerCategories.includes(newName.trim())) {
+                        showToast('操作失败：该分类名称已存在');
+                        return;
+                    }
+
+                    const finalNewName = newName.trim();
+
+                    // 1. 更新分类列表
+                    const categoryIndex = db.stickerCategories.indexOf(oldName);
+                    if (categoryIndex > -1) {
+                        db.stickerCategories[categoryIndex] = finalNewName;
+                    }
+
+                    // 2. 更新所有表情包的分类
+                    db.myStickers.forEach(sticker => {
+                        if (sticker.category === oldName) {
+                            sticker.category = finalNewName;
+                        }
+                    });
+
+                    await saveData();
+                    renderCategoryList(); // 重新渲染列表
+                    showToast(`分类已重命名为 "${finalNewName}"`);
+                    return; // (^-^-^ 处理完毕 ^-^-^)
+                }
+            });
+            // (^-^-^ 新增结束 ^-^-^)
+
             categoryManageBtn.addEventListener('click', () => {
                 renderCategoryList();
                 categoryModal.classList.add('visible');
@@ -8449,36 +8524,39 @@ ${loadedModules.map(m => `
 
             function renderCategoryList() {
                 categoryListContainer.innerHTML = '';
+
+                // (v-v-v 修复：确保 '全部' 和 '未分类' 始终存在且在最前 v-v-v)
+                if (!db.stickerCategories) db.stickerCategories = [];
+                if (!db.stickerCategories.includes('全部')) db.stickerCategories.unshift('全部');
+                if (!db.stickerCategories.includes('未分类')) db.stickerCategories.splice(1, 0, '未分类');
+                // (^-^-^ 修复结束 ^-^-^)
+
                 db.stickerCategories.forEach(category => {
                     const item = document.createElement('div');
                     item.className = 'category-item';
                     item.dataset.category = category;
 
+                    // (v-v-v 新增：添加编辑按钮 v-v-v)
+                    let buttonsHtml = '';
+                    // "全部" 和 "未分类" 不能被编辑或删除
+                    if (category !== '全部' && category !== '未分类') {
+                        buttonsHtml = `
+                            <button type="button" class="category-action-btn category-edit-btn" title="重命名" data-category="${category}"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z" /></svg></button>
+                            <button type="button" class="category-action-btn category-delete-btn" title="删除" data-category="${category}"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg></button>
+                        `;
+                    }
+
                     item.innerHTML = `
                         <span class="category-name">${category}</span>
-                        <button class="category-delete-btn" data-category="${category}">×</button>
+                        <div class="category-actions">
+                            ${buttonsHtml}
+                        </div>
                     `;
+                    // (^-^-^ 新增结束 ^-^-^)
                     categoryListContainer.appendChild(item);
                 });
 
-                categoryListContainer.querySelectorAll('.category-delete-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        const nameToDelete = e.target.dataset.category;
-                        if (nameToDelete === '全部' || nameToDelete === '未分类') return;
-
-                        if (confirm(`确定要删除分类 "${nameToDelete}" 吗？\n该分类下的表情将被移动到 "未分类"。`)) {
-                            db.stickerCategories = db.stickerCategories.filter(cat => cat !== nameToDelete);
-                            db.myStickers.forEach(sticker => {
-                                if (sticker.category === nameToDelete) {
-                                    sticker.category = '未分类';
-                                }
-                            });
-                            await saveData();
-                            renderCategoryList();
-                        }
-                    });
-                });
+                // (v-v-v 修复：已删除旧的 querySelectorAll(...).forEach 循环 v-v-v)
             }
 
             // 搜索功能
@@ -8793,7 +8871,7 @@ function renderStickerGrid() {
                 db.fontUrl = newFontUrl;
                 await saveData();
                 applyGlobalFont(newFontUrl);
-                showToast('新字体已应用！');
+                showToast('字体已保存并应用！');
             });
             restoreDefaultFontBtn.addEventListener('click', async () => {
                 fontUrlInput.value = '';
@@ -8805,14 +8883,23 @@ function renderStickerGrid() {
 
             // --- ▼▼▼ 新增：绑定预设按钮事件 ▼▼▼ ---
             populateFontPresetSelect();
-            document.getElementById('font-apply-preset')?.addEventListener('click', () => {
-                const select = document.getElementById('font-preset-select');
-                if (select.value) {
-                    applyFontPreset(select.value);
-                } else {
-                    showToast('请先选择一个预设');
-                }
-            });
+            
+            // [新增] 为字体预设下拉框添加 'change' 事件监听器
+            const fontPresetSelect = document.getElementById('font-preset-select');
+            if (fontPresetSelect) {
+                fontPresetSelect.addEventListener('change', () => {
+                    if (fontPresetSelect.value) {
+                        // 当用户选择时，立即调用 applyFontPreset
+                        applyFontPreset(fontPresetSelect.value);
+                    } else {
+                        // 如果用户选回了 "— 选择预设 —"
+                        const fontUrlInput = document.getElementById('font-url');
+                        if(fontUrlInput) fontUrlInput.value = '';
+                        applyGlobalFont(db.fontUrl); // 恢复到已保存的字体
+                    }
+                });
+            }
+            
             document.getElementById('font-save-preset')?.addEventListener('click', saveCurrentFontAsPreset);
             document.getElementById('font-manage-presets')?.addEventListener('click', openManageFontPresetsModal);
             document.getElementById('font-close-modal')?.addEventListener('click', () => {
@@ -8852,14 +8939,18 @@ function renderStickerGrid() {
             const preset = presets.find(p => p.name === presetName);
             if (!preset) return showToast('未找到该预设');
 
-            // 重新获取 input 确保在函数作用域内
             const fontUrlInput = document.getElementById('font-url');
+            
+            // 1. 填充输入框
             if (fontUrlInput) {
                 fontUrlInput.value = preset.fontUrl;
             }
             
-            // 只提示，不应用
-            showToast(`已将 "${preset.name}" 填入输入框`);
+            // 2. [新增] 立即应用字体进行预览
+            applyGlobalFont(preset.fontUrl);
+            
+            // 3. 提示用户
+            showToast(`已预览 "${preset.name}" 字体`);
         }
 
         function saveCurrentFontAsPreset() {
@@ -8919,7 +9010,8 @@ function renderStickerGrid() {
                 applyBtn.className = 'btn btn-primary btn-xsmall';
                 applyBtn.textContent = '应用';
                 applyBtn.onclick = function() {
-                    applyFontPreset(p.name);
+                    // 调用新的 applyFontPreset，它会填充输入框并实时预览
+                    applyFontPreset(p.name); 
                     modal.classList.remove('visible');
                     modal.style.display = 'none';
                 };
@@ -9028,7 +9120,14 @@ function renderStickerGrid() {
                 applyBtn.className = 'btn btn-primary btn-xsmall';
                 applyBtn.textContent = '应用';
                 applyBtn.onclick = function() {
-                    applyGlobalCssPreset(p.name);
+                    // 调用我们新定义的 applyGlobalCssPreset 函数
+                    // (它在 renderCustomizeForm 作用域内)
+                    const globalCssTextarea = document.getElementById('global-beautification-css');
+                    if (globalCssTextarea) {
+                        globalCssTextarea.value = p.css;
+                        applyGlobalCss(p.css); // 实时预览
+                        showToast(`已预览 "${p.name}"`);
+                    }
                     modal.classList.remove('visible');
                     modal.style.display = 'none';
                 };
@@ -10082,6 +10181,18 @@ function renderStickerGrid() {
                 option.textContent = colorThemes[key].name;
                 themeSelect.appendChild(option);
             });
+
+            // [新增] 为"主题颜色"下拉框添加 change 事件监听
+            themeSelect.addEventListener('change', () => {
+                const useCustomCss = document.getElementById('setting-use-custom-css').checked;
+                // 只有在"未勾选"自定义CSS时，才允许主题颜色更新预览
+                if (!useCustomCss) {
+                    const theme = colorThemes[themeSelect.value] || colorThemes['white_pink'];
+                    const previewBox = document.getElementById('private-bubble-css-preview');
+                    updateBubbleCssPreview(previewBox, '', true, theme);
+                }
+            });
+
             chatSettingsBtn.addEventListener('click', () => {
                 if (currentChatType === 'private') {
                     loadSettingsToSidebar();
@@ -10111,9 +10222,17 @@ function renderStickerGrid() {
                 customCssTextarea.disabled = !e.target.checked;
                 const char = db.characters.find(c => c.id === currentChatId);
                 if (char) {
-                    const themeKey = char.theme || 'white_pink';
+                    // [修改] 从下拉框实时获取主题，而不是从数据库
+                    const themeKey = document.getElementById('setting-theme-color').value || 'white_pink';
                     const theme = colorThemes[themeKey];
-                    updateBubbleCssPreview(privatePreviewBox, customCssTextarea.value, !e.target.checked, theme);
+
+                    if (e.target.checked) {
+                        // 如果勾选，预览输入框的内容
+                        updateBubbleCssPreview(privatePreviewBox, customCssTextarea.value, false, theme);
+                    } else {
+                        // 如果取消勾选，预览当前选择的主题
+                        updateBubbleCssPreview(privatePreviewBox, '', true, theme);
+                    }
                 }
             });
             customCssTextarea.addEventListener('input', (e) => {
@@ -10359,12 +10478,20 @@ function renderStickerGrid() {
         const naiPresetManageBtn = document.getElementById('nai-global-prompt-manage-presets');
         const naiPresetCloseModalBtn = document.getElementById('nai-global-prompt-close-modal');
 
-        if (naiPresetApplyBtn && naiPresetSelect) {
-            naiPresetApplyBtn.addEventListener('click', () => {
+        // [新增] 为 NAI 预设下拉框添加 'change' 事件监听器
+        if (naiPresetSelect) {
+            naiPresetSelect.addEventListener('change', () => {
                 if (naiPresetSelect.value) {
+                    // 当用户选择时，立即调用 applyNaiPromptPreset
                     applyNaiPromptPreset(naiPresetSelect.value);
                 } else {
-                    showToast('请先选择一个预设');
+                    // 如果用户选回 "— 选择预设 —"
+                    // 恢复到已保存的默认值
+                    const settings = getNovelAISettings();
+                    const positiveEl = document.getElementById('nai-default-positive');
+                    const negativeEl = document.getElementById('nai-default-negative');
+                    if (positiveEl) positiveEl.value = settings.default_positive || '';
+                    if (negativeEl) negativeEl.value = settings.default_negative || '';
                 }
             });
         }
@@ -10386,31 +10513,39 @@ function renderStickerGrid() {
            // API Presets
            const saveBtn = document.getElementById('api-save-preset');
            const manageBtn = document.getElementById('api-manage-presets');
-           const applyBtn = document.getElementById('api-apply-preset');
            const select = document.getElementById('api-preset-select');
            const modalClose = document.getElementById('api-close-modal');
-           const importBtn = document.getElementById('api-import-presets');
-           const exportBtn = document.getElementById('api-export-presets');
 
            if (saveBtn) saveBtn.addEventListener('click', saveCurrentApiAsPreset);
            if (manageBtn) manageBtn.addEventListener('click', openApiManageModal);
-           if (applyBtn) applyBtn.addEventListener('click', function(){ const v=select.value; if(!v) return (window.showToast&&showToast('请选择预设'))||alert('请选择预设'); applyApiPreset(v); });
-           if (modalClose) modalClose.addEventListener('click', function(){ 
+
+           if (select) {
+               select.addEventListener('change', function() {
+                   const v = select.value;
+                   if (v) {
+                       applyApiPreset(v);
+                   }
+               });
+           }
+
+           if (modalClose) modalClose.addEventListener('click', function(){
                const modal = document.getElementById('api-presets-modal');
                if (modal) {
                    modal.classList.remove('visible');
                    modal.style.display = 'none';
                }
            });
-           if (importBtn) importBtn.addEventListener('click', importApiPresets);
-           if (exportBtn) exportBtn.addEventListener('click', exportApiPresets);
            
            // Bubble CSS Presets
-           const bubbleApplyBtn = document.getElementById('apply-preset-btn');
            const bubbleSaveBtn = document.getElementById('save-preset-btn');
            const bubbleManageBtn = document.getElementById('manage-presets-btn');
            const bubbleModalClose = document.getElementById('close-presets-modal');
-           if (bubbleModalClose) bubbleModalClose.addEventListener('click', function(){ 
+           const bubbleSelect = document.getElementById('bubble-preset-select');
+           const groupBubbleSaveBtn = document.getElementById('group-save-preset-btn');
+           const groupBubbleManageBtn = document.getElementById('group-manage-presets-btn');
+           const groupBubbleSelect = document.getElementById('group-bubble-preset-select');
+
+           if (bubbleModalClose) bubbleModalClose.addEventListener('click', function(){
                const modal = document.getElementById('bubble-presets-modal');
                if (modal) {
                    modal.classList.remove('visible');
@@ -10418,45 +10553,88 @@ function renderStickerGrid() {
                }
            });
 
-           // --- 新增代码开始 ---
-           const groupBubbleApplyBtn = document.getElementById('group-apply-preset-btn');
-           const groupBubbleSaveBtn = document.getElementById('group-save-preset-btn');
-           const groupBubbleManageBtn = document.getElementById('group-manage-presets-btn');
-           // --- 新增代码结束 ---
+           // [已删除] bubbleApplyBtn 和 groupBubbleApplyBtn 监听器
 
-           if (bubbleApplyBtn) bubbleApplyBtn.addEventListener('click', () => {
-               const selVal = document.getElementById('bubble-preset-select').value;
-               if (!selVal) return (window.showToast && showToast('请选择要应用的预设')) || alert('请选择要应用的预设');
-               applyPresetToCurrentChat(selVal);
-           });
            if (bubbleSaveBtn) bubbleSaveBtn.addEventListener('click', saveCurrentTextareaAsPreset);
            if (bubbleManageBtn) bubbleManageBtn.addEventListener('click', openManagePresetsModal);
-           if (bubbleModalClose) bubbleModalClose.addEventListener('click', () => {
-               const modal = document.getElementById('bubble-presets-modal');
-               if (modal) modal.classList.remove('visible');
-           });
 
-           // --- 新增代码开始 ---
-           if (groupBubbleApplyBtn) groupBubbleApplyBtn.addEventListener('click', () => {
-               const selVal = document.getElementById('group-bubble-preset-select').value;
-               if (!selVal) return (window.showToast && showToast('请选择要应用的预设')) || alert('请选择要应用的预设');
-               applyPresetToCurrentChat(selVal);
-           });
+           // [新增] 气泡预设下拉框（私聊）的 "选择即预览" 逻辑
+           if (bubbleSelect) {
+               bubbleSelect.addEventListener('change', () => {
+                   const selVal = bubbleSelect.value;
+                   if (selVal) {
+                       applyPresetToCurrentChat(selVal);
+                   } else {
+                       // [新增] 用户选回了"— 选择预设 —"
+                       const textarea = document.getElementById('setting-custom-bubble-css');
+                       const checkbox = document.getElementById('setting-use-custom-css');
+                       if (textarea) textarea.value = '';
+                       if (checkbox) checkbox.checked = false; // 取消勾选
+                       if (textarea) textarea.disabled = true; // 禁用
+
+                       // 恢复到已保存的主题
+                       const chat = db.characters.find(c => c.id === currentChatId);
+                       const themeKey = chat ? chat.theme : 'white_pink';
+                       const theme = colorThemes[themeKey] || colorThemes['white_pink'];
+                       const previewBox = document.getElementById('private-bubble-css-preview');
+                       updateBubbleCssPreview(previewBox, '', true, theme);
+                   }
+               });
+           }
+
            if (groupBubbleSaveBtn) groupBubbleSaveBtn.addEventListener('click', saveCurrentTextareaAsPreset);
            if (groupBubbleManageBtn) groupBubbleManageBtn.addEventListener('click', openManagePresetsModal);
-           // --- 新增代码结束 ---
+
+           // [新增] 气泡预设下拉框（群聊）的 "选择即预览" 逻辑
+           if (groupBubbleSelect) {
+               groupBubbleSelect.addEventListener('change', () => {
+                   const selVal = groupBubbleSelect.value;
+                   if (selVal) {
+                       applyPresetToCurrentChat(selVal);
+                   } else {
+                       // [新增] 用户选回了"— 选择预设 —"
+                       const textarea = document.getElementById('setting-group-custom-bubble-css');
+                       const checkbox = document.getElementById('setting-group-use-custom-css');
+                       if (textarea) textarea.value = '';
+                       if (checkbox) checkbox.checked = false; // 取消勾选
+                       if (textarea) textarea.disabled = true; // 禁用
+
+                       // 恢复到已保存的主题
+                       const chat = db.groups.find(g => g.id === currentChatId);
+                       const themeKey = chat ? chat.theme : 'white_pink';
+                       const theme = colorThemes[themeKey] || colorThemes['white_pink'];
+                       const previewBox = document.getElementById('group-bubble-css-preview');
+                       updateBubbleCssPreview(previewBox, '', true, theme);
+                   }
+               });
+           }
 
            // My Persona Presets
            const personaSaveBtn = document.getElementById('mypersona-save-btn');
            const personaManageBtn = document.getElementById('mypersona-manage-btn');
-           const personaApplyBtn = document.getElementById('mypersona-apply-btn');
            const personaSelect = document.getElementById('mypersona-preset-select');
            const personaModalClose = document.getElementById('mypersona-close-modal');
 
            if (personaSaveBtn) personaSaveBtn.addEventListener('click', saveCurrentMyPersonaAsPreset);
            if (personaManageBtn) personaManageBtn.addEventListener('click', openManageMyPersonaModal);
-           if (personaApplyBtn) personaApplyBtn.addEventListener('click', function(){ const v = personaSelect.value; if(!v) return (window.showToast && showToast('请选择要应用的预设')) || alert('请选择要应用的预设'); applyMyPersonaPresetToCurrentChat(v); });
-           if (personaModalClose) personaModalClose.addEventListener('click', function(){ 
+
+           // [新增] 人设预设下拉框的 "选择即预览" 逻辑
+           if (personaSelect) {
+               personaSelect.addEventListener('change', function(){
+                   const v = personaSelect.value;
+                   if(v) {
+                       applyMyPersonaPresetToCurrentChat(v); // 调用修改后的预览函数
+                   } else {
+                       // [新增] 用户选回了"— 选择预设 —"，清空输入框
+                       const personaEl = document.getElementById('setting-my-persona') || document.getElementById('setting-group-my-persona');
+                       const avatarEl = document.getElementById('setting-my-avatar-preview') || document.getElementById('setting-group-my-avatar-preview');
+                       if (personaEl) personaEl.value = '';
+                       if (avatarEl) avatarEl.src = 'https://i.postimg.cc/GtbTnxhP/o-o-1.jpg'; // 恢复默认头像
+                   }
+               });
+           }
+
+           if (personaModalClose) personaModalClose.addEventListener('click', function(){
                const modal = document.getElementById('mypersona-presets-modal');
                if (modal) {
                    modal.classList.remove('visible');
@@ -10554,8 +10732,17 @@ function renderStickerGrid() {
                 groupCustomCssTextarea.disabled = !e.target.checked;
                 const group = db.groups.find(g => g.id === currentChatId);
                 if (group) {
-                    const theme = colorThemes[group.theme || 'white_pink'];
-                    updateBubbleCssPreview(groupPreviewBox, groupCustomCssTextarea.value, !e.target.checked, theme);
+                    // [修改] 从下拉框实时获取主题，而不是从数据库
+                    const themeKey = document.getElementById('setting-group-theme-color').value || 'white_pink';
+                    const theme = colorThemes[themeKey];
+
+                    if (e.target.checked) {
+                        // 如果勾选，预览输入框的内容
+                        updateBubbleCssPreview(groupPreviewBox, groupCustomCssTextarea.value, false, theme);
+                    } else {
+                        // 如果取消勾选，预览当前选择的主题
+                        updateBubbleCssPreview(groupPreviewBox, '', true, theme);
+                    }
                 }
             });
             groupCustomCssTextarea.addEventListener('input', (e) => {
@@ -10825,6 +11012,20 @@ function renderStickerGrid() {
             const theme = colorThemes[group.theme || 'white_pink'];
             updateBubbleCssPreview(groupPreviewBox, group.customBubbleCss, !group.useCustomBubbleCss, theme);
             populateBubblePresetSelect('group-bubble-preset-select');
+
+            // [新增] 为群聊"主题颜色"下拉框添加 change 事件监听
+            const groupThemeSelect = document.getElementById('setting-group-theme-color');
+            if (groupThemeSelect) {
+                groupThemeSelect.addEventListener('change', () => {
+                    const useCustomCss = document.getElementById('setting-group-use-custom-css').checked;
+                    // 只有在"未勾选"自定义CSS时，才允许主题颜色更新预览
+                    if (!useCustomCss) {
+                        const theme = colorThemes[groupThemeSelect.value] || colorThemes['white_pink'];
+                        const previewBox = document.getElementById('group-bubble-css-preview');
+                        updateBubbleCssPreview(previewBox, '', true, theme);
+                    }
+                });
+            }
         }
 
         function renderGroupMembersInSettings(group) {

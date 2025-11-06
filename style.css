@@ -1686,6 +1686,54 @@
             font-weight: 600;
         }
 
+        /* NAI 设置复选框组样式 */
+        .nai-settings-checkbox-group {
+            margin-bottom: 20px; /* 与标准form-group完全一致 */
+        }
+
+        .nai-settings-checkbox-group label[for] {
+            display: block;
+            margin-bottom: 8px; /* 与标准form-group完全一致 */
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .nai-settings-checkbox-group .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-bottom: 0; /* 修复：覆盖全局 label 的 8px 边距 */
+        }
+
+        .nai-settings-checkbox-group .checkbox-container span {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .nai-settings-checkbox-group .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .nai-settings-checkbox-group small {
+            display: block;
+            margin-top: 5px; /* 与标准form-group完全一致 */
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 全局表单说明文字样式统一 */
+        .form-group small {
+            font-size: 12px; /* 字体稍稍增大，更易读 */
+            color: #666;
+            margin-top: 5px; /* 增大与上方控件的间距 */
+            line-height: 1.5; /* 增加行高，多行文字不挤 */
+            display: block; /* 确保它是一个块级元素，间距更稳定 */
+        }
+
         #add-world-book-entry-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
@@ -4230,27 +4278,60 @@ border-top: none;
     font-size: 15px;
     font-weight: 500;
     color: #333;
+    flex-grow: 1; /* 占据剩余空间 */
+    padding-right: 10px; /* 避免和按钮太近 */
 }
-#existing-categories-list .category-delete-btn {
+
+/* (v-v-v 新增 v-v-v) */
+.category-actions {
+    display: flex;
+    gap: 8px; /* 按钮间距 */
+    flex-shrink: 0; /* 防止按钮被压缩 */
+}
+
+.category-action-btn {
     background: #f0f0f0;
     border: none;
-    color: #ef5350;
+    color: #555; /* 默认图标颜色 */
     cursor: pointer;
-    width: 24px;
-    height: 24px;
+    width: 30px; /* 增大点击区域 */
+    height: 30px; /* 增大点击区域 */
     border-radius: 50%;
-    font-weight: bold;
-    font-size: 16px;
-    line-height: 24px;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
 }
-/* (Bug 3 核心修复) 隐藏默认分类的操作按钮 */
-#existing-categories-list .category-item[data-category="全部"] .category-delete-btn,
-#existing-categories-list .category-item[data-category="未分类"] .category-delete-btn {
+
+.category-action-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* 编辑按钮 */
+.category-action-btn.category-edit-btn {
+    color: #007bff; /* 蓝色 */
+}
+.category-action-btn.category-edit-btn:hover {
+    background-color: #e6f2ff; /* 淡蓝色背景 */
+}
+
+/* 删除按钮 */
+.category-action-btn.category-delete-btn {
+    color: #ef5350; /* 红色 */
+}
+.category-action-btn.category-delete-btn:hover {
+    background-color: #ffebee; /* 淡红色背景 */
+}
+/* (^-^-^ 新增结束 ^-^-^) */
+
+/* (v-v-v 修复：隐藏整个按钮组 v-v-v) */
+#existing-categories-list .category-item[data-category="全部"] .category-actions,
+#existing-categories-list .category-item[data-category="未分类"] .category-actions {
     display: none;
 }
+/* (^-^-^ 修复结束 ^-^-^) */
+
 /* (Bug 3 核心修复) 隐藏默认分类的列表项 (匹配 image_c7ffbf.png) */
 #existing-categories-list .category-item[data-category="全部"],
 #existing-categories-list .category-item[data-category="未分类"] {
@@ -5735,15 +5816,6 @@ border-top: none;
     height: 12px; /* 缩小复选框 */
 }
 
-/* 全局样式预设库标签间距 */
-#global-css-preset-select {
-    margin-top: 15px; /* 增加上边距，距离"全局CSS美化"标题更远 */
-}
-
-label[for="global-css-preset-select"] {
-    margin-top: 15px !important; /* 增加上边距 */
-    display: block; /* 确保是块级元素 */
-}
 
 .entry-delete-btn {
     background: transparent;
@@ -6083,7 +6155,14 @@ label[for="global-css-preset-select"] {
     font-weight: 600; /* 和其他按钮保持一致，不加粗 */
 }
 #world-book-multi-select-bar #world-book-delete-selected-btn.disabled {
-    color: #ccc; 
+    color: #ccc;
     pointer-events: none;
+}
+
+/* 修复：NAI测试弹窗textarea拖动bug */
+#nai-test-prompt,
+#nai-test-negative {
+    resize: vertical; /* 限制只能垂直拖动 */
+    min-height: 80px;  /* (可选) 给一个合适的最小高度 */
 }
 

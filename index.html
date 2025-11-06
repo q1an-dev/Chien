@@ -503,7 +503,14 @@
                                                                                             id="setting-my-name"></div>
                 <div class="form-group"><label for="setting-my-persona">我的人设</label><textarea
                         id="setting-my-persona" placeholder="描述你希望在对话中扮演的形象。"></textarea></div>
-               <div class="panel panel-sm" style="padding:12px;border-radius:10px;border:1px solid var(--border-color,#e8e8ef);background:var(--panel-bg,#fff);box-shadow:var(--panel-shadow,0 4px 12px rgba(20,20,30,0.04));margin:10px 0;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><label for="mypersona-preset-select" style="width:88px;color:var(--muted,#667);font-size:13px;">人设</label><select id="mypersona-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">— 选择预设 —</option></select><button type="button" id="mypersona-apply-btn" class="btn btn-primary" style="margin-left:8px;padding:7px 10px;border-radius:8px;">应用</button></div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;"><label style="width:88px;color:var(--muted,#667);font-size:13px;">外观操作</label><button type="button" id="mypersona-save-btn" class="btn" style="padding:7px 10px;border-radius:8px;">另存为</button><button type="button" id="mypersona-manage-btn" class="btn" style="padding:7px 10px;border-radius:8px;">管理</button></div></div>
+               <div class="form-group">
+                    <label for="mypersona-preset-select">面具管理</label>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <select id="mypersona-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">— 选择预设 —</option></select>
+                        <button type="button" id="mypersona-save-btn" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button>
+                        <button type="button" id="mypersona-manage-btn" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button>
+                    </div>
+                </div>
                 <hr style="border:none; border-top:1px solid #eee; margin: 20px 0;">
                 <div class="form-group">
                     <button type="button" class="btn btn-secondary" id="link-world-book-btn">关联世界书</button>
@@ -527,7 +534,14 @@
                             style="margin-top: 10px; width: auto; padding: 5px 15px; font-size: 14px;">恢复默认
                     </button>
                 </div>
-               <div class="panel panel-sm" style="padding:12px;border-radius:10px;border:1px solid var(--border-color,#e8e8ef);background:var(--panel-bg,#fff);box-shadow:var(--panel-shadow,0 4px 12px rgba(20,20,30,0.04));margin:10px 0;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><label for="bubble-preset-select" style="width:88px;color:var(--muted,#667);font-size:13px;">气泡</label><select id="bubble-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">— 选择预设 —</option></select><button type="button" id="apply-preset-btn" class="btn btn-primary" style="margin-left:8px;padding:7px 10px;border-radius:8px;">应用</button></div><div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;"><label style="width:88px;color:var(--muted,#667);font-size:13px;">外观操作</label><button type="button" id="save-preset-btn" class="btn" style="padding:7px 10px;border-radius:8px;">另存为</button><button type="button" id="manage-presets-btn" class="btn" style="padding:7px 10px;border-radius:8px;">管理</button></div></div>
+               <div class="form-group">
+                    <label for="bubble-preset-select">气泡预设管理</label>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <select id="bubble-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">— 选择预设 —</option></select>
+                        <button type="button" id="save-preset-btn" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button>
+                        <button type="button" id="manage-presets-btn" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button>
+                    </div>
+                </div>
                 <div class="form-group"><label for="setting-max-memory">最大记忆轮数</label><input type="number"
                                                                                                    id="setting-max-memory"
                                                                                                    value="10" min="1">
@@ -640,7 +654,14 @@
                             style="margin-top: 10px; width: auto; padding: 5px 15px; font-size: 14px;">恢复默认
                     </button>
                 </div>
-                <div class="panel panel-sm" style="padding:12px;border-radius:10px;border:1px solid var(--border-color,#e8e8ef);background:var(--panel-bg,#fff);box-shadow:var(--panel-shadow,0 4px 12px rgba(20,20,30,0.04));margin:10px 0;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><label for="group-bubble-preset-select" style="width:88px;color:var(--muted,#667);font-size:13px;">气泡预设</label><select id="group-bubble-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">— 选择预设 —</option></select><button type="button" id="group-apply-preset-btn" class="btn btn-primary" style="margin-left:8px;padding:7px 10px;border-radius:8px;">应用</button></div><div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;"><label style="width:88px;color:var(--muted,#667);font-size:13px;">外观操作</label><button type="button" id="group-save-preset-btn" class="btn" style="padding:7px 10px;border-radius:8px;">另存为</button><button type="button" id="group-manage-presets-btn" class="btn" style="padding:7px 10px;border-radius:8px;">管理</button></div></div>
+                <div class="form-group">
+                    <label for="group-bubble-preset-select">气泡预设管理</label>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <select id="group-bubble-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">— 选择预设 —</option></select>
+                        <button type="button" id="group-save-preset-btn" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button>
+                        <button type="button" id="group-manage-presets-btn" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button>
+                    </div>
+                </div>
                 <div class="form-group"><label for="setting-group-max-memory">最大记忆轮数</label><input type="number"
                                                                                                          id="setting-group-max-memory"
                                                                                                          value="10"
@@ -1530,33 +1551,49 @@
         }
 
         /* NovelAI 设置弹窗中的复选框布局 */
+        /* NAI 设置复选框组样式 (v-v-v 修复间距 v-v-v) */
         .nai-settings-checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 10px 0;
+            /* 移除 padding 和 gap，使用标准 margin-bottom */
+            margin-bottom: 20px; /* 与标准form-group完全一致 */
         }
-        .nai-settings-checkbox-group label {
-            font-weight: 600;
+
+        .nai-settings-checkbox-group label[for] {
+            display: block;
+            margin-bottom: 8px; /* 与标准form-group完全一致 */
             color: var(--secondary-color);
-            margin-bottom: 0;
+            font-weight: 600;
         }
+
         .nai-settings-checkbox-group .checkbox-container {
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            margin-top: 5px;
+            margin-bottom: 0; /* 修复：覆盖全局 label 的 8px 边距 */
+            /* 修复：移除多余的 margin-top */
+            margin-top: 0;
         }
+
         .nai-settings-checkbox-group .checkbox-container span {
             font-size: 14px;
             color: #333;
         }
+
+        /* (v-v-v 新增，确保 <small> 标签的间距正确 v-v-v) */
         .nai-settings-checkbox-group .checkbox-container input[type="checkbox"] {
             width: 18px;
             height: 18px;
             margin: 0;
         }
+
+        .nai-settings-checkbox-group small {
+            display: block;
+            margin-top: 5px; /* 与标准form-group完全一致 */
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        /* (^-^-^ 修复结束 ^-^-^) */
 
     </style>
 
@@ -1580,7 +1617,7 @@
         <div class="nai-modal-scrollable-content">
             <div class="form-group">
                 <label>图像尺寸（oplus可无限出小图）</label>
-                <select id="nai-resolution" class="form-group">
+                <select id="nai-resolution">
                     <optgroup label="小">
                         <option value="512x768">纵向 (512x768)</option>
                         <option value="768x512">横向 (768x512)</option>
@@ -1600,17 +1637,17 @@
             </div>
             <div class="form-group">
                 <label>采样步数 (Steps)</label>
-                <input type="number" id="nai-steps" value="28" min="1" max="50" class="form-group">
+                <input type="number" id="nai-steps" value="28" min="1" max="50">
                 <small>推荐值: 28 (值越高质量越好但耗时越长)</small>
             </div>
             <div class="form-group">
                 <label>提示词相关性 (CFG Scale)</label>
-                <input type="number" id="nai-cfg-scale" value="5" min="1" max="20" step="0.5" class="form-group">
+                <input type="number" id="nai-cfg-scale" value="5" min="1" max="20" step="0.5">
                 <small>推荐值: 5 (控制图像与提示词的相关程度)</small>
             </div>
             <div class="form-group">
                 <label>采样器 (Sampler)</label>
-                <select id="nai-sampler" class="form-group">
+                <select id="nai-sampler">
                     <option value="k_euler">Euler</option>
                     <option value="k_euler_ancestral" selected>Euler Ancestral</option>
                     <option value="k_dpmpp_2s_ancestral">DPM++ 2S Ancestral</option>
@@ -1618,20 +1655,22 @@
                     <option value="k_dpmpp_sde">DPM++ SDE</option>
                     <option value="ddim">DDIM</option>
                 </select>
+                <small>推荐值: Euler Ancestral (不同的采样器有不同的图像风格)</small>
             </div>
             <div class="form-group">
                 <label>随机种子 (Seed)</label>
-                <input type="number" id="nai-seed" value="-1" min="-1" max="9999999999" class="form-group">
+                <input type="number" id="nai-seed" value="-1" min="-1" max="9999999999">
                 <small>-1 表示随机，固定种子可复现相同图像</small>
             </div>
             <div class="form-group">
                 <label>负面提示词预设 (UC Preset)</label>
-                <select id="nai-uc-preset" class="form-group">
+                <select id="nai-uc-preset">
                     <option value="0">Preset 0 - Heavy</option>
                     <option value="1" selected>Preset 1 - Light</option>
                     <option value="2">Preset 2 - Human Focus</option>
                     <option value="3">Preset 3 - None</option>
                 </select>
+                <small>推荐值: Preset 1 - Light (控制负面提示词的强度)</small>
             </div>
 
             <div class="form-group nai-settings-checkbox-group">
@@ -1640,6 +1679,7 @@
                     <input type="checkbox" id="nai-quality-toggle" checked>
                     <span>自动添加质量提升标签</span>
                 </label>
+                <small>推荐开启 (自动提升画面质量)</small>
             </div>
             <div class="form-group nai-settings-checkbox-group">
                 <label for="nai-smea">SMEA (提升细节)</label>
@@ -1647,6 +1687,7 @@
                     <input type="checkbox" id="nai-smea" checked>
                     <span>启用SMEA增强</span>
                 </label>
+                <small>推荐开启 (增强图像细节表现)</small>
             </div>
             <div class="form-group nai-settings-checkbox-group">
                 <label for="nai-smea-dyn">SMEA DYN (动态优化)</label>
@@ -1654,33 +1695,33 @@
                     <input type="checkbox" id="nai-smea-dyn">
                     <span>启用动态SMEA</span>
                 </label>
+                <small>可选功能 (动态优化细节表现)</small>
             </div>
-            <div class="form-group">
-                <label>默认正面提示词</label>
-                <textarea id="nai-default-positive" rows="3" class="form-group" placeholder="masterpiece, best quality, 1girl, beautiful...">masterpiece, best quality, 1girl, beautiful, detailed face, detailed eyes, long hair, anime style</textarea>
-                <small>此提示词将在生成时自动使用（如果测试弹窗中未填写）</small>
-            </div>
-            <div class="form-group">
-                <label>默认负面提示词</label>
-                <textarea id="nai-default-negative" rows="3" class="form-group" placeholder="lowres, bad anatomy, bad hands, text, error...">lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry</textarea>
-            </div>
-
             <div class="form-group">
                 <label>全局预设</label>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:10px;">
                     <select id="nai-global-prompt-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;">
                         <option value="">— 选择全局提示词预设 —</option>
                     </select>
-                    <button type="button" id="nai-global-prompt-apply-preset" class="btn btn-primary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">应用</button>
+                    <button type="button" id="nai-global-prompt-save-preset" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button>
+                    <button type="button" id="nai-global-prompt-manage-presets" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button>
                 </div>
-                <div style="display:flex;gap:8px;align-items:center;justify-content:flex-start;flex-wrap:wrap;">
-                    <button type="button" id="nai-global-prompt-save-preset" class="btn btn-secondary" style="flex:1;min-width:80px;width:auto;margin:0;">另存为</button>
-                    <button type="button" id="nai-global-prompt-manage-presets" class="btn btn-neutral" style="flex:1;min-width:80px;width:auto;margin:0;">管理</button>
-                </div>
+                <small>保存和管理常用的提示词预设</small>
             </div>
-            <div class="form-group" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
+
+            <div class="form-group">
+                <label>默认正面提示词</label>
+                <textarea id="nai-default-positive" rows="3" placeholder="masterpiece, best quality, 1girl, beautiful...">masterpiece, best quality, 1girl, beautiful, detailed face, detailed eyes, long hair, anime style</textarea>
+                <small>此提示词将在生成时自动使用，用于描述你希望在画面中看到的内容。</small>
+            </div>
+            <div class="form-group">
+                <label>默认负面提示词</label>
+                <textarea id="nai-default-negative" rows="3" placeholder="lowres, bad anatomy, bad hands, text, error...">lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry</textarea>
+                <small>设置默认的负面提示词，避免生成不需要的内容</small>
+            </div>
+            <div class="form-group">
                 <label>🌐 CORS 代理设置</label>
-                <select id="nai-cors-proxy" class="form-group">
+                <select id="nai-cors-proxy">
                     <option value="">❌ 直连（无代理）</option>
                     <option value="https://corsproxy.io/?" selected>✅ corsproxy.io（推荐）</option>
                     <option value="https://api.allorigins.win/raw?url=">allorigins.win</option>
@@ -1691,7 +1732,7 @@
             </div>
             <div id="nai-custom-proxy-group" class="form-group" style="display: none;">
                 <label>自定义代理地址</label>
-                <input type="text" id="nai-custom-proxy-url" placeholder="https://your-proxy.com/?" class="form-group">
+                <input type="text" id="nai-custom-proxy-url" placeholder="https://your-proxy.com/?">
                 <small>代理URL应以 / 或 ? 结尾，例如：https://proxy.com/?</small>
             </div>
         </div>
@@ -1710,18 +1751,13 @@
         <div class="nai-modal-scrollable-content">
             <div class="form-group">
                 <label>正面提示词（此处提示词仅用于该弹窗测试）</label>
-                <textarea id="nai-test-prompt" rows="4" class="form-group" placeholder="1girl, solo, long hair, blue eyes, smile...">1girl, solo, long hair, blue eyes, smile, outdoors, cherry blossoms, spring</textarea>
+                <textarea id="nai-test-prompt" rows="4" placeholder="1girl, solo, long hair, blue eyes, smile...">1girl, solo, long hair, blue eyes, smile, outdoors, cherry blossoms, spring</textarea>
             </div>
             <div class="form-group">
                 <label>负面提示词（可选，留空使用默认）</label>
-                <textarea id="nai-test-negative" rows="3" class="form-group" placeholder="留空将使用设置中的默认负面提示词"></textarea>
+                <textarea id="nai-test-negative" rows="3" placeholder="留空将使用设置中的默认负面提示词"></textarea>
             </div>
-            <div style="display: flex; justify-content: center; margin: 10px 0; align-items: center;">
-                <button id="nai-generate-btn" class="btn btn-primary" style="padding: 12px 30px; font-size: 16px; width: auto; margin: 0;">
-                    生成图像
-                </button>
-            </div>
-            <div id="nai-test-status" style="text-align: center; color: #666; margin: 15px 0; display: none;">
+                <div id="nai-test-status" style="text-align: center; color: #666; margin: 15px 0; display: none;">
                 正在生成中，请稍候...
             </div>
             <div id="nai-test-result" style="display: none; margin-top: 20px;">
@@ -1735,6 +1771,7 @@
         
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button id="close-nai-test-btn" class="btn btn-neutral" style="flex: 1;">关闭</button>
+            <button id="nai-generate-btn" class="btn btn-primary" style="flex: 1;">生成图像</button>
         </div>
     </div>
 </div>
