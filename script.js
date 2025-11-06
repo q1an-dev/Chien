@@ -203,7 +203,7 @@
 </div>
 <button type="submit" class="btn btn-primary" id="save-btn"><span class="btn-text">保 存</span><div class="spinner"></div></button></form><div class="api-presets-embedded" style="margin-top:12px;"><div id="api-presets-control" style="margin:12px 0;padding:12px;border-radius:8px;border:1px solid var(--border-color, #eee);background:var(--panel-bg, #fff);box-shadow:var(--panel-shadow, none);"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><label style="min-width:86px;color:var(--muted,#666);">API 预设：</label><select id="api-preset-select" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd;"><option value="">— 选择 API 预设 —</option></select><button id="api-apply-preset" class="btn btn-primary" style="margin-left:8px;padding:6px 10px;">应用</button></div><div style="display:flex;gap:8px;align-items:center;"><button id="api-save-preset" class="btn" style="padding:6px 10px;">另存为</button><button id="api-manage-presets" class="btn" style="padding:6px 10px;">管理</button><div style="flex:1"></div><button id="api-import-presets" class="btn" style="padding:6px 10px;">导入</button><button id="api-export-presets" class="btn" style="padding:6px 10px;">导出</button></div></div><div id="api-presets-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;"><div style="width:640px;max-width:94%;background:var(--panel-bg,#fff);padding:16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);"><h3 style="margin:0 0 12px 0;">API 预设管理</h3><div id="api-presets-list" style="max-height:360px;overflow:auto;border:1px solid #f0f0f0;padding:8px;border-radius:6px;"></div><div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;"><button id="api-close-modal" class="btn btn-primary">关闭</button></div></div></div></div></main>`;
         document.getElementById('wallpaper-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">更换壁纸</h1></div><div class="placeholder"></div></header><main class="content"><div class="wallpaper-preview" id="wallpaper-preview"><span>当前壁纸预览</span></div><input type="file" id="wallpaper-upload" accept="image/*" style="display: none;"><label for="wallpaper-upload" class="btn btn-primary">从相册选择新壁纸</label></main>`;
-        document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><p style="font-size:12px; color:#888; text-align:center;">示例: https://lf3-static.bytednsdoc.com/obj/eden-cn/jplptk/ljhwZthlaukjlkulzlp/portal/fonts/HarmonyOS_Sans_SC_Regular.woff2</p><button type="submit" class="btn btn-primary">应用字体</button><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 15px;">恢复默认字体</button></form></main>`;
+        document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-preset-select">字体预设</label><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><select id="font-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;"><option value="">— 选择预设 —</option></select><button type="button" id="font-apply-preset" class="btn btn-primary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">应用</button></div></div><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><div style="display:flex;gap:8px;align-items:center;margin-bottom:15px;"><button type="submit" class="btn btn-primary" style="flex:1;min-width:0;margin:0;">保存</button><button type="button" id="font-save-preset" class="btn btn-secondary" style="flex:1;min-width:0;width:auto;margin:0;">另存为</button><button type="button" id="font-manage-presets" class="btn btn-neutral" style="flex:1;min-width:0;width:auto;margin:0;">管理</button></div><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 0;">恢复默认字体</button></form></main>`;
         document.getElementById('customize-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">主屏幕自定义</h1></div><div class="placeholder"></div></header><main class="content"><form id="customize-form"></form></main>`;
         document.getElementById('tutorial-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">教程</h1></div><div class="placeholder"></div></header><main class="content" id="tutorial-content-area"></main>`;
 
@@ -309,7 +309,7 @@
             'apiSettings', 'wallpaper', 'homeScreenMode', 'fontUrl', 'customIcons', 'stickerCategories',
             'apiPresets', 'bubbleCssPresets', 'myPersonaPresets', 'globalCss',
             'globalCssPresets', 'homeSignature', 'forumPosts', 'forumBindings', 'pomodoroTasks', 'pomodoroSettings', 'insWidgetSettings', 'homeWidgetSettings',
-            'naiGlobalPromptPresets' // ▼▼▼ 新增 ▼▼▼
+            'naiGlobalPromptPresets', 'fontPresets' // ▼▼▼ 新增 ▼▼▼
         ];
         const appVersion = "1.2.0"; // Current app version
         const updateLog = [
@@ -318,7 +318,6 @@
                 date: "2025-10-15",
                 notes: [
                     "新增：猫箱图床 (Catbox) 渲染机制，在当前绑定的表情包世界书中包含 'catbox' 关键词即可切换到猫箱模式，注意！iposting图床表情包和猫箱表情包不可同时渲染，只能选择一方。如：绑定了猫箱表情包世界书，就无法渲染过往iposting图床的表情包，不绑定则反之。",
-                    "新增：世界书批量删除功能，长按条目即可进入多选删除模式，支持分类全选。",
                 ]
             },
             {
@@ -376,6 +375,7 @@
             naiPromptModules: [],
             // ▼▼▼ 新增：NAI 全局提示词预设 ▼▼▼
             naiGlobalPromptPresets: [],
+            fontPresets: [], // ▼▼▼ 新增 ▼▼▼
         };
         let currentChatId = null, currentChatType = null, isGenerating = false, longPressTimer = null,
             isInMultiSelectMode = false, editingMessageId = null, currentPage = 1, currentTransferMessageId = null,
@@ -386,12 +386,14 @@
         let currentPomodoroTask = null, pomodoroInterval = null, pomodoroRemainingSeconds = 0, pomodoroCurrentSessionSeconds = 0, isPomodoroPaused = true, pomodoroPokeCount = 0, pomodoroIsInterrupted = false, currentPomodoroSettingsContext = null, pomodoroSessionHistory = [];
         let isStickerManageMode = false;
         let selectedStickerIds = new Set();
-        let isWorldBookMultiSelectMode = false;
-        let selectedWorldBookIds = new Set();
         let peekContentCache = {};
         let generatingPeekApps = new Set(); // Tracks which apps are currently generating content
         let selectedMessageIds = new Set();
         const MESSAGES_PER_PAGE = 50;
+        
+        // 世界书多选模式状态
+        let isInWorldBookMultiSelectMode = false;
+        let selectedWorldBookIds = new Set();
 
         // --- DOM Element Cache ---
         const screens = document.querySelectorAll('.screen'),
@@ -619,7 +621,8 @@
                     pomodoroSettings: { boundCharId: null, userPersona: '', focusBackground: '', taskCardBackground: '', encouragementMinutes: 25, pokeLimit: 5, globalWorldBookIds: [] },
                     insWidgetSettings: { avatar1: 'https://i.postimg.cc/Y96LPskq/o-o-2.jpg', bubble1: 'love u.', avatar2: 'https://i.postimg.cc/GtbTnxhP/o-o-1.jpg', bubble2: 'miss u.' },
                     homeWidgetSettings: defaultWidgetSettings,
-                    naiGlobalPromptPresets: [] // ▼▼▼ 新增 ▼▼▼
+                    naiGlobalPromptPresets: [], // ▼▼▼ 新增 ▼▼▼
+                    fontPresets: [] // ▼▼▼ 新增 ▼▼▼
                 };
                 db[key] = settings[key] !== undefined ? settings[key] : (defaultValue[key] !== undefined ? JSON.parse(JSON.stringify(defaultValue[key])) : undefined);
             });
@@ -2040,8 +2043,6 @@
             setupPomodoroGlobalSettings(); // NEW: Setup global settings
             setupInsWidgetAvatarModal();
             setupHeartPhotoModal();
-            document.getElementById('delete-selected-world-books-btn').addEventListener('click', deleteSelectedWorldBooks);
-            document.getElementById('cancel-wb-multi-select-btn').addEventListener('click', exitWorldBookMultiSelectMode);
         };
 
         function setupInsWidgetAvatarModal() {
@@ -3582,15 +3583,15 @@
            if (negativeEl) negativeEl.value = p.negative || '';
 
            // 关键：应用后，立即保存到 localStorage，使其成为"当前"设置
-           const settings = getNovelAISettings(); // 获取其他设置
-           settings.default_positive = p.positive || '';
-           settings.default_negative = p.negative || '';
-           localStorage.setItem('novelai-settings', JSON.stringify(settings));
+           // const settings = getNovelAISettings(); // 获取其他设置 <-- 移除
+           // settings.default_positive = p.positive || ''; // <-- 移除
+           // settings.default_negative = p.negative || ''; // <-- 移除
+           // localStorage.setItem('novelai-settings', JSON.stringify(settings)); // <-- 移除
            // 同时更新单独存储的默认值
-           localStorage.setItem('nai-global-positive', p.positive || '');
-           localStorage.setItem('nai-global-negative', p.negative || '');
+           // localStorage.setItem('nai-global-positive', p.positive || ''); // <-- 移除
+           // localStorage.setItem('nai-global-negative', p.negative || ''); // <-- 移除
 
-           showToast('预设已应用并设为当前默认');
+           showToast(`已将 "${presetName}" 填入提示词框`);
        }
 
        /**
@@ -3906,23 +3907,28 @@
            if (!presets.length) list.innerHTML = '<p style="color:#888;margin:6px 0;">暂无预设</p>';
            presets.forEach((p, idx) => {
                const row = document.createElement('div');
+               // ▼▼▼ 修复：为人设预设列表行添加 flex 布局样式，使其与气泡预设弹窗统一
                row.style.display = 'flex';
                row.style.justifyContent = 'space-between';
                row.style.alignItems = 'center';
-               row.style.padding = '8px 0';
-               row.style.borderBottom = '1px solid #f0f0f0';
+               row.style.padding = '8px 0'; // 增加上下间距
+               row.style.borderBottom = '1px solid #f0f0f0'; // 增加分割线
+               // ▲▲▲ 修复结束
 
                const nameDiv = document.createElement('div');
-               nameDiv.style.flex = '1';
+               nameDiv.className = 'preset-name';
+               nameDiv.style.flex = '1'; // ▼▼▼ 修复：让名称占据左侧所有空间
                nameDiv.style.whiteSpace = 'nowrap';
                nameDiv.style.overflow = 'hidden';
                nameDiv.style.textOverflow = 'ellipsis';
                nameDiv.textContent = p.name;
-               row.appendChild(nameDiv);
 
                const btnWrap = document.createElement('div');
+               btnWrap.className = 'preset-actions';
+               // ▼▼▼ 修复：让按钮组横向排列
                btnWrap.style.display = 'flex';
-               btnWrap.style.gap = '6px';
+               btnWrap.style.gap = '6px'; // 按钮之间的间距
+               // ▲▲▲ 修复结束
 
                const applyBtn = document.createElement('button');
                applyBtn.className = 'btn btn-primary btn-xsmall';
@@ -3957,6 +3963,8 @@
                btnWrap.appendChild(applyBtn);
                btnWrap.appendChild(renameBtn);
                btnWrap.appendChild(deleteBtn);
+
+               row.appendChild(nameDiv);
                row.appendChild(btnWrap);
 
                list.appendChild(row);
@@ -4173,75 +4181,63 @@
                 lastUserMessageTimestamp: null,
             };
 
-            // --- 新增：处理世界书 (兼容两种格式) ---
             const importedWorldBookIds = [];
-            
-            // 格式一：处理哈基米.json中的 character_book
+            let structuredEntries = [];
+
             if (charData.character_book && Array.isArray(charData.character_book.entries)) {
-                const categoryName = data.name || charData.name; // 优先使用根级的name作为分类名
-                charData.character_book.entries.forEach(entry => {
-                    const name = entry.comment;
-                    const content = entry.content;
-                    if (name && content) {
-                        const existingBook = db.worldBooks.find(wb => wb.name.toLowerCase() === name.toLowerCase());
-                        if (existingBook) {
-                            if (!importedWorldBookIds.includes(existingBook.id)) {
-                                importedWorldBookIds.push(existingBook.id);
-                            }
-                        } else {
-                            const newBook = {
-                                id: `wb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                                name: name,
-                                content: content,
-                                position: 'after',
-                                category: categoryName
-                            };
-                            db.worldBooks.push(newBook);
-                            importedWorldBookIds.push(newBook.id);
-                        }
-                    }
-                });
-            }
-            // 格式二：处理通用格式的 world_info / wi
-            else {
+                structuredEntries = charData.character_book.entries.map(entry => {
+                    const keys = (entry.keys || []).map(k => k.trim().toLowerCase()).filter(k => k);
+                    return {
+                        enabled: (entry.enabled !== undefined) ? entry.enabled : true,
+                        keys: keys,
+                        comment: entry.comment || '',
+                        content: entry.content || ''
+                    };
+                }).filter(entry => entry.content);
+            } else {
                 const worldInfo = charData.world_info || charData.wi || '';
                 if (worldInfo && typeof worldInfo === 'string' && worldInfo.trim() !== '') {
-                    const entries = worldInfo.split(/\n\s*\n/).filter(entry => entry.trim() !== '');
-                    entries.forEach(entryText => {
+                    const entriesText = worldInfo.split(/\n\s*\n/).filter(entry => entry.trim() !== '');
+                    
+                    structuredEntries = entriesText.map(entryText => {
                         const lines = entryText.trim().split('\n');
-                        if (lines.length > 0) {
-                            const name = lines[0].trim();
-                            const content = lines.slice(1).join('\n').trim();
-                            if (name && content) {
-                                const existingBook = db.worldBooks.find(wb => wb.name.toLowerCase() === name.toLowerCase());
-                                if (existingBook) {
-                                    if (!importedWorldBookIds.includes(existingBook.id)) {
-                                        importedWorldBookIds.push(existingBook.id);
-                                    }
-                                } else {
-                                    const newBook = {
-                                        id: `wb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                                        name: name,
-                                        content: content,
-                                        position: 'after',
-                                        category: '导入的角色设定'
-                                    };
-                                    db.worldBooks.push(newBook);
-                                    importedWorldBookIds.push(newBook.id);
-                                }
-                            }
+                        let content = entryText.trim();
+                        let comment = '';
+
+                        if (lines.length > 1) {
+                            comment = lines[0].trim();
+                            content = lines.slice(1).join('\n').trim();
                         }
-                    });
+
+                        return {
+                            enabled: true,
+                            keys: [],
+                            comment: comment || 'PNG导入条目',
+                            content: content
+                        };
+                    }).filter(entry => entry.content);
                 }
+            }
+            
+            if (structuredEntries.length > 0) {
+                const newBook = {
+                    id: `wb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                    name: `${charData.name}的设定集`,
+                    content: structuredEntries,
+                    position: 'after',
+                    category: '设定集'
+                };
+                db.worldBooks.push(newBook);
+                importedWorldBookIds.push(newBook.id);
+
+                setTimeout(() => {
+                    showToast(`同时导入了 ${structuredEntries.length} 条世界书设定。`);
+                }, 1600);
             }
             
             if (importedWorldBookIds.length > 0) {
                 newChar.worldBookIds = importedWorldBookIds;
-                setTimeout(() => {
-                    showToast(`同时导入了 ${importedWorldBookIds.length} 条世界书设定。`);
-                }, 1600);
             }
-            // --- 新增逻辑结束 ---
 
             db.characters.push(newChar);
             await saveData();
@@ -4688,6 +4684,17 @@
                  }
              }
          });
+         
+         const cssImportInput = document.getElementById('import-global-css-input');
+         if (cssImportInput) {
+             cssImportInput.addEventListener('change', (e) => {
+                 const file = e.target.files[0];
+                 if (file) {
+                     handleGlobalCssImport(file);
+                 }
+                 e.target.value = null;
+             });
+         }
         }
 
                 function renderCustomizeForm() {
@@ -4737,8 +4744,8 @@
                 </div>
                 <div class="collapsible-content">
                     <p style="font-size: 13px; color: #555; margin-bottom: 20px; text-align: left; line-height: 1.6;">
-                        - <strong>主屏幕上的小组件内容</strong>可以直接点击编辑，失焦后自动保存。<br>
-                        - <strong>中央头像</strong>则是在主屏幕点击后弹窗更换。
+                        > <strong>主屏幕上的小组件内容</strong>可以直接点击编辑，失焦后自动保存。<br>
+                        > <strong>中央头像</strong>则是在主屏幕点击后弹窗更换。
                     </p>
                     <button type="button" id="reset-widget-btn" class="btn btn-neutral" style="margin-top: 10px; width: 100%;">恢复默认</button>
                 </div>
@@ -4754,23 +4761,30 @@
                     <span class="collapsible-arrow">▼</span>
                 </div>
                 <div class="collapsible-content">
-                    <div class="form-group">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <label for="global-beautification-css" style="font-weight: bold; font-size: 14px; color: var(--primary-color); margin-bottom: 0;">全局美化CSS代码</label>
-                            <button type="button" id="apply-global-css-now-btn" class="btn btn-primary btn-small">立即应用</button>
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="global-css-preset-select" style="font-size: 14px; margin-left: 0; color: var(--primary-color); font-weight: bold; margin-bottom: 12px;">全局样式预设库</label>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <select id="global-css-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;">
+                                <option value="">— 选择预设 —</option>
+                            </select>
+                            <button type="button" id="global-css-apply-btn" class="btn btn-primary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">应用</button>
                         </div>
-                        <textarea id="global-beautification-css" class="form-group" rows="8" placeholder="在此输入CSS代码... 您的创造力没有边界！"></textarea>
                     </div>
-                    <div class="panel panel-sm" style="padding:12px;border-radius:10px;border:1px solid var(--border-color,#e8e8ef);background:var(--panel-bg,#fff);box-shadow:var(--panel-shadow,0 4px 12px rgba(20,20,30,0.04));margin:10px 0;">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                            <label for="global-css-preset-select" style="width:auto;color:var(--muted,#667);font-size:12px; font-weight: bold;">全局样式预设库</label>
-                            <select id="global-css-preset-select" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--input-border,#e6e6ea);background:var(--input-bg,#fff);font-size:14px;"><option value="">-- 选择预设 --</option></select>
+                    
+                    <div class="form-group" style="margin-top: 0px; margin-bottom: 15px;">
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-start;">
+                            <button type="button" id="global-css-save-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">另存</button>
+                            <button type="button" id="global-css-manage-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">管理</button>
+                            <button type="button" id="global-css-import-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">导入</button>
+                            <button type="button" id="global-css-export-btn" class="btn" style="flex:1;min-width:0;width:auto;margin:0;padding: 10px 12px; height: 40px; background-color: #efefef; color: #333; border: none; font-weight: 600;">导出</button>
                         </div>
-                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;justify-content: flex-end;">
-                            <button type="button" id="global-css-apply-btn" class="btn btn-primary btn-xsmall">应用预设</button>
-                            <button type="button" id="global-css-save-btn" class="btn btn-xsmall">存为预设</button>
-                            <button type="button" id="global-css-manage-btn" class="btn btn-xsmall">管理</button>
-                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 0px;">
+                        <label for="global-beautification-css" style="font-weight: bold; font-size: 14px; color: var(--primary-color); margin-bottom: 10px;">全局美化CSS代码</label>
+                        <textarea id="global-beautification-css" class="form-group" rows="8" placeholder="在此输入CSS代码... 您的创造力没有边界！"></textarea>
+                        <button type="button" id="apply-global-css-now-btn" class="btn btn-primary" style="margin-top: 10px; width: 100%;">保存</button>
                     </div>
                 </div>
             </div>
@@ -4874,10 +4888,10 @@
                     const preset = db.globalCssPresets.find(p => p.name === presetName);
                     if (preset) {
                         globalCssTextarea.value = preset.css;
-                        db.globalCss = preset.css;
-                        applyGlobalCss(preset.css);
-                        saveData();
-                        showToast('全局CSS预设已应用');
+                        // db.globalCss = preset.css; // <-- 移除保存
+                        // applyGlobalCss(preset.css); // <-- 移除应用
+                        // saveData(); // <-- 移除保存
+                        showToast(`已将 "${presetName}" 填入CSS框，请点击"立即应用"保存`);
                     }
                 });
             }
@@ -4904,16 +4918,19 @@
             if (globalCssManageBtn) {
                  globalCssManageBtn.addEventListener('click', openGlobalCssManageModal);
             }
+            const globalCssImportBtn = document.getElementById('global-css-import-btn');
+            if (globalCssImportBtn) {
+                globalCssImportBtn.addEventListener('click', importGlobalCssPresets);
+            }
+            const globalCssExportBtn = document.getElementById('global-css-export-btn');
+            if (globalCssExportBtn) {
+                globalCssExportBtn.addEventListener('click', exportGlobalCssPresets);
+            }
         }
 
 
         function setupTutorialApp() {
-            tutorialContentArea.addEventListener('click', (e) => {
-                const header = e.target.closest('.tutorial-header');
-                if (header) {
-                    header.parentElement.classList.toggle('open');
-                }
-            });
+            renderTutorialContent();
         }
 
         // --- NEW: Update Log Functions ---
@@ -7299,9 +7316,7 @@ return `${seconds}秒`;
         }
 
         // --- AI Interaction & Prompts ---
-        function generatePrivateSystemPrompt(character) {
-            const worldBooksBefore = (character.worldBookIds || []).map(id => db.worldBooks.find(wb => wb.id === id && wb.position === 'before')).filter(Boolean).map(wb => wb.content).join('\n');
-            const worldBooksAfter = (character.worldBookIds || []).map(id => db.worldBooks.find(wb => wb.id === id && wb.position === 'after')).filter(Boolean).map(wb => wb.content).join('\n');
+        function generatePrivateSystemPrompt(character, worldBooksBefore = '', worldBooksAfter = '') {
             const now = new Date();
             const currentTime = `${now.getFullYear()}年${pad(now.getMonth() + 1)}月${pad(now.getDate())}日 ${pad(now.getHours())}:${pad(now.getMinutes())}`;
             let prompt = `你正在一个名为“404”的线上聊天软件中扮演一个角色。请严格遵守以下规则：\n`;
@@ -7421,9 +7436,7 @@ ${DOMPurify.sanitize(m.content)}
             return prompt;
         }
 
-        function generateGroupSystemPrompt(group) {
-            const worldBooksBefore = (group.worldBookIds || []).map(id => db.worldBooks.find(wb => wb.id === id && wb.position === 'before')).filter(Boolean).map(wb => wb.content).join('\n');
-            const worldBooksAfter = (group.worldBookIds || []).map(id => db.worldBooks.find(wb => wb.id === id && wb.position === 'after')).filter(Boolean).map(wb => wb.content).join('\n');
+        function generateGroupSystemPrompt(group, worldBooksBefore = '', worldBooksAfter = '') {
 
             let prompt = `你正在一个名为“404”的线上聊天软件中，在一个名为“${group.name}”的群聊里进行角色扮演。请严格遵守以下所有规则：\n\n`;
 
@@ -7546,12 +7559,60 @@ ${loadedModules.map(m => `
             messageArea.scrollTop = messageArea.scrollHeight;
             try {
                 let systemPrompt, requestBody;
-                if (chatType === 'private') {
-                    systemPrompt = generatePrivateSystemPrompt(chat);
-                } else {
-                    systemPrompt = generateGroupSystemPrompt(chat);
-                }
                 const historySlice = chat.history.slice(-chat.maxMemory);
+                
+                const associatedWorldBooks = (chat.worldBookIds || [])
+                    .map(id => db.worldBooks.find(wb => wb.id === id))
+                    .filter(Boolean);
+
+                let worldBooksBefore = '';
+                let worldBooksAfter = '';
+
+                const lastUserMessageEntry = historySlice.length > 0 ? historySlice[historySlice.length - 1] : null;
+                let lastUserMessage = '';
+                if (lastUserMessageEntry) {
+                    if (lastUserMessageEntry.parts && lastUserMessageEntry.parts.length > 0) {
+                        lastUserMessage = lastUserMessageEntry.parts
+                            .filter(p => p.type === 'text')
+                            .map(p => p.text)
+                            .join(' ')
+                            .toLowerCase();
+                    } else {
+                        lastUserMessage = lastUserMessageEntry.content.toLowerCase();
+                    }
+                }
+
+                associatedWorldBooks.forEach(book => {
+                    let bookContent = '';
+                    
+                    if (Array.isArray(book.content)) {
+                        book.content.forEach(entry => {
+                            if (entry.enabled) {
+                                if (!entry.keys || entry.keys.length === 0) {
+                                    bookContent += entry.content + '\n';
+                                } else {
+                                    if (entry.keys.some(key => lastUserMessage.includes(key.toLowerCase()))) {
+                                        bookContent += entry.content + '\n';
+                                    }
+                                }
+                            }
+                        });
+                    } else if (typeof book.content === 'string') {
+                        bookContent = book.content + '\n';
+                    }
+
+                    if (book.position === 'before') {
+                        worldBooksBefore += bookContent;
+                    } else {
+                        worldBooksAfter += bookContent;
+                    }
+                });
+
+                if (chatType === 'private') {
+                    systemPrompt = generatePrivateSystemPrompt(chat, worldBooksBefore, worldBooksAfter);
+                } else {
+                    systemPrompt = generateGroupSystemPrompt(chat, worldBooksBefore, worldBooksAfter);
+                }
                 if (provider === 'gemini') {
                     const contents = historySlice.map(msg => {
                         const role = msg.role === 'assistant' ? 'model' : 'user';
@@ -7581,32 +7642,36 @@ ${loadedModules.map(m => `
                 } else {
                     const messages = [{role: 'system', content: systemPrompt}];
                     historySlice.forEach(msg => {
-                       let content;
-                       // --- 新增逻辑：处理引用 ---
-                       if (msg.role === 'user' && msg.quote) {
-                           const replyTextMatch = msg.content.match(/\[.*?的消息：([\s\S]+?)\]/);
-                           const replyText = replyTextMatch ? replyTextMatch[1] : msg.content;
-                           
-                           // 构建AI能理解的上下文
-                           content = `[${chat.myName}引用“${msg.quote.content}”并回复：${replyText}]`;
-                           messages.push({ role: 'user', content: content });
+                        let content;
+                        if (msg.parts && msg.parts.length > 0) {
+                            content = msg.parts.map(p => {
+                                if (p.type === 'text' || p.type === 'html') {
+                                    return {type: 'text', text: p.text};
+                                } else if (p.type === 'image') {
+                                    return {type: 'image_url', image_url: {url: p.data}};
+                                }
+                                return null;
+                            }).filter(p => p);
+                        } else {
+                            content = msg.content;
+                        }
+                        if (msg.role === 'user' && msg.quote) {
+                            const myName = (chatType === 'private') ? chat.myName : chat.me.nickname;
+                            let replyText = '';
+                            if (Array.isArray(content)) {
+                                replyText = content.filter(p => p.type === 'text').map(p => p.text).join(' ');
+                            } else {
+                                replyText = String(content);
+                            }
 
-                       } else {
-                            // 原有逻辑
-                           if (msg.parts && msg.parts.length > 0) {
-                               content = msg.parts.map(p => {
-                                   if (p.type === 'text' || p.type === 'html') {
-                                       return {type: 'text', text: p.text};
-                                   } else if (p.type === 'image') {
-                                       return {type: 'image_url', image_url: {url: p.data}};
-                                   }
-                                   return null;
-                               }).filter(p => p);
-                           } else {
-                               content = msg.content;
-                           }
-                           messages.push({role: msg.role, content: content});
-                       }
+                            const replyTextMatch = replyText.match(/\[.*?的消息：([\s\S]+?)\]/);
+                            replyText = replyTextMatch ? replyTextMatch[1] : replyText;
+                            
+                            content = `[${myName}引用"${msg.quote.content.substring(0, 50)}..."并回复：${replyText}]`;
+                            messages.push({ role: 'user', content: content });
+                        } else {
+                            messages.push({role: msg.role, content: content});
+                        }
                     });
                     requestBody = {model: model, messages: messages, stream: true};
                 }
@@ -8724,7 +8789,159 @@ function renderStickerGrid() {
                 applyGlobalFont('');
                 showToast('已恢复默认字体！');
             });
+
+            // --- ▼▼▼ 新增：绑定预设按钮事件 ▼▼▼ ---
+            populateFontPresetSelect();
+            document.getElementById('font-apply-preset')?.addEventListener('click', () => {
+                const select = document.getElementById('font-preset-select');
+                if (select.value) {
+                    applyFontPreset(select.value);
+                } else {
+                    showToast('请先选择一个预设');
+                }
+            });
+            document.getElementById('font-save-preset')?.addEventListener('click', saveCurrentFontAsPreset);
+            document.getElementById('font-manage-presets')?.addEventListener('click', openManageFontPresetsModal);
+            document.getElementById('font-close-modal')?.addEventListener('click', () => {
+                const modal = document.getElementById('font-presets-modal');
+                if (modal) {
+                    modal.classList.remove('visible');
+                    modal.style.display = 'none';
+                }
+            });
+            // --- ▲▲▲ 新增结束 ▲▲▲ ---
         }
+
+        // --- ▼▼▼ 新增：字体预设辅助函数 ▼▼▼ ---
+        function _getFontPresets() {
+            return db.fontPresets || [];
+        }
+        function _saveFontPresets(arr) {
+            db.fontPresets = arr || [];
+            saveData();
+        }
+
+        function populateFontPresetSelect() {
+            const sel = document.getElementById('font-preset-select');
+            if (!sel) return;
+            const presets = _getFontPresets();
+            sel.innerHTML = '<option value="">— 选择预设 —</option>';
+            presets.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.textContent = p.name;
+                sel.appendChild(opt);
+            });
+        }
+
+        async function applyFontPreset(presetName) {
+            const presets = _getFontPresets();
+            const preset = presets.find(p => p.name === presetName);
+            if (!preset) return showToast('未找到该预设');
+
+            // 重新获取 input 确保在函数作用域内
+            const fontUrlInput = document.getElementById('font-url');
+            if (fontUrlInput) {
+                fontUrlInput.value = preset.fontUrl;
+            }
+            
+            // 只提示，不应用
+            showToast(`已将 "${preset.name}" 填入输入框`);
+        }
+
+        function saveCurrentFontAsPreset() {
+            const fontUrl = fontUrlInput.value.trim();
+            if (!fontUrl) return showToast('字体链接为空，无法保存');
+
+            let name = prompt('请输入此字体预设的名称（同名将覆盖）:');
+            if (!name) return;
+
+            const presets = _getFontPresets();
+            const existingIndex = presets.findIndex(p => p.name === name);
+            if (existingIndex > -1) {
+                presets[existingIndex].fontUrl = fontUrl;
+            } else {
+                presets.push({ name, fontUrl });
+            }
+            _saveFontPresets(presets);
+            populateFontPresetSelect();
+            showToast('字体预设已保存');
+        }
+
+        function openManageFontPresetsModal() {
+            const modal = document.getElementById('font-presets-modal');
+            const list = document.getElementById('font-presets-list');
+            if (!modal || !list) return;
+
+            // 显示模态框
+            modal.style.display = 'flex';
+            modal.classList.add('visible');
+
+            list.innerHTML = '';
+            const presets = _getFontPresets();
+            if (!presets.length) list.innerHTML = '<p style="color:#888;margin:6px 0;">暂无预设</p>';
+
+            presets.forEach((p, idx) => {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.alignItems = 'center';
+                row.style.padding = '8px 0';
+                row.style.borderBottom = '1px solid #f0f0f0';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.style.flex = '1';
+                nameDiv.style.whiteSpace = 'nowrap';
+                nameDiv.style.overflow = 'hidden';
+                nameDiv.style.textOverflow = 'ellipsis';
+                nameDiv.textContent = p.name;
+                nameDiv.title = p.fontUrl;
+                row.appendChild(nameDiv);
+
+                const btnWrap = document.createElement('div');
+                btnWrap.style.display = 'flex';
+                btnWrap.style.gap = '6px';
+
+                const applyBtn = document.createElement('button');
+                applyBtn.className = 'btn btn-primary btn-xsmall';
+                applyBtn.textContent = '应用';
+                applyBtn.onclick = function() {
+                    applyFontPreset(p.name);
+                    modal.classList.remove('visible');
+                    modal.style.display = 'none';
+                };
+
+                const renameBtn = document.createElement('button');
+                renameBtn.className = 'btn btn-xsmall';
+                renameBtn.textContent = '重命名';
+                renameBtn.onclick = function() {
+                    const newName = prompt('输入新名称：', p.name);
+                    if (!newName || newName === p.name) return;
+                    _getFontPresets()[idx].name = newName;
+                    _saveFontPresets(db.fontPresets);
+                    openManageFontPresetsModal();
+                    populateFontPresetSelect();
+                };
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn btn-danger btn-xsmall';
+                delBtn.textContent = '删除';
+                delBtn.onclick = function() {
+                    if (!confirm('确定删除预设 "' + p.name + '" ?')) return;
+                    _getFontPresets().splice(idx, 1);
+                    _saveFontPresets(db.fontPresets);
+                    openManageFontPresetsModal();
+                    populateFontPresetSelect();
+                };
+
+                btnWrap.appendChild(applyBtn);
+                btnWrap.appendChild(renameBtn);
+                btnWrap.appendChild(delBtn);
+                row.appendChild(btnWrap);
+                list.appendChild(row);
+            });
+        }
+        // --- ▲▲▲ 新增结束 ▲▲▲ ---
 
         function applyGlobalFont(fontUrl) {
             const styleId = 'global-font-style';
@@ -8826,203 +9043,687 @@ function renderStickerGrid() {
                     populateGlobalCssPresetSelect();
                 };
 
+                btnWrap.appendChild(applyBtn);
                 btnWrap.appendChild(renameBtn);
                 btnWrap.appendChild(delBtn);
                 row.appendChild(btnWrap);
                 list.appendChild(row);
             });
-            modal.classList.add('visible');
         }
 
-        // --- 世界书批量删除相关函数 ---
-        function enterWorldBookMultiSelectMode(initialId, initialCategory = null) {
-            if (isWorldBookMultiSelectMode) return;
-            isWorldBookMultiSelectMode = true;
-
-            document.getElementById('add-world-book-btn').style.display = 'none';
-            document.getElementById('cancel-wb-multi-select-btn').style.display = 'inline-block';
-            document.getElementById('world-book-multi-select-bar').style.display = 'flex';
-            document.querySelector('#world-book-screen .content').style.paddingBottom = '70px';
-
-            selectedWorldBookIds.clear();
-            if (initialId) {
-                selectedWorldBookIds.add(initialId);
+        function exportGlobalCssPresets() {
+            const presets = db.globalCssPresets || [];
+            if (presets.length === 0) {
+                return showToast('没有可导出的CSS预设');
             }
-
-            updateWorldBookSelectCount();
-            renderWorldBookList(initialCategory); // Pass the category to expand
+            
+            const fileContent = presets.map(p => 
+                `/*! PRESET_NAME: ${p.name} */\n${p.css}\n`
+            ).join('\n');
+            
+            const blob = new Blob([fileContent], { type: 'text/css;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `global_css_presets_${new Date().toISOString().slice(0, 10)}.css`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('CSS预设导出成功！');
         }
 
-        function exitWorldBookMultiSelectMode() {
-            isWorldBookMultiSelectMode = false;
-
-            document.getElementById('add-world-book-btn').style.display = 'inline-block';
-            document.getElementById('cancel-wb-multi-select-btn').style.display = 'none';
-            document.getElementById('world-book-multi-select-bar').style.display = 'none';
-            document.querySelector('#world-book-screen .content').style.paddingBottom = '0';
-
-            selectedWorldBookIds.clear();
-            renderWorldBookList();
+        function importGlobalCssPresets() {
+            document.getElementById('import-global-css-input').click();
         }
 
-        function toggleWorldBookSelection(bookId) {
-            const itemEl = worldBookListContainer.querySelector(`.world-book-item[data-id="${bookId}"]`);
-            if (selectedWorldBookIds.has(bookId)) {
-                selectedWorldBookIds.delete(bookId);
-                if(itemEl) itemEl.classList.remove('selected');
-            } else {
-                selectedWorldBookIds.add(bookId);
-                if(itemEl) itemEl.classList.add('selected');
-            }
-            updateWorldBookSelectCount();
-        }
-
-        function updateWorldBookSelectCount() {
-            const count = selectedWorldBookIds.size;
-            document.getElementById('world-book-select-count').textContent = `已选择 ${count} 项`;
-            document.getElementById('delete-selected-world-books-btn').disabled = count === 0;
-        }
-
-        async function deleteSelectedWorldBooks() {
-            const count = selectedWorldBookIds.size;
-            if (count === 0) return;
-
-            if (confirm(`确定要删除这 ${count} 个世界书条目吗？此操作不可恢复。`)) {
-                const idsToDelete = Array.from(selectedWorldBookIds);
+        async function handleGlobalCssImport(file) {
+            if (!file) return;
+            showToast('正在导入CSS预设...');
+            
+            const fileContent = await file.text();
+            
+            try {
+                const importedPresets = [];
+                const parts = fileContent.split('/*! PRESET_NAME: ');
                 
-                await dexieDB.worldBooks.bulkDelete(idsToDelete);
-                db.worldBooks = db.worldBooks.filter(book => !selectedWorldBookIds.has(book.id));
+                if (parts.length <= 1) {
+                    throw new Error('文件格式不正确，未找到 `/*! PRESET_NAME: ` 分隔符');
+                }
+
+                parts.shift();
                 
-                db.characters.forEach(char => {
-                    if (char.worldBookIds) {
-                        char.worldBookIds = char.worldBookIds.filter(id => !selectedWorldBookIds.has(id));
-                    }
-                });
-                db.groups.forEach(group => {
-                    if (group.worldBookIds) {
-                        group.worldBookIds = group.worldBookIds.filter(id => !selectedWorldBookIds.has(id));
+                parts.forEach(part => {
+                    const nameEndIndex = part.indexOf('*/');
+                    if (nameEndIndex === -1) return;
+                    
+                    const name = part.substring(0, nameEndIndex).trim();
+                    const css = part.substring(nameEndIndex + 2).trim();
+                    
+                    if (name && css) {
+                        importedPresets.push({ name, css });
                     }
                 });
 
-                await saveData();
-                showToast(`已成功删除 ${count} 个条目`);
-                exitWorldBookMultiSelectMode();
+                if (importedPresets.length === 0) {
+                    return showToast('导入失败：未在文件中找到任何有效的预设');
+                }
+
+                if (confirm(`成功解析到 ${importedPresets.length} 个CSS预设。\n是否要将它们合并到您现有的预设库中？\n\n（同名预设将被覆盖）`)) {
+                    if (!db.globalCssPresets) db.globalCssPresets = [];
+                    
+                    importedPresets.forEach(newPreset => {
+                        const existingIndex = db.globalCssPresets.findIndex(p => p.name === newPreset.name);
+                        if (existingIndex > -1) {
+                            db.globalCssPresets[existingIndex] = newPreset;
+                        } else {
+                            db.globalCssPresets.push(newPreset);
+                        }
+                    });
+                    
+                    await saveData();
+                    populateGlobalCssPresetSelect();
+                    openGlobalCssManageModal();
+                    showToast(`成功导入/更新 ${importedPresets.length} 个预设！`);
+                }
+
+            } catch (error) {
+                console.error('CSS预设导入失败:', error);
+                showToast(`导入失败: ${error.message}`);
             }
         }
 
+  
         function setupWorldBookApp() {
+            const worldBookListContainer = document.getElementById('world-book-list-container');
+            const noWorldBooksPlaceholder = document.getElementById('no-world-books-placeholder');
+            const addWorldBookBtn = document.getElementById('add-world-book-btn');
+            const editWorldBookForm = document.getElementById('edit-world-book-form');
+            const worldBookIdInput = document.getElementById('world-book-id');
+            const worldBookNameInput = document.getElementById('world-book-name');
+            const worldBookCategoryInput = document.getElementById('world-book-category');
+            const entriesContainer = document.getElementById('world-book-entries-container');
+            const addEntryBtn = document.getElementById('add-world-book-entry-btn');
+
+            const importWbBtn = document.getElementById('import-world-books-btn');
+            const exportWbBtn = document.getElementById('export-world-books-btn');
+            const importWbFileInput = document.getElementById('import-world-books-file-input');
+            
+            // 动作表和多选模式相关元素
+            const worldBookMoreBtn = document.getElementById('world-book-more-btn');
+            const worldBookActionSheet = document.getElementById('world-book-actionsheet');
+            const worldBookActionSheetCancel = document.getElementById('world-book-actionsheet-cancel');
+            const worldBookExportBtn = document.getElementById('world-book-export-btn');
+            const worldBookImportBtn = document.getElementById('world-book-import-btn');
+            const worldBookSelectBtn = document.getElementById('world-book-select-btn');
+            const worldBookCancelSelectBtn = document.getElementById('world-book-cancel-select-btn');
+            const worldBookHeaderNormal = document.getElementById('world-book-header-normal');
+            const worldBookHeaderSelect = document.getElementById('world-book-header-select');
+            const worldBookMultiSelectBar = document.getElementById('world-book-multi-select-bar');
+            const worldBookSelectAllBtn = document.getElementById('world-book-select-all-btn');
+            const worldBookDeleteSelectedBtn = document.getElementById('world-book-delete-selected-btn');
+            
+            // 使用全局多选模式状态（已在模块顶部定义）
+            // isInWorldBookMultiSelectMode 和 selectedWorldBookIds 已在顶部定义
+
+        
             addWorldBookBtn.addEventListener('click', () => {
                 currentEditingWorldBookId = null;
                 editWorldBookForm.reset();
+                worldBookIdInput.value = '';
+                worldBookNameInput.value = '';
+                worldBookCategoryInput.value = '';
                 document.querySelector('input[name="world-book-position"][value="before"]').checked = true;
+
+                entriesContainer.innerHTML = '';
+                const newBlock = createWorldBookEntryBlock();
+                entriesContainer.appendChild(newBlock);
+
                 switchScreen('edit-world-book-screen');
             });
+
+            addEntryBtn.addEventListener('click', () => {
+                const newBlock = createWorldBookEntryBlock();
+                entriesContainer.appendChild(newBlock);
+                entriesContainer.scrollTop = entriesContainer.scrollHeight;
+            });
+
+            if (exportWbBtn) {
+                exportWbBtn.addEventListener('click', exportWorldBooks);
+            }
+            if (importWbBtn) {
+                importWbBtn.addEventListener('click', () => {
+                    importWbFileInput.click();
+                });
+            }
+            if (importWbFileInput) {
+                importWbFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        handleWorldBookImport(file);
+                    }
+                    e.target.value = null;
+                });
+            }
+
+            // 旧的点击事件监听器已移除，新的监听器在下方添加
+
             editWorldBookForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const name = worldBookNameInput.value.trim();
-                const content = worldBookContentInput.value.trim();
-                const category = document.getElementById('world-book-category').value.trim();
+                const category = worldBookCategoryInput.value.trim();
                 const position = document.querySelector('input[name="world-book-position"]:checked').value;
-                if (!name || !content) return showToast('名称和内容不能为空');
+                
+                const entryBlocks = entriesContainer.querySelectorAll('.world-book-entry-block');
+                const newEntries = [];
+                entryBlocks.forEach(block => {
+                    const content = block.querySelector('.entry-content-textarea').value.trim();
+                    if (content) {
+                        const keysInput = block.querySelector('.entry-keys-input').value.trim();
+                        newEntries.push({
+                            enabled: block.querySelector('.entry-enabled-switch').checked,
+                            keys: keysInput ? keysInput.split(',').map(k => k.trim().toLowerCase()).filter(k => k) : [],
+                            comment: block.querySelector('.entry-comment-input').value.trim(),
+                            content: content
+                        });
+                    }
+                });
+
+                if (!name) {
+                    showToast('条目名称不能为空');
+                    return;
+                }
+                if (newEntries.length === 0) {
+                    showToast('至少需要一个有内容的子条目');
+                    return;
+                }
+
+                const bookData = {
+                    name: name,
+                    content: newEntries,
+                    position: position,
+                    category: category
+                };
+
                 if (currentEditingWorldBookId) {
                     const book = db.worldBooks.find(wb => wb.id === currentEditingWorldBookId);
                     if (book) {
-                        book.name = name;
-                        book.content = content;
-                        book.position = position;
-                        book.category = category;
+                        Object.assign(book, bookData);
                     }
                 } else {
-                    db.worldBooks.push({id: `wb_${Date.now()}`, name, content, position, category});
+                    bookData.id = `wb_${Date.now()}`;
+                    db.worldBooks.push(bookData);
                 }
+
                 await saveData();
                 showToast('世界书条目已保存');
                 renderWorldBookList();
                 switchScreen('world-book-screen');
             });
-            worldBookListContainer.addEventListener('click', e => {
-                const worldBookItem = e.target.closest('.world-book-item');
 
-                if (isWorldBookMultiSelectMode) {
-                    // 1. 点击分类的多选框
-                    if (e.target.matches('.category-checkbox')) {
-                        const category = e.target.dataset.category;
-                        const booksInCategory = db.worldBooks.filter(b => (b.category || '未分类') === category);
-                        const bookIdsInCategory = booksInCategory.map(b => b.id);
-                        const shouldSelectAll = e.target.checked;
-
-                        bookIdsInCategory.forEach(bookId => {
-                            if (shouldSelectAll) {
-                                selectedWorldBookIds.add(bookId);
-                            } else {
-                                selectedWorldBookIds.delete(bookId);
-                            }
-                        });
-                        renderWorldBookList(category); // Re-render to show selection changes
-                        updateWorldBookSelectCount();
-                        return;
-                    }
-
-                    // 2. 点击单个条目进行选择
-                    if (worldBookItem) {
-                        toggleWorldBookSelection(worldBookItem.dataset.id);
-                        // Re-render to update the checkmark and category checkbox state
-                        const category = worldBookItem.closest('.collapsible-section').dataset.category;
-                        renderWorldBookList(category);
-                        return;
-                    }
-                    
-                    // 3. 点击分类标题区域进行展开/折叠
-                    if (e.target.closest('.category-toggle-area')) {
-                        e.target.closest('.collapsible-section').classList.toggle('open');
-                        return;
-                    }
-
-                } else { // 非多选模式
-                    // 1. 点击分类标题进行展开/折叠
-                    if (e.target.closest('.collapsible-header')) {
-                        e.target.closest('.collapsible-section').classList.toggle('open');
-                        return;
-                    }
-                    
-                    // 2. 点击条目进入编辑
-                    if (worldBookItem && !e.target.closest('.action-btn')) {
-                        const book = db.worldBooks.find(wb => wb.id === worldBookItem.dataset.id);
-                        if (book) {
-                            currentEditingWorldBookId = book.id;
-                            worldBookIdInput.value = book.id;
-                            worldBookNameInput.value = book.name;
-                            worldBookContentInput.value = book.content;
-                            document.getElementById('world-book-category').value = book.category || '';
-                            document.querySelector(`input[name="world-book-position"][value="${book.position}"]`).checked = true;
-                            switchScreen('edit-world-book-screen');
-                        }
-                    }
-                }
-            });
+            // 长按删除世界书条目逻辑
             worldBookListContainer.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 const item = e.target.closest('.world-book-item');
-                if (item) {
-                    const category = item.closest('.collapsible-section')?.dataset.category;
-                    enterWorldBookMultiSelectMode(item.dataset.id, category);
+                if (item && !e.target.closest('.action-btn')) {
+                    const bookId = item.dataset.id;
+                    const book = db.worldBooks.find(wb => wb.id === bookId);
+                    if (book && confirm(`确定要删除世界书条目"${book.name}"吗？此操作不可恢复。`)) {
+                        deleteWorldBookById(bookId);
+                    }
                 }
             });
             worldBookListContainer.addEventListener('touchstart', (e) => {
                 const item = e.target.closest('.world-book-item');
-                if (!item) return;
+                if (!item || e.target.closest('.action-btn')) return;
                 longPressTimer = setTimeout(() => {
-                    const category = item.closest('.collapsible-section')?.dataset.category;
-                    enterWorldBookMultiSelectMode(item.dataset.id, category);
+                    const bookId = item.dataset.id;
+                    const book = db.worldBooks.find(wb => wb.id === bookId);
+                    if (book && confirm(`确定要删除世界书条目"${book.name}"吗？此操作不可恢复。`)) {
+                        deleteWorldBookById(bookId);
+                    }
                 }, 500);
             });
             worldBookListContainer.addEventListener('mouseup', () => clearTimeout(longPressTimer));
             worldBookListContainer.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
             worldBookListContainer.addEventListener('touchend', () => clearTimeout(longPressTimer));
             worldBookListContainer.addEventListener('touchmove', () => clearTimeout(longPressTimer));
+            
+            // ========== 动作表功能（改为下拉框） ==========
+            // 点击"更多"按钮，弹出下拉框
+            if (worldBookMoreBtn && worldBookActionSheet) {
+                worldBookMoreBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // 切换显示/隐藏
+                    if (worldBookActionSheet.classList.contains('visible')) {
+                        worldBookActionSheet.classList.remove('visible');
+                    } else {
+                        worldBookActionSheet.classList.add('visible');
+                    }
+                });
+            }
+            
+            // 点击下拉框外的区域，关闭下拉框
+            document.addEventListener('click', (e) => {
+                if (worldBookActionSheet && worldBookActionSheet.classList.contains('visible')) {
+                    // 如果点击的不是下拉框内的元素，也不是"更多"按钮，则关闭
+                    if (!worldBookActionSheet.contains(e.target) && 
+                        !worldBookMoreBtn.contains(e.target)) {
+                        worldBookActionSheet.classList.remove('visible');
+                    }
+                }
+            });
+            
+            // 动作表中的按钮：导出
+            if (worldBookExportBtn) {
+                worldBookExportBtn.addEventListener('click', () => {
+                    worldBookActionSheet.classList.remove('visible');
+                    exportWorldBooks();
+                });
+            }
+            
+            // 动作表中的按钮：导入
+            if (worldBookImportBtn) {
+                worldBookImportBtn.addEventListener('click', () => {
+                    worldBookActionSheet.classList.remove('visible');
+                    if (importWbFileInput) {
+                        importWbFileInput.click();
+                    }
+                });
+            }
+            
+            // 动作表中的按钮：选择
+            if (worldBookSelectBtn) {
+                worldBookSelectBtn.addEventListener('click', () => {
+                    worldBookActionSheet.classList.remove('visible');
+                    enterWorldBookMultiSelectMode();
+                });
+            }
+            
+            // ========== 多选模式功能 ==========
+            // 进入多选模式
+            function enterWorldBookMultiSelectMode() {
+                isInWorldBookMultiSelectMode = true;
+                selectedWorldBookIds.clear();
+                
+                // 切换顶栏
+                if (worldBookHeaderNormal) worldBookHeaderNormal.style.display = 'none';
+                if (worldBookHeaderSelect) worldBookHeaderSelect.style.display = 'flex';
+                
+                // 显示底部多选栏
+                if (worldBookMultiSelectBar) worldBookMultiSelectBar.style.display = 'flex';
+                
+                // 给所有条目和分类添加多选样式
+                worldBookListContainer.querySelectorAll('.world-book-item').forEach(item => {
+                    item.classList.add('is-selecting');
+                });
+                worldBookListContainer.querySelectorAll('.collapsible-header').forEach(header => {
+                    header.classList.add('is-selecting');
+                });
+                worldBookListContainer.querySelectorAll('.collapsible-section').forEach(section => {
+                    section.classList.add('is-selecting');
+                });
+                
+                // 展开所有分类
+                worldBookListContainer.querySelectorAll('.collapsible-section').forEach(section => {
+                    section.classList.add('open');
+                });
+                
+                updateDeleteButtonState();
+            }
+            
+            // 退出多选模式
+            function exitWorldBookMultiSelectMode() {
+                isInWorldBookMultiSelectMode = false;
+                selectedWorldBookIds.clear();
+                
+                // 切换顶栏
+                if (worldBookHeaderNormal) worldBookHeaderNormal.style.display = 'flex';
+                if (worldBookHeaderSelect) worldBookHeaderSelect.style.display = 'none';
+                
+                // 隐藏底部多选栏
+                if (worldBookMultiSelectBar) worldBookMultiSelectBar.style.display = 'none';
+                
+                // 移除所有多选样式
+                worldBookListContainer.querySelectorAll('.world-book-item').forEach(item => {
+                    item.classList.remove('is-selecting', 'selected');
+                });
+                worldBookListContainer.querySelectorAll('.collapsible-header').forEach(header => {
+                    header.classList.remove('is-selecting', 'selected');
+                });
+                worldBookListContainer.querySelectorAll('.collapsible-section').forEach(section => {
+                    section.classList.remove('is-selecting');
+                });
+            }
+            
+            // 切换条目选中状态
+            function toggleWorldBookItemSelection(bookId) {
+                if (!isInWorldBookMultiSelectMode) return;
+                
+                const item = worldBookListContainer.querySelector(`.world-book-item[data-id="${bookId}"]`);
+                if (!item) return;
+                
+                if (selectedWorldBookIds.has(bookId)) {
+                    selectedWorldBookIds.delete(bookId);
+                    item.classList.remove('selected');
+                } else {
+                    selectedWorldBookIds.add(bookId);
+                    item.classList.add('selected');
+                }
+                
+                // 更新分类选中状态
+                updateCategorySelectionState();
+                updateDeleteButtonState();
+            }
+            
+            // 切换分类选中状态
+            function toggleCategorySelection(category) {
+                if (!isInWorldBookMultiSelectMode) return;
+                
+                const section = worldBookListContainer.querySelector(`.collapsible-section[data-category="${category}"]`);
+                if (!section) return;
+                
+                const header = section.querySelector('.collapsible-header');
+                const items = section.querySelectorAll('.world-book-item');
+                
+                // 检查分类是否已全部选中
+                const checkedCount = Array.from(items).filter(item => {
+                    const bookId = item.dataset.id;
+                    return selectedWorldBookIds.has(bookId);
+                }).length;
+                
+                const allSelected = checkedCount === items.length && items.length > 0;
+                
+                if (allSelected) {
+                    // 取消选中该分类下的所有条目
+                    items.forEach(item => {
+                        const bookId = item.dataset.id;
+                        if (selectedWorldBookIds.has(bookId)) {
+                            selectedWorldBookIds.delete(bookId);
+                            item.classList.remove('selected');
+                        }
+                    });
+                    if (header) {
+                        header.classList.remove('selected', 'indeterminate');
+                    }
+                } else {
+                    // 选中该分类下的所有条目
+                    items.forEach(item => {
+                        const bookId = item.dataset.id;
+                        selectedWorldBookIds.add(bookId);
+                        item.classList.add('selected');
+                    });
+                    if (header) {
+                        header.classList.add('selected');
+                        header.classList.remove('indeterminate');
+                    }
+                }
+                
+                updateDeleteButtonState();
+            }
+            
+            // 更新分类选中状态（根据条目选中状态）
+            function updateCategorySelectionState() {
+                worldBookListContainer.querySelectorAll('.collapsible-section').forEach(section => {
+                    const category = section.dataset.category;
+                    const header = section.querySelector('.collapsible-header');
+                    const items = section.querySelectorAll('.world-book-item');
+                    
+                    if (items.length === 0) {
+                        // 没有条目时，移除所有状态
+                        if (header) {
+                            header.classList.remove('selected', 'indeterminate');
+                        }
+                        return;
+                    }
+                    
+                    const checkedCount = Array.from(items).filter(item => {
+                        const bookId = item.dataset.id;
+                        return selectedWorldBookIds.has(bookId);
+                    }).length;
+                    
+                    if (checkedCount === 0) {
+                        // 全未选：移除所有状态
+                        if (header) {
+                            header.classList.remove('selected', 'indeterminate');
+                        }
+                    } else if (checkedCount === items.length) {
+                        // 全选：显示选中状态（p3）
+                        if (header) {
+                            header.classList.add('selected');
+                            header.classList.remove('indeterminate');
+                        }
+                    } else {
+                        // 部分选中：显示部分选中状态（p2）
+                        if (header) {
+                            header.classList.add('indeterminate');
+                            header.classList.remove('selected');
+                        }
+                    }
+                });
+            }
+            
+            // 更新删除按钮状态
+            function updateDeleteButtonState() {
+                if (worldBookDeleteSelectedBtn) {
+                    const count = selectedWorldBookIds.size;
+                    worldBookDeleteSelectedBtn.textContent = `删除 (${count})`;
+                    if (count === 0) {
+                        worldBookDeleteSelectedBtn.classList.add('disabled');
+                    } else {
+                        worldBookDeleteSelectedBtn.classList.remove('disabled');
+                    }
+                }
+                
+                // 更新全选按钮文字
+                if (worldBookSelectAllBtn) {
+                    const allItems = worldBookListContainer.querySelectorAll('.world-book-item');
+                    const allSelected = allItems.length > 0 && Array.from(allItems).every(item => {
+                        const bookId = item.dataset.id;
+                        return selectedWorldBookIds.has(bookId);
+                    });
+                    worldBookSelectAllBtn.textContent = allSelected ? '取消全选' : '全选';
+                }
+            }
+            
+            // 全选/取消全选
+            if (worldBookSelectAllBtn) {
+                worldBookSelectAllBtn.addEventListener('click', () => {
+                    if (!isInWorldBookMultiSelectMode) return;
+                    
+                    const allItems = worldBookListContainer.querySelectorAll('.world-book-item');
+                    const allSelected = Array.from(allItems).every(item => {
+                        const bookId = item.dataset.id;
+                        return selectedWorldBookIds.has(bookId);
+                    });
+                    
+                    if (allSelected) {
+                        // 取消全选
+                        selectedWorldBookIds.clear();
+                        allItems.forEach(item => {
+                            item.classList.remove('selected');
+                        });
+                        worldBookListContainer.querySelectorAll('.collapsible-header').forEach(header => {
+                            header.classList.remove('selected');
+                        });
+                        // 更新按钮文字为"全选"
+                        worldBookSelectAllBtn.textContent = '全选';
+                    } else {
+                        // 全选
+                        allItems.forEach(item => {
+                            const bookId = item.dataset.id;
+                            selectedWorldBookIds.add(bookId);
+                            item.classList.add('selected');
+                        });
+                        worldBookListContainer.querySelectorAll('.collapsible-header').forEach(header => {
+                            header.classList.add('selected');
+                        });
+                        // 更新按钮文字为"取消全选"
+                        worldBookSelectAllBtn.textContent = '取消全选';
+                    }
+                    
+                    updateDeleteButtonState();
+                });
+            }
+            
+            // 批量删除
+            if (worldBookDeleteSelectedBtn) {
+                worldBookDeleteSelectedBtn.addEventListener('click', async () => {
+                    if (selectedWorldBookIds.size === 0 || worldBookDeleteSelectedBtn.classList.contains('disabled')) return;
+                    
+                    const count = selectedWorldBookIds.size;
+                    if (!confirm(`确定要删除选中的 ${count} 个世界书条目吗？此操作不可恢复。`)) {
+                        return;
+                    }
+                    
+                    const idsToDelete = Array.from(selectedWorldBookIds);
+                    
+                    // 批量删除（不调用renderWorldBookList，最后统一调用一次）
+                    for (const bookId of idsToDelete) {
+                        await dexieDB.worldBooks.delete(bookId);
+                        db.worldBooks = db.worldBooks.filter(wb => wb.id !== bookId);
+                        db.characters.forEach(char => {
+                            if (char.worldBookIds) char.worldBookIds = char.worldBookIds.filter(id => id !== bookId);
+                        });
+                        db.groups.forEach(group => {
+                            if (group.worldBookIds) group.worldBookIds = group.worldBookIds.filter(id => id !== bookId);
+                        });
+                    }
+                    
+                    await saveData();
+                    exitWorldBookMultiSelectMode();
+                    renderWorldBookList();
+                    showToast(`已删除 ${count} 个条目`);
+                });
+            }
+            
+            // 取消多选模式
+            if (worldBookCancelSelectBtn) {
+                worldBookCancelSelectBtn.addEventListener('click', () => {
+                    exitWorldBookMultiSelectMode();
+                });
+            }
+            
+            // 修改列表点击事件，支持多选模式
+            // 先移除所有旧的点击监听器
+            const oldClickHandler = worldBookListContainer._clickHandler;
+            if (oldClickHandler) {
+                worldBookListContainer.removeEventListener('click', oldClickHandler);
+            }
+            
+            // 创建新的点击处理器（统一处理所有点击事件）
+            const newClickHandler = (e => {
+                // 多选模式下的点击处理
+                if (isInWorldBookMultiSelectMode) {
+                    // 阻止默认行为
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // 点击条目（整个条目都可以点击选中）
+                    const worldBookItem = e.target.closest('.world-book-item');
+                    if (worldBookItem) {
+                        const bookId = worldBookItem.dataset.id;
+                        toggleWorldBookItemSelection(bookId);
+                        return;
+                    }
+                    
+                    // 点击分类标题
+                    const collapsibleHeader = e.target.closest('.collapsible-header');
+                    if (collapsibleHeader) {
+                        // 检查是否点击在复选框区域（左侧50px内）
+                        const rect = collapsibleHeader.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const isClickingCheckbox = clickX < 50;
+                        
+                        if (isClickingCheckbox) {
+                            // 点击复选框区域，切换分类选中状态
+                            const section = collapsibleHeader.closest('.collapsible-section');
+                            if (section) {
+                                const category = section.dataset.category;
+                                toggleCategorySelection(category);
+                            }
+                        } else {
+                            // 点击分类标题的其他区域，展开/折叠
+                            const section = collapsibleHeader.closest('.collapsible-section');
+                            if (section) {
+                                section.classList.toggle('open');
+                            }
+                        }
+                        return;
+                    }
+                    
+                    return; // 多选模式下，不执行编辑功能
+                }
+                
+                // 非多选模式下的原有逻辑
+                // 先检查是否是分类标题的点击（展开/折叠）
+                if (e.target.closest('.collapsible-header')) {
+                    const section = e.target.closest('.collapsible-section');
+                    if (section) {
+                        section.classList.toggle('open');
+                        return;
+                    }
+                }
+                
+                // 再检查是否是条目的点击（编辑）
+                const worldBookItem = e.target.closest('.world-book-item');
+                if (worldBookItem && !e.target.closest('.action-btn')) {
+                    const bookId = worldBookItem.dataset.id;
+                    const book = db.worldBooks.find(wb => wb.id === bookId);
+                    if (book) {
+                        currentEditingWorldBookId = book.id;
+                        worldBookIdInput.value = book.id;
+                        worldBookNameInput.value = book.name;
+                        worldBookCategoryInput.value = book.category || '';
+                        document.querySelector(`input[name="world-book-position"][value="${book.position}"]`).checked = true;
+
+                        entriesContainer.innerHTML = '';
+                        if (Array.isArray(book.content) && book.content.length > 0) {
+                            book.content.forEach(entry => {
+                                const block = createWorldBookEntryBlock(entry);
+                                entriesContainer.appendChild(block);
+                            });
+                        } else if (typeof book.content === 'string' && book.content) {
+                            const oldContentEntry = {
+                                enabled: true,
+                                keys: [],
+                                comment: '自动迁移的旧数据',
+                                content: book.content
+                            };
+                            const block = createWorldBookEntryBlock(oldContentEntry);
+                            entriesContainer.appendChild(block);
+                        } else {
+                            const newBlock = createWorldBookEntryBlock();
+                            entriesContainer.appendChild(newBlock);
+                        }
+
+                        switchScreen('edit-world-book-screen');
+                    }
+                }
+            });
+            
+            // 保存处理器引用，以便后续移除
+            worldBookListContainer._clickHandler = newClickHandler;
+            worldBookListContainer.addEventListener('click', newClickHandler);
         }
 
-        function renderWorldBookList(expandedCategory = null) {
+        // 删除世界书条目的辅助函数
+        async function deleteWorldBookById(bookId) {
+            await dexieDB.worldBooks.delete(bookId);
+            db.worldBooks = db.worldBooks.filter(wb => wb.id !== bookId);
+            db.characters.forEach(char => {
+                if (char.worldBookIds) char.worldBookIds = char.worldBookIds.filter(id => id !== bookId);
+            });
+            db.groups.forEach(group => {
+                if (group.worldBookIds) group.worldBookIds = group.worldBookIds.filter(id => id !== bookId);
+            });
+            await saveData();
+            renderWorldBookList();
+            showToast('世界书条目已删除');
+        }
+
+        // renderWorldBookList 函数
+        function renderWorldBookList() {
             worldBookListContainer.innerHTML = '';
             noWorldBooksPlaceholder.style.display = db.worldBooks.length === 0 ? 'block' : 'none';
             if (db.worldBooks.length === 0) return;
@@ -9043,31 +9744,46 @@ function renderStickerGrid() {
             sortedCategories.forEach(category => {
                 const section = document.createElement('div');
                 section.className = 'collapsible-section';
-                section.dataset.category = category; // Add category data attribute
-
-                // Expand the specific category if provided
-                if (isWorldBookMultiSelectMode && category === expandedCategory) {
-                    section.classList.add('open');
-                }
+                section.dataset.category = category;
 
                 const header = document.createElement('div');
                 header.className = 'collapsible-header';
-                
-                let checkboxHTML = '';
-                if (isWorldBookMultiSelectMode) {
-                    const allInCategory = groupedBooks[category].every(book => selectedWorldBookIds.has(book.id));
-                    checkboxHTML = `<input type="checkbox" class="category-checkbox" data-category="${category}" ${allInCategory ? 'checked' : ''}>`;
-                }
-                
+
+                // 删除分类删除按钮 (方案二 - 最终修订)
+                // const deleteCategoryBtn = `<button type="button" class="category-delete-btn" title="删除整个分类" style="background: transparent; border: none; color: #e53935; font-size: 18px; cursor: pointer; padding: 4px 8px; margin-left: auto;">×</button>`;
+
                 header.innerHTML = `
-                    <div class="category-select-area">
-                        ${checkboxHTML}
-                    </div>
-                    <div class="category-toggle-area">
-                        <h4>${category}</h4>
-                        <span class="collapsible-arrow">▼</span>
-                    </div>
+                    <h4 style="flex: 1; margin: 0;">${category}</h4>
+                    <span class="collapsible-arrow">▼</span>
                 `;
+
+                // 分类删除按钮逻辑 (已删除)
+                // const deleteBtn = header.querySelector('.category-delete-btn');
+                // if (deleteBtn) {
+                //     deleteBtn.addEventListener('click', async (e) => {
+                //         e.preventDefault();
+                //         e.stopPropagation();
+                //         const booksInCategory = groupedBooks[category];
+                //         if (confirm(`确定要删除整个分类"${category}"下的 ${booksInCategory.length} 个世界书条目吗？此操作不可恢复。`)) {
+                //             const bookIdsToDelete = booksInCategory.map(b => b.id);
+                //             await dexieDB.worldBooks.bulkDelete(bookIdsToDelete);
+                //             db.worldBooks = db.worldBooks.filter(wb => !bookIdsToDelete.includes(wb.id));
+                //             db.characters.forEach(char => {
+                //                 if (char.worldBookIds) {
+                //                     char.worldBookIds = char.worldBookIds.filter(id => !bookIdsToDelete.includes(id));
+                //                 }
+                //             });
+                //             db.groups.forEach(group => {
+                //                 if (group.worldBookIds) {
+                //                     group.worldBookIds = group.worldBookIds.filter(id => !bookIdsToDelete.includes(id));
+                //                 }
+                //             });
+                //             await saveData();
+                //             renderWorldBookList();
+                //             showToast(`已删除分类"${category}"下的 ${booksInCategory.length} 个条目`);
+                //         }
+                //     });
+                // }
 
                 const content = document.createElement('div');
                 content.className = 'collapsible-content';
@@ -9080,40 +9796,31 @@ function renderStickerGrid() {
                     li.className = 'list-item world-book-item';
                     li.dataset.id = book.id;
 
-                    if (isWorldBookMultiSelectMode) {
-                        li.classList.add('is-selecting');
-                        if (selectedWorldBookIds.has(book.id)) {
-                            li.classList.add('selected');
-                        }
+                    let contentPreview = '';
+                    if (Array.isArray(book.content)) {
+                        contentPreview = book.content.map(entry => entry.content || '').filter(c => c).join(' ').substring(0, 100);
+                        if (contentPreview.length >= 100) contentPreview += '...';
+                    } else if (typeof book.content === 'string') {
+                        contentPreview = book.content.substring(0, 100);
+                        if (book.content.length >= 100) contentPreview += '...';
+                    } else {
+                        contentPreview = '';
                     }
+                    li.innerHTML = `<div class="item-details" style="padding-left: 0;"><div class="item-name">${book.name}</div><div class="item-preview">${contentPreview || '(无内容)'}</div></div>`;
 
-                    li.innerHTML = `<div class="item-details" style="padding-left: 0;"><div class="item-name">${book.name}</div><div class="item-preview">${book.content}</div></div>`;
-                    
-                    if (!isWorldBookMultiSelectMode) {
-                        const delBtn = document.createElement('button');
-                        delBtn.className = 'action-btn';
-                        delBtn.style.cssText = 'position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 6px; border: none; background: transparent;';
-                        delBtn.title = '删除世界书';
-                        delBtn.innerHTML = '<img src="https://i.postimg.cc/hGW6B0Wf/icons8-50.png" alt="删除" style="width: 22px; height: 22px; object-fit: contain;">';
-                        delBtn.addEventListener('click', async (ev) => {
-                            ev.stopPropagation();
-                            if (!confirm('确定要删除这个世界书条目吗？')) return;
-                            const bookIdToDelete = book.id;
-                            await dexieDB.worldBooks.delete(bookIdToDelete);
-                            db.worldBooks = db.worldBooks.filter(wb => wb.id !== bookIdToDelete);
-                            db.characters.forEach(char => {
-                                if (char.worldBookIds) char.worldBookIds = char.worldBookIds.filter(id => id !== bookIdToDelete);
-                            });
-                            db.groups.forEach(group => {
-                                if (group.worldBookIds) group.worldBookIds = group.worldBookIds.filter(id => id !== bookIdToDelete);
-                            });
-                            await saveData();
-                            renderWorldBookList();
-                            showToast('世界书条目已删除');
-                        });
-                        li.style.position = 'relative';
-                        li.appendChild(delBtn);
-                    }
+                    // 单个删除按钮 (已删除 - 方案二 - 最终修订)
+                    // const delBtn = document.createElement('button');
+                    // delBtn.className = 'action-btn';
+                    // delBtn.style.cssText = 'position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 6px; border: none; background: transparent;';
+                    // delBtn.title = '删除世界书';
+                    // delBtn.innerHTML = '<img src="https://i.postimg.cc/hGW6B0Wf/icons8-50.png" alt="删除" style="width: 22px; height: 22px; object-fit: contain;">';
+                    // delBtn.addEventListener('click', async (ev) => {
+                    //     ev.stopPropagation();
+                    //     if (!confirm('确定要删除这个世界书条目吗？')) return;
+                    //     await deleteWorldBookById(book.id);
+                    // });
+                    // li.style.position = 'relative';
+                    // li.appendChild(delBtn);
                     categoryList.appendChild(li);
                 });
 
@@ -9122,6 +9829,34 @@ function renderStickerGrid() {
                 section.appendChild(content);
                 worldBookListContainer.appendChild(section);
             });
+            
+            // 如果当前在多选模式下，重新应用多选样式
+            if (isInWorldBookMultiSelectMode) {
+                worldBookListContainer.querySelectorAll('.world-book-item').forEach(item => {
+                    item.classList.add('is-selecting');
+                    if (selectedWorldBookIds.has(item.dataset.id)) {
+                        item.classList.add('selected');
+                    }
+                });
+                worldBookListContainer.querySelectorAll('.collapsible-header').forEach(header => {
+                    header.classList.add('is-selecting');
+                    const section = header.closest('.collapsible-section');
+                    if (section) {
+                        const items = section.querySelectorAll('.world-book-item');
+                        const allSelected = Array.from(items).every(item => {
+                            const bookId = item.dataset.id;
+                            return selectedWorldBookIds.has(bookId);
+                        });
+                        if (allSelected && items.length > 0) {
+                            header.classList.add('selected');
+                        }
+                    }
+                });
+                worldBookListContainer.querySelectorAll('.collapsible-section').forEach(section => {
+                    section.classList.add('is-selecting');
+                    section.classList.add('open'); // 多选模式下展开所有分类
+                });
+            }
         }
 
         function renderCategorizedWorldBookList(container, books, selectedIds, idPrefix) {
@@ -12370,4 +13105,209 @@ function renderForumPosts(posts) {
         }
         // --- 函数添加结束 ---
 
+        function createWorldBookEntryBlock(entry = {}) {
+            const block = document.createElement('div');
+            block.className = 'world-book-entry-block';
+
+            const entryId = `entry_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const isEnabled = entry.enabled !== false;
+
+            block.innerHTML = `
+                <div class="entry-controls">
+                    <label class="entry-toggle-switch" for="${entryId}-enable">
+                        <input type="checkbox" class="entry-enabled-switch" id="${entryId}-enable" ${isEnabled ? 'checked' : ''}>
+                        启用此子条目
+                    </label>
+                    <button type="button" class="entry-delete-btn" title="删除此条目">×</button>
+                </div>
+                <div class="form-group">
+                    <label for="${entryId}-comment">标题 (可选, 仅自己可见)</label>
+                    <input type="text" class="entry-comment-input" id="${entryId}-comment" value="${entry.comment || ''}" placeholder="例如：关于角色的童年设定">
+                </div>
+                <div class="form-group">
+                    <label for="${entryId}-keys">关键词 (可选, 英文逗号分隔)</label>
+                    <input type="text" class="entry-keys-input" id="${entryId}-keys" value="${(entry.keys || []).join(', ')}" placeholder="例如：地点, 天气">
+                </div>
+                <div class="form-group">
+                    <label for="${entryId}-content">内容 (必填)</label>
+                    <textarea class="entry-content-textarea" id="${entryId}-content" rows="5" placeholder="输入详细设定...">${entry.content || ''}</textarea>
+                </div>
+            `;
+
+            // 使用事件委托，确保删除按钮的点击事件能正常工作
+            const deleteBtn = block.querySelector('.entry-delete-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation(); // 阻止其他事件监听器
+                    
+                    if (confirm('确定要删除这个子条目吗？')) {
+                        // 确保删除操作执行
+                        const parent = block.parentNode;
+                        if (parent) {
+                            parent.removeChild(block);
+                        } else {
+                            // 如果parentNode不存在，尝试使用remove()
+                            try {
+                                block.remove();
+                            } catch (err) {
+                                console.error('删除子条目失败:', err);
+                            }
+                        }
+                    }
+                    return false; // 确保不会触发其他事件
+                }, true); // 使用捕获阶段，确保优先执行
+            }
+
+            return block;
+        }
+
+        function renderTutorialContent() {
+            const tutorialContentArea = document.getElementById('tutorial-content-area');
+            if (!tutorialContentArea) return;
+
+            tutorialContentArea.addEventListener('click', (e) => {
+                const header = e.target.closest('.tutorial-header');
+                if (header) {
+                    header.parentElement.classList.toggle('open');
+                }
+            });
+
+            const tutorials = [
+                {title: '写在前面', imageUrls: ['https://i.postimg.cc/7PgyMG9S/image.jpg']},
+                {
+                    title: '软件介绍',
+                    imageUrls: ['https://i.postimg.cc/VvsJRh6q/IMG-20250713-162647.jpg', 'https://i.postimg.cc/8P5FfxxD/IMG-20250713-162702.jpg', 'https://i.postimg.cc/3r94R3Sn/IMG-20250713-162712.jpg']
+                },
+                {
+                    title: '404',
+                    imageUrls: ['https://i.postimg.cc/x8scFPJW/IMG-20250713-162756.jpg', 'https://i.postimg.cc/pX6mfqtj/IMG-20250713-162809.jpg', 'https://i.postimg.cc/YScjV00q/IMG-20250713-162819.jpg', 'https://i.postimg.cc/13VfJw9j/IMG-20250713-162828.jpg']
+                },
+                {title: '404-群聊', imageUrls: ['https://i.postimg.cc/X7LSmRTJ/404.jpg']}
+            ];
+
+            const existingItems = tutorialContentArea.querySelectorAll('.tutorial-item');
+            existingItems.forEach(item => item.remove());
+
+            tutorials.forEach(tutorial => {
+                const item = document.createElement('div');
+                item.className = 'tutorial-item';
+                const imagesHtml = tutorial.imageUrls.map(url => `<img src="${url}" alt="${tutorial.title}教程图片" loading="lazy">`).join('');
+                item.innerHTML = `<div class="tutorial-header">${tutorial.title}</div><div class="tutorial-content">${imagesHtml}</div>`;
+                tutorialContentArea.appendChild(item);
+            });
+
+            renderUpdateLog();
+        }
+
+        async function exportWorldBooks() {
+            try {
+                const booksToExport = db.worldBooks;
+                if (booksToExport.length === 0) {
+                    showToast('没有可导出的世界书。');
+                    return;
+                }
+
+                const backupData = {
+                    type: 'EPhoneWorldBookBackup',
+                    version: 1,
+                    timestamp: Date.now(),
+                    books: booksToExport
+                };
+
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
+                downloadFile(url, `世界书备份_${dateStr}.json`);
+                URL.revokeObjectURL(url);
+                showToast('世界书导出成功！');
+
+            } catch (error) {
+                showToast(`导出失败: ${error.message}`);
+            }
+        }
+
+        async function handleWorldBookImport(file) {
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                let booksToImport = [];
+                let sourceName = "未知文件";
+
+                if (data.type === 'EPhoneWorldBookBackup' && Array.isArray(data.books)) {
+                    booksToImport = data.books;
+                    sourceName = "EPhone 备份";
+                }
+                else if (data.name && data.entries && typeof data.entries === 'object') {
+                    sourceName = `TavernAI 世界书: ${data.name}`;
+                    const structuredEntries = Object.values(data.entries).map(entry => ({
+                        enabled: !entry.disable,
+                        keys: entry.key ? entry.key.split(',').map(k => k.trim().toLowerCase()).filter(k => k) : [],
+                        comment: entry.comment || '',
+                        content: entry.content
+                    })).filter(e => e.content);
+                    
+                    if (structuredEntries.length > 0) {
+                        booksToImport.push({
+                            id: `wb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                            name: `${data.name}的设定集`,
+                            content: structuredEntries,
+                            position: 'after',
+                            category: '设定集'
+                        });
+                    }
+                }
+                else if (data.data && data.data.character_book && Array.isArray(data.data.character_book.entries)) {
+                    sourceName = `TavernAI 角色卡: ${data.data.name}`;
+                    const structuredEntries = data.data.character_book.entries.map(entry => ({
+                        enabled: entry.enabled !== undefined ? entry.enabled : true,
+                        keys: (entry.keys || []).map(k => k.trim().toLowerCase()).filter(k => k),
+                        comment: entry.comment || '',
+                        content: entry.content
+                    })).filter(e => e.content);
+
+                    if (structuredEntries.length > 0) {
+                         booksToImport.push({
+                            id: `wb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                            name: `${data.data.name}的设定集`,
+                            content: structuredEntries,
+                            position: 'after',
+                            category: '设定集'
+                        });
+                    }
+                }
+
+                if (booksToImport.length === 0) {
+                    throw new Error("文件中未找到可识别的世界书条目。");
+                }
+
+                if (confirm(`从 ${sourceName} 找到了 ${booksToImport.length} 个世界书条目。\n是否要将它们合并到你现有的世界书中？\n\n(注意：这只会添加新条目，不会覆盖同名条目。)`)) {
+                    db.worldBooks.push(...booksToImport.map(book => ({ ...book, id: `wb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}` })));
+                    await saveData();
+                    renderWorldBookList();
+                    showToast(`成功导入 ${booksToImport.length} 个条目！`);
+                    switchScreen('world-book-screen');
+                }
+
+            } catch (error) {
+                showToast(`导入失败: ${error.message}`);
+            }
+        }
+
+        function downloadFile(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
     });
+

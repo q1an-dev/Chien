@@ -1655,12 +1655,45 @@
 
         .form-group.radio-group {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             align-items: center;
         }
 
         .form-group.radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             margin-bottom: 0;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .form-group.radio-group label input[type="radio"] {
+            margin: 0;
+            width: auto;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .form-group.radio-group label:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .form-group.radio-group label input[type="radio"]:checked + span {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        #add-world-book-entry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        #edit-world-book-screen .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 87, 108, 0.4);
         }
 
         .btn {
@@ -3503,92 +3536,6 @@
     overflow: hidden;
 }
 
-.post-detail-main {
-    padding: 15px;
-}
-
-.post-author-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.author-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 12px;
-    flex-shrink: 0;
-}
-
-.author-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.author-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: #333;
-}
-
-.post-meta-data {
-    font-size: 12px;
-    color: #999;
-}
-
-.post-detail-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 15px 0;
-    line-height: 1.4;
-    color: #1a1a1a;
-}
-
-.post-detail-content-body {
-    font-size: 16px;
-    line-height: 1.75;
-    color: #333;
-    white-space: pre-wrap;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.post-detail-actions {
-    display: flex;
-    justify-content: space-around;
-    padding-top: 10px;
-}
-
-.post-detail-actions .action-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #666;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: background-color 0.2s;
-}
-
-.post-detail-actions .action-item:hover {
-    background-color: #f5f5f5;
-}
-
-.post-detail-actions .action-item svg {
-    width: 20px;
-    height: 20px;
-    fill: #888;
-}
-
 /* --- 评论区样式 --- */
 .comments-section {
     background-color: #ffffff;
@@ -3740,12 +3687,12 @@
 }
 /* --- 新增：折叠面板样式 --- */
 .collapsible-section {
-    background-color: #fff8fa;
-    border: 1px solid #fce4ec;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    overflow: hidden; /* 防止内容溢出圆角 */
-    transition: all 0.3s ease-in-out;
+    background-color: #fff8fa; /* 恢复粉色背景 */
+    border: 1px solid #fce4ec; /* 恢复粉色边框 */
+    border-radius: 12px; /* 恢复圆角 */
+    margin-bottom: 15px; /* 恢复底部边距 */
+    overflow: hidden;
+    transition: all 0.3s ease-in-out; /* 恢复动画 */
 }
 
 .collapsible-header {
@@ -3784,14 +3731,14 @@
 .collapsible-content {
     max-height: 0; /* 默认折叠 */
     overflow: hidden;
-    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
-    padding: 0 20px; /* 左右留出边距，上下为0确保完全隐藏 */
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out; /* 恢复动画 */
+    padding: 0 20px; /* 恢复左右边距 */
 }
 
 /* 当 .collapsible-section 拥有 .open 类时应用的样式 */
 .collapsible-section.open .collapsible-content {
-    max-height: 5000px; /* 一个足够大的值来完全显示内容 */
-    padding: 0 20px 8px; /* 展开时恢复底部内边距 */
+    max-height: 5000px; /* 恢复固定值 */
+    padding: 0 20px 8px; /* 恢复底部内边距 */
 }
 
 .collapsible-section.open .collapsible-arrow {
@@ -4896,6 +4843,77 @@ border-top: none;
             font-weight: 600;
         }
 
+        /* --- 新增：自定义单选按钮组 (用于世界书注入位置) (v4 修复版) --- */
+        /* 容器 */
+        .radio-button-group {
+            display: flex;
+            align-items: stretch; /* 修复：从 center 改为 stretch，让label填满高度 */
+            width: 100%;
+            /* 修复：移除父级的白色背景，这是白边的根源 */
+            /* background: var(--white-color); */ 
+            border: 2px solid #fce4ec;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        /* 隐藏原始 radio */
+        .radio-button-group input[type="radio"] {
+            display: none;
+        }
+
+        /* 标签 (作为按钮) */
+        .radio-button-group label {
+            flex: 1;
+            display: flex;
+            align-items: center; /* 垂直居中对齐 */
+            justify-content: center; /* 水平居中对齐 */
+            padding: 12px 10px; /* 修复：调整内边距，使文字更居中 */
+            cursor: pointer;
+            font-size: 16px; /* 修复：增大字号 */
+            font-weight: 500;
+            color: var(--primary-color);
+            transition: background-color 0.2s ease;
+            user-select: none;
+            background-color: var(--white-color); /* 修复：给未选中的label添加白色背景 */
+        }
+
+        /* 中间分割线 */
+        .radio-divider {
+            width: 1px;
+            align-self: stretch;
+            background-color: #fce4ec;
+            margin: 0; /* 修复：移除内外边距，让它顶满 */
+            padding: 0;
+        }
+
+        /* 自定义圆圈 (未选中) */
+        .radio-button-group label::before {
+            content: '';
+            display: inline-block;
+            width: 15px; /* 修复：调整大小 */
+            height: 15px; /* 修复：调整大小 */
+            border-radius: 50%;
+            border: 2px solid #f8bbd0;
+            background-color: #fff;
+            margin-right: 5px; /* 修复：调整间距 */
+            transition: all 0.2s ease;
+            flex-shrink: 0; /* 修复：防止缩放 */
+        }
+
+        /* 选中状态：圆圈 */
+        .radio-button-group input[type="radio"]:checked + label::before {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color); /* 修复：填充为实心 */
+        }
+
+        /* 选中状态：背景色块 */
+        .radio-button-group input[type="radio"]:checked + label {
+            background-color: var(--white-color); /* 取消粉色底色，保持白色背景 */
+            font-weight: 600;
+        }
+        /* --- 单选按钮组样式结束 --- */
+
         /* --- Pomodoro Record Card in Chat (New Style) --- */
         .pomodoro-record-card {
             width: 230px;
@@ -5068,33 +5086,7 @@ border-top: none;
     animation: slideUp 0.3s ease-out;
 }
 
-.world-book-item.is-selecting {
-    cursor: pointer;
-}
-
-.world-book-item.selected::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 15px;
-    transform: translateY(-50%);
-    background-color: var(--primary-color);
-    color: white;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: bold;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.world-book-item.selected {
-    padding-left: 50px !important;
-    background-color: #fff0f5;
-}
+/* 旧的样式已移除，使用新的iOS风格复选框样式 */
 
 
 .collapsible-header .category-checkbox {
@@ -5420,33 +5412,56 @@ border-top: none;
     opacity: 1;
 }
 
-/* 3. 修复 .action-sheet-overlay (底部动作表) */
-.action-sheet-overlay {
-    /* display: none; */ /* 移除 */
-    /* animation: fadeIn 0.3s ease; */ /* 移除 */
-    
-    /* 新增/修改 */
-    display: flex;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0s 0.3s;
+/* 3. 世界书动作表改为下拉框样式 */
+#world-book-actionsheet.action-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent; /* 移除背景遮罩 */
+    z-index: 200;
+    display: none;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-top: 81px; /* 与顶栏下端线条齐平（header高度：padding 20px*2 + 内容40px + border 1px = 81px） */
+    padding-right: 12px; /* 距离右边留出空间，确保不超出屏幕 */
+    padding-left: 12px; /* 距离左边留出空间，确保不超出屏幕 */
+    pointer-events: none; /* 背景不响应点击 */
+    box-sizing: border-box; /* 确保padding包含在宽度内 */
 }
-.action-sheet-overlay.visible {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.3s ease;
+#world-book-actionsheet.action-sheet-overlay.visible {
+    display: flex;
+    pointer-events: auto; /* 显示时响应点击 */
 }
 
-/* 4. 修复 .action-sheet (动作表内容) */
-.action-sheet {
-    /* animation: slideUp 0.3s ease-out; */ /* 移除 */
-    
-    /* 新增/修改：使用 transform 替代 animation */
-    transform: translateY(100%);
-    transition: transform 0.3s ease-out;
+/* 4. 世界书动作表内容改为下拉框（参考iOS风格） */
+#world-book-actionsheet .action-sheet {
+    background-color: rgba(255, 255, 255, 0.95); /* 半透明白色背景 */
+    backdrop-filter: blur(15px); /* 模糊效果 */
+    -webkit-backdrop-filter: blur(15px);
+    width: auto;
+    min-width: 90px; /* 进一步减小最小宽度，使下拉框更窄 */
+    max-width: calc(100vw - 24px); /* 确保不会超出屏幕（12px左边距 + 12px右边距） */
+    border-radius: 12px;
+    padding: 0; /* 移除padding，让菜单项自己控制 */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); /* 增强阴影 */
+    animation: fadeIn 0.15s ease-out; /* 淡入动画 */
+    transform: none; /* 移除transform */
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* 移除gap，使用border分隔 */
+    pointer-events: auto;
+    margin-top: 0; /* 确保紧贴顶部padding（与顶栏下端线条齐平） */
+    margin-right: 0; /* 移除右边距 */
+    margin-left: 0; /* 移除左边距 */
+    overflow: hidden; /* 确保圆角生效 */
+    box-sizing: border-box; /* 确保padding包含在宽度内 */
 }
-.action-sheet-overlay.visible .action-sheet {
-    transform: translateY(0);
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* --- NAI 模块手册弹窗样式 (V2 - 修复 z-index) --- */
@@ -5651,3 +5666,424 @@ border-top: none;
 .btn-action-delete:hover {
     background-color: #e53935;
 }
+
+/* --- 世界书条目样式 (从 ephone-style.css 移植) --- */
+.world-book-entry-block {
+    background-color: #fff;
+    border: 1px solid #fce4ec;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(255, 128, 171, 0.08);
+    padding: 15px 18px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.world-book-entry-block .form-group {
+    margin-bottom: 12px;
+}
+
+.world-book-entry-block .form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 6px;
+}
+
+.world-book-entry-block .form-group input,
+.world-book-entry-block .form-group textarea {
+    font-size: 14px;
+    padding: 12px 14px;
+    background-color: #fff;
+    border: 1px solid #fce4ec;
+    border-radius: 10px;
+    transition: border-color 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03) inset;
+}
+
+.world-book-entry-block .form-group input:focus,
+.world-book-entry-block .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.world-book-entry-block textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.entry-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #fce4ec; /* 改为粉色边框 */
+}
+
+.entry-toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.entry-toggle-switch input[type="checkbox"] {
+    width: 12px; /* 缩小复选框 */
+    height: 12px; /* 缩小复选框 */
+}
+
+/* 全局样式预设库标签间距 */
+#global-css-preset-select {
+    margin-top: 15px; /* 增加上边距，距离"全局CSS美化"标题更远 */
+}
+
+label[for="global-css-preset-select"] {
+    margin-top: 15px !important; /* 增加上边距 */
+    display: block; /* 确保是块级元素 */
+}
+
+.entry-delete-btn {
+    background: transparent;
+    color: #e53935;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    position: relative; /* 确保按钮可以接收点击事件 */
+    z-index: 10; /* 确保按钮在其他元素之上 */
+    pointer-events: auto; /* 确保按钮可以接收点击事件 */
+    transition: background-color 0.2s ease;
+}
+
+.entry-delete-btn:hover {
+    background-color: rgba(229, 57, 53, 0.1); /* 悬停时显示淡红色背景 */
+}
+/* --- 世界书条目样式结束 --- */
+
+
+/* (旧的 .segmented-control-group 样式已被删除) */
+
+/* --- 世界书列表页 (方案二 - 最终修订版 v3) --- */
+
+/* 1. 列表页背景和边距 */
+#world-book-screen .content {
+    padding: 0; 
+    background-color: #fff; 
+}
+#world-book-screen .list-container {
+    padding: 0; 
+}
+#no-world-books-placeholder {
+    padding-top: 50px;
+    background-color: #fff;
+}
+
+/* 2. 分类标题和折叠面板 - 仅针对世界书列表页 */
+/* 恢复粉色圆角框，但条目保持白色 */
+#world-book-screen .collapsible-section {
+    background-color: #fffbfc; /* 更浅的粉色背景 */
+    border: 1px solid #fce4ec; /* 恢复粉色边框 */
+    border-radius: 12px; /* 恢复圆角 */
+    margin-bottom: 15px; /* 恢复底部边距 */
+    overflow: hidden;
+}
+
+/* 第一个分类标题距离顶栏拉开距离 */
+#world-book-screen .collapsible-section:first-child {
+    margin-top: 12px; /* 第一个分类距离顶栏拉开距离（稍微近一点） */
+}
+
+#world-book-screen .collapsible-header {
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-color); /* 粉色字体 */
+    background-color: #fffbfc; /* 更浅的粉色背景 */
+    border-bottom: 1px solid #fce4ec; /* 粉色分隔线 */
+    border-top: none; 
+    margin-top: 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    border-radius: 12px 12px 0 0; /* 顶部圆角 */
+}
+/* 多选模式下，分类标题应该右移，和条目一致 */
+#world-book-screen .collapsible-header.is-selecting {
+    padding-left: 50px !important; /* 强制覆盖原始padding，与条目一致 */
+}
+
+#world-book-screen .collapsible-content {
+    max-height: 0; /* 默认折叠 */
+    overflow: hidden;
+    transition: max-height 0.3s ease-out; /* 恢复折叠展开动画 */
+    padding: 0; /* 移除左右边距，让内容通栏 */
+    background-color: #fff; /* 确保内容区域是白色背景 */
+}
+
+#world-book-screen .collapsible-section.open .collapsible-content {
+    max-height: 2000px; /* 使用足够大的值来显示内容，支持动画 */
+    padding: 0; /* 展开时也移除内边距，让内容通栏 */
+    background-color: #fff; /* 确保条目是白色背景 */
+}
+
+/* 3. 分类展开/折叠箭头 (粉色) - 与教程、自定义保持一致 */
+#world-book-screen .collapsible-arrow {
+    font-size: 12px;
+    color: var(--primary-color);
+    transition: transform 0.3s ease-in-out; /* 与通用样式保持一致 */
+}
+/* 展开时箭头旋转180度（▼变成▲） */
+#world-book-screen .collapsible-section.open .collapsible-arrow {
+    transform: rotate(180deg);
+}
+
+/* 4. 列表项 (白色底，无圆角) */
+.world-book-item {
+    padding: 12px 20px; 
+    border-bottom: 1px solid #f0f0f0; /* 灰色分隔线 */
+    background-color: #fff; /* 白色背景 */
+    position: relative;
+    border-radius: 0; /* 确保无圆角 */
+}
+.world-book-item:last-child {
+    border-bottom: 1px solid #f0f0f0; /* 最后一个条目也有底部分隔线 */
+}
+.world-book-item .item-details {
+    padding-left: 0;
+}
+.world-book-item .item-name {
+    color: var(--text-color); /* 黑色字体 */
+    font-weight: 500;
+    font-size: 16px;
+}
+.world-book-item .item-preview {
+    color: #888;
+    font-size: 14px;
+    margin-top: 4px;
+}
+/* 移除列表项的删除按钮 (已在JS中禁用) */
+.world-book-item .action-btn {
+    display: none;
+}
+
+/* 5. 删除折叠动画 (关键!) */
+.world-book-items-wrapper {
+    display: grid;
+    grid-template-rows: 0fr; /* 默认隐藏 */
+    overflow: hidden;
+    transition: none !important; /* <--- 移除所有动画过渡 */
+}
+.world-book-items-wrapper.open {
+    grid-template-rows: 1fr; /* 展开 */
+}
+.world-book-items-wrapper > div {
+    min-height: 0;
+}
+
+
+/* 6. 动作表 ("更多"弹窗) (匹配 image_7bf10a.png) */
+/* 世界书动作表按钮样式（参考iOS风格） */
+#world-book-actionsheet .action-sheet-button.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* 左对齐 */
+    gap: 10px; /* 图标和文字之间距离 */
+    font-weight: 500;
+    font-size: 16px; 
+    color: var(--text-color); /* 黑色文字 */
+    padding: 12px 10px; /* 进一步减小左右padding，使下拉框更窄 */
+    border-radius: 0; /* 移除圆角，让整体圆角生效 */
+    margin-bottom: 0; /* 移除底部间距 */
+    background: transparent; /* 透明背景 */
+    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* 分隔线 */
+    cursor: pointer;
+    box-sizing: border-box; /* 确保padding包含在宽度内 */
+}
+#world-book-actionsheet .action-sheet-button.icon-button:last-child {
+    border-bottom: none; /* 最后一个没有分隔线 */
+}
+#world-book-actionsheet .action-sheet-button.icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* hover效果 */
+}
+#world-book-actionsheet .action-sheet-button.icon-button svg {
+    width: 20px; /* 图标大小 */
+    height: 20px;
+    flex-shrink: 0;
+}
+#world-book-actionsheet .action-sheet-button.icon-button span {
+    flex-grow: 0; /* 不拉伸，紧贴图标 */
+    white-space: nowrap; /* 防止文字换行 */
+}
+.action-sheet-button.icon-button svg {
+    width: 24px; 
+    height: 24px;
+    fill: none; 
+    stroke: var(--primary-color); /* 粉色图标 */
+    stroke-width: 2;
+}
+/* 导入、导出、选择的SVG都使用stroke描边（线条图标） */
+#world-book-import-btn svg,
+#world-book-export-btn svg,
+#world-book-select-btn svg {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 2;
+}
+#world-book-actionsheet-cancel {
+    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+    font-size: 16px !important;
+}
+
+/* 7. 多选模式 (匹配 image_7bf16f.png) */
+.world-book-item.is-selecting,
+.collapsible-header.is-selecting {
+    cursor: pointer;
+    transition: background-color 0.2s;
+    padding-left: 50px; /* 增加padding，避免遮挡标题 */
+    position: relative;
+}
+/* 选中时的粉色背景 */
+.world-book-item.selected,
+.collapsible-header.selected {
+    background-color: #fff0f5; 
+}
+/* 统一的复选框样式 - 圆形复选框，灰色边框（参考iOS风格） */
+.world-book-item.is-selecting::before,
+.collapsible-header.is-selecting::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 15px; /* 调整左边距 */
+    transform: translateY(-50%);
+    width: 22px; /* 圆形复选框大小（分类） */
+    height: 22px;
+    border-radius: 50%; /* 圆形 */
+    border: 2px solid #ccc; /* 灰色边框 */
+    background-color: #fff; /* 白色背景 */
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+/* 条目复选框稍小 */
+.world-book-item.is-selecting::before {
+    width: 20px;
+    height: 20px;
+}
+/* 选中时的勾选样式 - 圆形粉色按钮，白色勾选（使用CSS border绘制） */
+.world-book-item.selected::before,
+.collapsible-header.selected::before {
+    background-color: var(--primary-color); /* 粉色背景 */
+    border-color: var(--primary-color); /* 粉色边框 */
+    border-radius: 50%; /* 圆形按钮 */
+}
+/* 使用::after伪元素绘制勾选符号（参考iOS风格） */
+.world-book-item.selected::after,
+.collapsible-header.selected::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    /* 分类复选框：left 15px + 宽度22px/2 = 26px（中心） */
+    left: 26px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    /* 居中：先移到中心，再旋转 */
+    transform: translate(-50%, -50%) rotate(45deg);
+    pointer-events: none;
+}
+/* 条目勾选符号位置调整 */
+.world-book-item.selected::after {
+    /* 条目复选框：left 15px + 宽度20px/2 = 25px（中心） */
+    left: 25px;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+/* 部分选中状态（indeterminate）- 使用横杠（参考iOS风格） */
+.collapsible-header.indeterminate::before {
+    background-color: var(--primary-color); /* 粉色背景 */
+    border-color: var(--primary-color); /* 粉色边框 */
+    border-radius: 50%; /* 圆形按钮 */
+}
+.collapsible-header.indeterminate::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 26px; /* 分类复选框中心位置 */
+    width: 10px; /* 横杠宽度 */
+    height: 2px; /* 横杠粗细 */
+    background: white;
+    border-radius: 1px;
+    transform: translateY(-50%) translateX(-50%);
+    pointer-events: none;
+}
+.collapsible-section.is-selecting .category-checkbox {
+    display: none !important; 
+}
+
+
+/* 8. 底部多选操作栏 (匹配 image_7bf16f.png) */
+#world-book-multi-select-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+    border-top: 1px solid #eee;
+    z-index: 20;
+    animation: slideUp 0.3s ease-out;
+}
+#world-book-multi-select-bar label { display: none; }
+#world-book-multi-select-bar input[type="checkbox"] { display: none; }
+
+#world-book-multi-select-bar .action-btn {
+    font-size: 16px;
+    font-weight: 600;
+    width: auto;
+    padding: 8px 16px; /* 减小padding，避免按钮太大 */
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2; /* 确保文字垂直居中 */
+    min-height: 36px; /* 设置最小高度，避免按钮太高 */
+}
+/* 全选按钮保持粉色 */
+#world-book-multi-select-bar #world-book-select-all-btn {
+    color: var(--primary-color); /* 粉色文字 */
+    font-weight: 600; /* 和其他按钮保持一致 */
+}
+/* 删除按钮改为红色 */
+#world-book-multi-select-bar #world-book-delete-selected-btn {
+    color: #ff3b30; /* 红色文字 */
+    font-weight: 600; /* 和其他按钮保持一致，不加粗 */
+}
+#world-book-multi-select-bar #world-book-delete-selected-btn.disabled {
+    color: #ccc; 
+    pointer-events: none;
+}
+

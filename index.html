@@ -198,28 +198,63 @@
     </div>
   
     <div id="world-book-screen" class="screen">
-        <header class="app-header">
+        <header class="app-header" id="world-book-header-normal">
             <button class="back-btn" data-target="home-screen">‹</button>
             <div class="title-container">
                 <h1 class="title">世界书</h1>
             </div>
             <div class="action-btn-group">
-                <button class="action-btn" id="add-world-book-btn">+</button>
-                <button class="action-btn" id="cancel-wb-multi-select-btn" style="display: none; font-size: 16px;">取消</button>
+                <button class="action-btn" id="add-world-book-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="action-btn" id="world-book-more-btn" title="更多">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                        <circle cx="6" cy="12" r="1.5" fill="currentColor"/>
+                        <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                        <circle cx="18" cy="12" r="1.5" fill="currentColor"/>
+                    </svg>
+                </button>
             </div>
         </header>
-        <main class="content">
+        <header class="app-header" id="world-book-header-select" style="display: none;">
+            <button class="action-btn" id="world-book-cancel-select-btn" style="font-size: 16px; font-weight: 500; color: var(--primary-color); width: auto;">取消</button>
+            <div class="title-container">
+                <h1 class="title" id="world-book-select-title">世界书</h1>
+            </div>
+            <div class="placeholder"></div>
+        </header>
+        <main class="content" style="padding-bottom: 0;">
             <ul class="list-container" id="world-book-list-container"></ul>
             <div class="placeholder-text" id="no-world-books-placeholder" style="display: none;">
                 <p>你的世界一片混沌...</p>
-                <p>点击右上角的“+”创造第一个设定吧！</p>
+                <p>点击右上角的"+"创造第一个设定吧！</p>
+            </div>
+            <div id="world-book-actionsheet" class="action-sheet-overlay">
+                <div class="action-sheet">
+                    <button class="action-sheet-button icon-button" id="world-book-import-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span>导入</span>
+                    </button>
+                    <button class="action-sheet-button icon-button" id="world-book-export-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>导出</span>
+                    </button>
+                    <button class="action-sheet-button icon-button" id="world-book-select-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9 12l2 2 4-4"></path></svg>
+                        <span>选择</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="world-book-multi-select-bar" style="display: none;">
+                <button class="action-btn" id="world-book-select-all-btn">全选</button>
+                <button class="action-btn" id="world-book-delete-selected-btn">删除 (0)</button>
             </div>
         </main>
-        <div id="world-book-multi-select-bar" style="display: none;">
-            <span id="world-book-select-count">已选择 0 项</span>
-            <button class="btn btn-danger" id="delete-selected-world-books-btn" style="width: auto; padding: 8px 16px;">删除已选</button>
-        </div>
-    </div>
+      </div>
     <div id="edit-world-book-screen" class="screen">
         <header class="app-header">
             <button class="back-btn" data-target="world-book-screen">‹</button>
@@ -239,15 +274,19 @@
                     <label for="world-book-category">条目分类</label>
                     <input type="text" id="world-book-category" placeholder="例如：人物、地点、组织（可选）">
                 </div>
-                <div class="form-group">
-                    <label for="world-book-content">条目内容</label>
-                    <textarea id="world-book-content" rows="8" placeholder="详细描述此项设定..." required></textarea>
+                <div id="world-book-entries-container" class="form-group" style="display: flex; flex-direction: column; gap: 15px;">
                 </div>
+                <button type="button" id="add-world-book-entry-btn" class="btn btn-secondary" style="margin-bottom: 20px;">添加子条目</button>
                 <div class="form-group">
                     <label>注入位置</label>
-                    <div class="form-group radio-group">
-                        <label><input type="radio" name="world-book-position" value="before" checked> 前</label>
-                        <label><input type="radio" name="world-book-position" value="after"> 后</label>
+                    <div class="radio-button-group">
+                        <input type="radio" id="world-book-position-before" name="world-book-position" value="before" checked>
+                        <label for="world-book-position-before">人设前</label>
+
+                        <div class="radio-divider"></div>
+
+                        <input type="radio" id="world-book-position-after" name="world-book-position" value="after">
+                        <label for="world-book-position-after">人设后</label>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">保存条目</button>
@@ -1289,8 +1328,10 @@
 <div id="mypersona-presets-modal" class="modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;z-index:9999;"><div class="modal-window" style="max-width:520px;background:var(--panel-bg,#fff);padding:14px;border-radius:10px;box-shadow:0 12px 36px rgba(10,10,20,0.12);"><h3 style="margin:0 0 10px 0;font-size:16px;">管理我的人设预设</h3><div id="mypersona-presets-list" style="max-height:340px; overflow:auto; margin-bottom:12px;"></div><div style="display:flex;gap:8px;justify-content:flex-end;"><button type="button" id="mypersona-close-modal" class="btn btn-primary" style="padding:8px 12px;border-radius:8px;">关闭</button></div></div></div>
 <div id="global-css-presets-modal" class="modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;z-index:9999;"><div class="modal-window" style="max-width:520px;background:var(--panel-bg,#fff);padding:14px;border-radius:10px;box-shadow:0 12px 36px rgba(10,10,20,0.12);"><h3 style="margin:0 0 10px 0;font-size:16px;">管理全局CSS预设</h3><div id="global-css-presets-list" style="max-height:340px; overflow:auto; margin-bottom:12px;"></div><div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;"><button type="button" id="global-css-close-modal" class="btn btn-primary" style="padding:8px 12px;border-radius:8px;">关闭</button></div></div></div>
 <input type="file" id="import-data-input" accept=".ee" style="display: none;">
+<input type="file" id="import-global-css-input" accept=".css" style="display: none;">
 <div id="storage-screen" class="screen"></div>
 <input type="file" id="character-card-input" accept="image/png,application/json" style="display: none;">
+<input type="file" id="import-world-books-file-input" accept=".json" style="display: none;">
 <!-- INS Widget Avatar Modal -->
 <div id="ins-widget-avatar-modal" class="modal-overlay">
     <div class="modal-window">
@@ -1624,17 +1665,17 @@
                 <textarea id="nai-default-negative" rows="3" class="form-group" placeholder="lowres, bad anatomy, bad hands, text, error...">lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry</textarea>
             </div>
 
-            <div id="nai-global-prompt-presets-control" style="margin:12px 0;padding:12px;border-radius:8px;border:1px solid var(--border-color, #eee);background:var(--panel-bg, #fff);box-shadow:var(--panel-shadow, none);">
-                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:center;">
-                    <label style="min-width:80px;color:var(--muted,#666);flex-shrink:0;">全局预设：</label>
-                    <select id="nai-global-prompt-preset-select" style="flex:1;min-width:0;padding:8px;border-radius:6px;border:1px solid #ddd;">
+            <div class="form-group">
+                <label>全局预设</label>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                    <select id="nai-global-prompt-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;">
                         <option value="">— 选择全局提示词预设 —</option>
                     </select>
-                    <button type="button" id="nai-global-prompt-apply-preset" class="btn btn-primary" style="flex-shrink:0;padding:6px 10px;">应用</button>
+                    <button type="button" id="nai-global-prompt-apply-preset" class="btn btn-primary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">应用</button>
                 </div>
-                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                    <button type="button" id="nai-global-prompt-save-preset" class="btn" style="flex-shrink:0;padding:6px 10px;">另存为</button>
-                    <button type="button" id="nai-global-prompt-manage-presets" class="btn" style="flex-shrink:0;padding:6px 10px;">管理</button>
+                <div style="display:flex;gap:8px;align-items:center;justify-content:flex-start;flex-wrap:wrap;">
+                    <button type="button" id="nai-global-prompt-save-preset" class="btn btn-secondary" style="flex:1;min-width:80px;width:auto;margin:0;">另存为</button>
+                    <button type="button" id="nai-global-prompt-manage-presets" class="btn btn-neutral" style="flex:1;min-width:80px;width:auto;margin:0;">管理</button>
                 </div>
             </div>
             <div class="form-group" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
@@ -1768,6 +1809,8 @@
         </div>
     </div>
 </div>
+
+<div id="font-presets-modal" class="modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;z-index:9999;"><div class="modal-window" style="max-width:520px;background:var(--panel-bg,#fff);padding:14px;border-radius:10px;box-shadow:0 12px 36px rgba(10,10,20,0.12);"><h3 style="margin:0 0 10px 0;font-size:16px;">管理字体预设</h3><div id="font-presets-list" style="max-height:340px; overflow:auto; margin-bottom:12px;"></div><div style="display:flex;gap:8px;justify-content:flex-end;"><button type="button" id="font-close-modal" class="btn btn-primary" style="padding:8px 12px;border-radius:8px;">关闭</button></div></div></div>
 
     <script src="script.js" defer></script>
 </body>
