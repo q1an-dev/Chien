@@ -132,7 +132,7 @@
         }
 
         // --- Initial HTML Injection ---
-        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form">
+        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-container">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form">
         <div class="form-group">
             <label for="api-preset-select">API预设</label>
             <div style="display:flex;align-items:center;gap:10px;">
@@ -224,8 +224,8 @@
 <button type="submit" class="btn btn-primary" id="save-btn"><span class="btn-text">保 存</span><div class="spinner"></div></button></form></main>`;
         document.getElementById('wallpaper-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">更换壁纸</h1></div><div class="placeholder"></div></header><main class="content"><div class="wallpaper-preview" id="wallpaper-preview"><span>当前壁纸预览</span></div><input type="file" id="wallpaper-upload" accept="image/*" style="display: none;"><label for="wallpaper-upload" class="btn btn-primary">从相册选择新壁纸</label></main>`;
         document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-preset-select">字体预设</label><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><select id="font-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;"><option value="">— 选择预设 —</option></select><button type="button" id="font-save-preset" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button><button type="button" id="font-manage-presets" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button></div></div><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">保存并应用</button><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 0;">恢复默认字体</button></form></main>`;
-        document.getElementById('customize-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">主屏幕自定义</h1></div><div class="placeholder"></div></header><main class="content"><form id="customize-form"></form></main>`;
-        document.getElementById('tutorial-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">教程</h1></div><div class="placeholder"></div></header><main class="content" id="tutorial-content-area"></main>`;
+        document.getElementById('customize-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-container">‹</button><div class="title-container"><h1 class="title">主屏幕自定义</h1></div><div class="placeholder"></div></header><main class="content"><form id="customize-form"></form></main>`;
+        document.getElementById('tutorial-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-container">‹</button><div class="title-container"><h1 class="title">教程</h1></div><div class="placeholder"></div></header><main class="content" id="tutorial-content-area"></main>`;
 
         // --- Global Variables and Constants ---
         const colorThemes = {
@@ -14337,36 +14337,6 @@ function renderForumPosts(posts) {
             return block;
         }
 
-        function renderTutorialContent() {
-            const tutorialContentArea = document.getElementById('tutorial-content-area');
-            if (!tutorialContentArea) return;
-
-            const tutorials = [
-                {title: '写在前面', imageUrls: ['https://i.postimg.cc/7PgyMG9S/image.jpg']},
-                {
-                    title: '软件介绍',
-                    imageUrls: ['https://i.postimg.cc/VvsJRh6q/IMG-20250713-162647.jpg', 'https://i.postimg.cc/8P5FfxxD/IMG-20250713-162702.jpg', 'https://i.postimg.cc/3r94R3Sn/IMG-20250713-162712.jpg']
-                },
-                {
-                    title: '404',
-                    imageUrls: ['https://i.postimg.cc/x8scFPJW/IMG-20250713-162756.jpg', 'https://i.postimg.cc/pX6mfqtj/IMG-20250713-162809.jpg', 'https://i.postimg.cc/YScjV00q/IMG-20250713-162819.jpg', 'https://i.postimg.cc/13VfJw9j/IMG-20250713-162828.jpg']
-                },
-                {title: '404-群聊', imageUrls: ['https://i.postimg.cc/X7LSmRTJ/404.jpg']}
-            ];
-
-            const existingItems = tutorialContentArea.querySelectorAll('.tutorial-item');
-            existingItems.forEach(item => item.remove());
-
-            tutorials.forEach(tutorial => {
-                const item = document.createElement('div');
-                item.className = 'tutorial-item';
-                const imagesHtml = tutorial.imageUrls.map(url => `<img src="${url}" alt="${tutorial.title}教程图片" loading="lazy">`).join('');
-                item.innerHTML = `<div class="tutorial-header">${tutorial.title}</div><div class="tutorial-content">${imagesHtml}</div>`;
-                tutorialContentArea.appendChild(item);
-            });
-
-            renderUpdateLog();
-        }
 
         async function exportWorldBooks() {
             try {
