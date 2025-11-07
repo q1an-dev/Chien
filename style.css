@@ -201,8 +201,8 @@
         }
 
         .app-header .action-btn-group .action-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
             stroke: var(--primary-color);
             stroke-width: 2;
             fill: none;
@@ -520,8 +520,7 @@
             margin-bottom: 6px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
-            object-fit: contain;
-            background-color: transparent;
+            object-fit: cover;
         }
 
         .app-icon:hover .icon-img {
@@ -1145,14 +1144,6 @@
             transition: all 0.3s ease;
         }
 
-        .message-wrapper.sent .transfer-card {
-            border-bottom-right-radius: 5px;
-        }
-
-        .message-wrapper.received .transfer-card {
-            border-bottom-left-radius: 5px;
-        }
-
         /* 2. 左侧图标 */
         .transfer-icon-bg {
             width: 40px;
@@ -1284,6 +1275,7 @@
         .transfer-card.returned .transfer-status {
              color: var(--inactive-text); /* 所有文字变灰 */
         }
+        /* --- 粘贴结束 --- */
 
         .gift-card {
             width: 230px;
@@ -6230,215 +6222,5 @@ border-top: none;
 #nai-test-negative {
     resize: vertical; /* 限制只能垂直拖动 */
     min-height: 80px;  /* (可选) 给一个合适的最小高度 */
-}
-
-/* --- 渲染器应用样式 (V2 - 横向标签栏) --- */
-
-/* (旧的 .renderer-layout, .renderer-sidebar, .renderer-main 已被删除) */
-
-/* 渲染器分类标签栏 - iOS风格 */
-#renderer-category-tabs {
-    display: flex;
-    overflow-x: auto;
-    padding: 0 16px; /* iOS标准内边距 */
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.1); /* iOS风格的细分隔线，使用半透明 */
-    gap: 28px; /* 增加标签间距，更符合iOS风格 */
-    flex-shrink: 0;
-    background-color: #fafafa; /* iOS浅灰底色，更接近系统设置 */
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    position: relative;
-    box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.05); /* 微妙的阴影，增加层次感 */
-}
-
-#renderer-category-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-#renderer-category-tabs .tab-item {
-    padding: 13px 0 11px 0; /* 增加上下内边距，更符合iOS风格 */
-    font-size: 15px;
-    color: #8e8e93; /* iOS标准灰色，更柔和 */
-    cursor: pointer;
-    white-space: nowrap;
-    border-bottom: 2.5px solid transparent; /* 为选中状态预留空间，稍粗一点 */
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* iOS标准缓动函数 */
-    font-weight: 400;
-    position: relative;
-    user-select: none;
-    min-height: 44px; /* iOS推荐的最小触摸目标 */
-    display: flex;
-    align-items: center;
-    letter-spacing: -0.01em; /* iOS字体微调 */
-}
-
-#renderer-category-tabs .tab-item:hover:not(.active) {
-    color: #1d1d1f; /* 悬停时变深，接近iOS交互效果 */
-}
-
-#renderer-category-tabs .tab-item.active {
-    color: var(--primary-color); /* Bilibili粉色 */
-    font-weight: 600; /* 选中时加粗 */
-    border-bottom-color: var(--primary-color);
-    border-bottom-width: 2.5px; /* 确保下划线粗细一致 */
-}
-
-/* 分类标签包装器样式 */
-#renderer-category-tabs .tab-item-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* 删除按钮样式 */
-#renderer-category-tabs .tab-delete-btn {
-    background: none;
-    border: none;
-    padding: 2px;
-    cursor: pointer;
-    color: #8e8e93;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-    border-radius: 4px;
-    min-width: 20px;
-    min-height: 20px;
-}
-
-#renderer-category-tabs .tab-delete-btn:hover {
-    opacity: 1;
-    color: #ff3b30;
-    background-color: rgba(255, 59, 48, 0.1);
-}
-
-#renderer-category-tabs .tab-delete-btn:active {
-    opacity: 0.8;
-    transform: scale(0.95);
-}
-
-/* 新增：规则列表滚动容器 */
-.renderer-rule-list-container {
-    flex-grow: 1; /* 占据所有剩余空间 */
-    overflow-y: auto; /* 允许列表滚动 */
-    padding: 0; /* iOS风格：无内边距 */
-    background-color: #ffffff;
-}
-
-.renderer-rule-list-container .list-item {
-    display: block;
-    padding: 0; /* iOS风格：无内边距，由内容控制 */
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.1); /* iOS风格：细分隔线 */
-    background-color: #ffffff;
-    transition: background-color 0.15s ease;
-}
-
-.renderer-rule-list-container .list-item:active {
-    background-color: #f5f5f5; /* iOS风格：点击反馈 */
-}
-
-.renderer-rule-list-container .list-item:last-child {
-    border-bottom: none;
-}
-
-/* iOS风格：规则内容容器 */
-.renderer-rule-content {
-    padding: 12px 16px; /* iOS标准内边距 */
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-/* iOS风格：规则标题 */
-.renderer-rule-title {
-    font-size: 17px; /* iOS标准字体大小 */
-    font-weight: 400; /* iOS标准字重 */
-    color: #000000; /* iOS标准文字颜色 */
-    line-height: 1.4;
-    letter-spacing: -0.01em; /* iOS字体微调 */
-}
-
-/* iOS风格：正则表达式显示 */
-.renderer-rule-regex {
-    font-size: 15px; /* iOS标准字体大小 */
-    color: #8e8e93; /* iOS标准灰色 */
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Monaco', 'Menlo', monospace;
-    line-height: 1.4;
-    word-break: break-all; /* 长文本自动换行 */
-}
-.char-binding-list {
-    max-height: 150px;
-    overflow-y: auto;
-    border: 1px solid #eee;
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-}
-.char-binding-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 5px;
-    border-bottom: 1px solid #f2f2f2;
-    gap: 10px;
-}
-.char-binding-item:last-child {
-    border-bottom: none;
-}
-.char-binding-item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    cursor: pointer;
-}
-.char-binding-item label {
-    font-size: 14px;
-    color: var(--text-color);
-    flex-grow: 1;
-    cursor: pointer;
-    margin: 0;
-    user-select: none;
-}
-/* --- END: 渲染器应用样式 --- */
-/* --- 渲染器弹窗补充样式 --- */
-/* (renderer-options-grid 已删除) */
-/* --- 渲染器面板尺寸、字号与滚动优化 --- */
-#edit-renderer-rule-modal .modal-window {
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-}
-#edit-renderer-rule-form {
-    overflow-y: auto;
-    flex-grow: 1;
-    padding: 5px 15px 5px 5px;
-    margin-right: -10px;
-}
-#edit-renderer-rule-modal h3 {
-    font-size: 18px;
-    margin-bottom: 15px;
-    flex-shrink: 0;
-}
-#edit-renderer-rule-modal .form-group {
-    margin-bottom: 12px;
-}
-#edit-renderer-rule-modal .form-group label {
-    font-size: 14px;
-    color: var(--primary-color);
-    margin-bottom: 6px;
-}
-#edit-renderer-rule-modal .form-group input[type="text"],
-#edit-renderer-rule-modal .form-group textarea {
-    font-size: 14px;
-    padding: 10px;
-    resize: vertical; /* 只能竖直拉动 */
-    min-height: 60px; /* 最小高度 */
-}
-.regex-flags-container,
-.scope-options {
-    font-size: 14px;
-}
-#edit-renderer-rule-form .btn-primary {
-    margin-top: 10px;
 }
 

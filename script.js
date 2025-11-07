@@ -132,7 +132,7 @@
         }
 
         // --- Initial HTML Injection ---
-        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-container">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form">
+        document.getElementById('api-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">API 设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="api-form">
         <div class="form-group">
             <label for="api-preset-select">API预设</label>
             <div style="display:flex;align-items:center;gap:10px;">
@@ -224,8 +224,8 @@
 <button type="submit" class="btn btn-primary" id="save-btn"><span class="btn-text">保 存</span><div class="spinner"></div></button></form></main>`;
         document.getElementById('wallpaper-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">更换壁纸</h1></div><div class="placeholder"></div></header><main class="content"><div class="wallpaper-preview" id="wallpaper-preview"><span>当前壁纸预览</span></div><input type="file" id="wallpaper-upload" accept="image/*" style="display: none;"><label for="wallpaper-upload" class="btn btn-primary">从相册选择新壁纸</label></main>`;
         document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-preset-select">字体预设</label><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><select id="font-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;"><option value="">— 选择预设 —</option></select><button type="button" id="font-save-preset" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button><button type="button" id="font-manage-presets" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button></div></div><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">保存并应用</button><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 0;">恢复默认字体</button></form></main>`;
-        document.getElementById('customize-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-container">‹</button><div class="title-container"><h1 class="title">主屏幕自定义</h1></div><div class="placeholder"></div></header><main class="content"><form id="customize-form"></form></main>`;
-        document.getElementById('tutorial-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-container">‹</button><div class="title-container"><h1 class="title">教程</h1></div><div class="placeholder"></div></header><main class="content" id="tutorial-content-area"></main>`;
+        document.getElementById('customize-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">主屏幕自定义</h1></div><div class="placeholder"></div></header><main class="content"><form id="customize-form"></form></main>`;
+        document.getElementById('tutorial-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">教程</h1></div><div class="placeholder"></div></header><main class="content" id="tutorial-content-area"></main>`;
 
         // --- Global Variables and Constants ---
         const colorThemes = {
@@ -295,11 +295,11 @@
                const defaultIcons = {
             'chat-list-screen': {name: '404', url: 'https://i.postimg.cc/VvQB8dQT/chan-143.png'},
             'api-settings-screen': {name: 'api', url: 'https://i.postimg.cc/50FqT8GL/chan-125.png'},
+            'wallpaper-screen': {name: '壁纸', url: 'https://i.postimg.cc/3wqFttL3/chan-90.png'},
             'world-book-screen': {name: '世界书', url: 'https://i.postimg.cc/prCWkrKT/chan-74.png'},
             'customize-screen': {name: '自定义', url: 'https://i.postimg.cc/vZVdC7gt/chan-133.png'},
             'font-settings-screen': {name: '字体', url: 'https://i.postimg.cc/FzVtC0x4/chan-21.png'},
             'tutorial-screen': {name: '教程', url: 'https://i.postimg.cc/6QgNzCFf/chan-118.png'},
-            'renderer-screen': {name: '渲染器', url: 'https://i.postimg.cc/1zVjK3bT/ji-lichan-2.png'},
             'day-mode-btn': {name: '白昼模式', url: 'https://i.postimg.cc/Jz0tYqnT/chan-145.png'},
             'night-mode-btn': {name: '夜间模式', url: 'https://i.postimg.cc/htYvkdQK/chan-146.png'},
             'forum-screen': {name: '论坛', url: 'https://i.postimg.cc/fyPVBZf1/1758451183605.png'},
@@ -396,8 +396,6 @@
             // ▼▼▼ 新增：NAI 全局提示词预设 ▼▼▼
             naiGlobalPromptPresets: [],
             fontPresets: [], // ▼▼▼ 新增 ▼▼▼
-            renderers: [], // 新增：渲染器规则
-            rendererCategories: [], // 新增：渲染器分类
         };
         let currentChatId = null, currentChatType = null, isGenerating = false, longPressTimer = null,
             isInMultiSelectMode = false, editingMessageId = null, currentPage = 1, currentTransferMessageId = null,
@@ -540,8 +538,6 @@
             groups: '&id',
             worldBooks: '&id',
             myStickers: '&id, category',
-            renderers: '&id, categoryId', // 渲染器规则
-            rendererCategories: '&id', // 渲染器分类
             naiPromptModules: '&id, category', // ▼▼▼ 新增 ▼▼▼
             globalSettings: 'key'
         }).upgrade(async tx => {
@@ -594,8 +590,6 @@
                 await dexieDB.worldBooks.bulkPut(db.worldBooks);
                 await dexieDB.myStickers.bulkPut(db.myStickers);
                 await dexieDB.naiPromptModules.bulkPut(db.naiPromptModules); // ▼▼▼ 新增 ▼▼▼
-                await dexieDB.renderers.bulkPut(db.renderers); // 新增
-                await dexieDB.rendererCategories.bulkPut(db.rendererCategories); // 新增
 
                 const settingsPromises = globalSettingKeys.map(key => {
                     if (db[key] !== undefined) {
@@ -609,15 +603,13 @@
 
         const loadData = async () => {
             // ▼▼▼ 修改这行，添加 naiPromptModules ▼▼▼
-            const [characters, groups, worldBooks, myStickers, naiPromptModules, settingsArray, renderers, rendererCategories] = await Promise.all([
+            const [characters, groups, worldBooks, myStickers, naiPromptModules, settingsArray] = await Promise.all([
                 dexieDB.characters.toArray(),
                 dexieDB.groups.toArray(),
                 dexieDB.worldBooks.toArray(),
                 dexieDB.myStickers.toArray(),
                 dexieDB.naiPromptModules.toArray(), // ▼▼▼ 新增 ▼▼▼
-                dexieDB.globalSettings.toArray(),
-                dexieDB.renderers.toArray(), // 新增
-                dexieDB.rendererCategories.toArray() // 新增
+                dexieDB.globalSettings.toArray()
             ]);
 
             db.characters = characters;
@@ -625,8 +617,6 @@
             db.worldBooks = worldBooks;
             db.myStickers = myStickers;
             db.naiPromptModules = naiPromptModules; // ▼▼▼ 新增 ▼▼▼
-            db.renderers = renderers; // 新增
-            db.rendererCategories = rendererCategories; // 新增
 
             const settings = settingsArray.reduce((acc, { key, value }) => {
                 acc[key] = value;
@@ -2034,18 +2024,19 @@
                 }
             });
 
+            updateClock();
             setInterval(updateClock, 30000);
             applyGlobalFont(db.fontUrl);
             applyGlobalCss(db.globalCss);
             applyPomodoroBackgrounds();
             setupHomeScreen();
-            updateClock();
             setupChatListScreen();
             setupAddCharModal();
             setupChatRoom();
             setupChatSettings();
             setupApiSettingsApp();
-                        await setupStickerSystem();
+            setupWallpaperApp();
+            await setupStickerSystem();
             setupPresetFeatures();
             setupVoiceMessageSystem();
             setupPhotoVideoSystem();
@@ -2057,7 +2048,6 @@
             setupFontSettingsApp();
             setupGroupChatSystem();
             setupCustomizeApp();
-            setupRendererApp(); // 添加渲染器应用初始化
             setupTutorialApp();
             checkForUpdates();
             setupPeekFeature();
@@ -4324,8 +4314,8 @@
                         </div>
                         <a href="#" class="app-icon" data-target="chat-list-screen"><img src="${getIcon('chat-list-screen')}" alt="404" class="icon-img"><span class="app-name">${defaultIcons['chat-list-screen'].name}</span></a>
                         <a href="#" class="app-icon" data-target="api-settings-screen"><img src="${getIcon('api-settings-screen')}" alt="API" class="icon-img"><span class="app-name">${defaultIcons['api-settings-screen'].name}</span></a>
+                        <a href="#" class="app-icon" data-target="wallpaper-screen"><img src="${getIcon('wallpaper-screen')}" alt="Wallpaper" class="icon-img"><span class="app-name">${defaultIcons['wallpaper-screen'].name}</span></a>
                         <a href="#" class="app-icon" data-target="world-book-screen"><img src="${getIcon('world-book-screen')}" alt="World Book" class="icon-img"><span class="app-name">${defaultIcons['world-book-screen'].name}</span></a>
-                        <a href="#" class="app-icon" data-target="renderer-screen"><img src="${getIcon('renderer-screen')}" alt="渲染器" class="icon-img"><span class="app-name">${defaultIcons['renderer-screen'].name}</span></a>
                         <a href="#" class="app-icon" data-target="customize-screen"><img src="${getIcon('customize-screen')}" alt="Customize" class="icon-img"><span class="app-name">${defaultIcons['customize-screen'].name}</span></a>
                         <a href="#" class="app-icon" data-target="tutorial-screen"><img src="${getIcon('tutorial-screen')}" alt="Tutorial" class="icon-img"><span class="app-name">${defaultIcons['tutorial-screen'].name}</span></a>
                         <div class="heart-photo-widget"></div>
@@ -4693,15 +4683,25 @@
              }
          });
          
-              }
+         const cssImportInput = document.getElementById('import-global-css-input');
+         if (cssImportInput) {
+             cssImportInput.addEventListener('change', (e) => {
+                 const file = e.target.files[0];
+                 if (file) {
+                     handleGlobalCssImport(file);
+                 }
+                 e.target.value = null;
+             });
+         }
+        }
 
                 function renderCustomizeForm() {
             customizeForm.innerHTML = ''; // 清空旧内容
 
             // --- 1. 应用图标自定义部分 ---
             const iconOrder = [
-                'chat-list-screen', 'api-settings-screen', 'world-book-screen', 'renderer-screen',
-                'customize-screen', 'tutorial-screen',
+                'chat-list-screen', 'api-settings-screen', 'wallpaper-screen',
+                'world-book-screen', 'customize-screen', 'tutorial-screen',
                 'font-settings-screen', 'day-mode-btn', 'night-mode-btn', 'forum-screen', 'music-screen', 'diary-screen', 'piggy-bank-screen', 'pomodoro-screen', 'storage-analysis-screen'
             ];
 
@@ -4721,10 +4721,6 @@
             });
 
             const iconsSectionHTML = `
-            <div class="wallpaper-preview" id="wallpaper-preview" style="margin: 0 auto 25px auto;"><span>当前壁纸预览</span></div>
-            <input type="file" id="wallpaper-upload" accept="image/*" style="display: none;">
-            <label for="wallpaper-upload" class="btn btn-primary" style="margin-bottom: 25px;">从相册选择新壁纸</label>
-            <hr style="border:none; border-top:1px solid #f0f0f0; margin: 0 0 25px 0;">
             <div class="collapsible-section">
                 <div class="collapsible-header">
                     <h4>应用图标</h4>
@@ -4736,34 +4732,6 @@
             </div>
             `;
             customizeForm.insertAdjacentHTML('beforeend', iconsSectionHTML);
-
-            // --- Begin Moved Wallpaper Logic ---
-            const wallpaperUpload = document.getElementById('wallpaper-upload');
-            const wallpaperPreview = document.getElementById('wallpaper-preview');
-
-            if (wallpaperPreview) {
-                wallpaperPreview.style.backgroundImage = `url(${db.wallpaper})`;
-                wallpaperPreview.textContent = '';
-            }
-
-            if (wallpaperUpload) {
-                wallpaperUpload.addEventListener('change', async (a) => {
-                    const n = a.target.files[0];
-                    if (n) {
-                        try {
-                            const r = await compressImage(n, {quality: 0.85, maxWidth: 1080, maxHeight: 1920});
-                            db.wallpaper = r;
-                            applyWallpaper(r, document.getElementById('home-screen')); // 确保 applyWallpaper 仍能正确工作
-                            wallpaperPreview.style.backgroundImage = `url(${r})`;
-                            await saveData();
-                            showToast('壁纸更换成功！');
-                        } catch (s) {
-                            showToast('壁纸压缩失败，请重试');
-                        }
-                    }
-                });
-            }
-            // --- End Moved Wallpaper Logic ---
 
             // --- 2. 主页小部件自定义部分 ---
             const widgetSectionHTML = `
@@ -4961,702 +4929,8 @@
             if (globalCssExportBtn) {
                 globalCssExportBtn.addEventListener('click', exportGlobalCssPresets);
             }
-
-            // CSS导入按钮事件绑定
-            const cssImportInput = document.getElementById('import-global-css-input');
-            if (cssImportInput) {
-                cssImportInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        handleGlobalCssImport(file);
-                    }
-                    e.target.value = null;
-                });
-            }
         }
 
-  
-        // ===============================================================
-        // START: 渲染器应用核心逻辑 (V2.1 - 渲染实现)
-        // ===============================================================
-
-        /**
-         * 渲染渲染器分类列表
-         * @param {string} currentCategoryId - 当前选中的分类ID
-         */
-        function renderRendererCategories(currentCategoryId = 'all') {
-            // ▼▼▼ 修改：目标从列表改为标签栏 ▼▼▼
-            const tabsContainer = document.getElementById('renderer-category-tabs');
-            if (!tabsContainer) return;
-
-            tabsContainer.innerHTML = ''; // 清空
-            
-            // 1. 添加 "全部" 标签
-            const allTab = document.createElement('div');
-            allTab.className = 'tab-item';
-            allTab.textContent = '全部';
-            allTab.dataset.id = 'all';
-            if (currentCategoryId === 'all') {
-                allTab.classList.add('active');
-            }
-            tabsContainer.appendChild(allTab);
-
-            // 2. 遍历并添加数据库中的分类
-            (db.rendererCategories || []).forEach(category => {
-                const tabWrapper = document.createElement('div');
-                tabWrapper.className = 'tab-item-wrapper';
-                tabWrapper.style.display = 'flex';
-                tabWrapper.style.alignItems = 'center';
-                tabWrapper.style.gap = '4px';
-
-                const tab = document.createElement('div');
-                tab.className = 'tab-item';
-                tab.textContent = category.name;
-                tab.dataset.id = category.id;
-                if (currentCategoryId === category.id) {
-                    tab.classList.add('active');
-                }
-                tabWrapper.appendChild(tab);
-
-                // 添加删除按钮
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'tab-delete-btn';
-                deleteBtn.innerHTML = `
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                `;
-                deleteBtn.title = '删除分类';
-                deleteBtn.style.cssText = 'background: none; border: none; padding: 2px; cursor: pointer; color: #8e8e93; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: opacity 0.2s;';
-                deleteBtn.addEventListener('mouseenter', () => {
-                    deleteBtn.style.opacity = '1';
-                    deleteBtn.style.color = '#ff3b30';
-                });
-                deleteBtn.addEventListener('mouseleave', () => {
-                    deleteBtn.style.opacity = '0.6';
-                    deleteBtn.style.color = '#8e8e93';
-                });
-                deleteBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation(); // 阻止触发标签点击事件
-                    const categoryId = category.id; // 保存分类ID
-                    const cat = db.rendererCategories.find(c => c.id === categoryId);
-                    if (cat) {
-                        // 调用删除函数（需要在setupRendererApp作用域内）
-                        if (confirm(`确定要删除分类"${cat.name}"吗？\n该分类下的规则将被移动到"全部"分类。\n此操作不可恢复。`)) {
-                            // 1. 从分类列表删除
-                            db.rendererCategories = db.rendererCategories.filter(c => c.id !== categoryId);
-
-                            // 2. 将该分类下的规则移动到"全部"（清除分类ID）
-                            db.renderers.forEach(rule => {
-                                if (rule.categoryId === categoryId) {
-                                    rule.categoryId = null;
-                                }
-                            });
-
-                            // 3. 如果删除的是当前选中的分类，切换到"全部"
-                            // 注意：这里需要访问setupRendererApp作用域内的currentRendererCategoryId
-                            // 由于renderRendererCategories在setupRendererApp内，可以通过闭包访问
-                            // 但为了安全，我们通过重新渲染来更新状态
-                            
-                            // 4. 保存数据
-                            await saveData();
-
-                            // 5. 刷新分类列表和规则列表
-                            // 注意：由于renderRendererCategories在setupRendererApp外部，需要通过参数传递
-                            // 这里我们通过DOM获取当前选中的分类ID
-                            const activeTab = tabsContainer.querySelector('.tab-item.active');
-                            let newCategoryId = activeTab ? activeTab.dataset.id : 'all';
-                            if (newCategoryId === categoryId) {
-                                newCategoryId = 'all';
-                            }
-                            renderRendererCategories(newCategoryId);
-                            renderRendererRules(newCategoryId);
-                            showToast(`分类"${cat.name}"已删除`);
-                        }
-                    }
-                });
-
-                tabWrapper.appendChild(deleteBtn);
-                tabsContainer.appendChild(tabWrapper);
-            });
-            // ▲▲▲ 修改结束 ▲▲▲
-        }
-
-        /**
-         * 渲染渲染器规则列表
-         * @param {string} categoryId - 要显示的分类ID ('all' 或 'specific_id')
-         */
-        function renderRendererRules(categoryId) {
-            const ruleList = document.getElementById('renderer-rule-list');
-            const placeholder = document.getElementById('no-renderer-rules-placeholder');
-            if (!ruleList || !placeholder) return;
-
-            ruleList.innerHTML = ''; // 清空
-
-            // 1. 过滤规则
-            const rulesToRender = (db.renderers || []).filter(rule => {
-                if (categoryId === 'all') {
-                    return true; // 显示全部
-                }
-                return rule.categoryId === categoryId; // 仅显示该分类
-            });
-
-            // 2. 检查是否有规则
-            if (rulesToRender.length === 0) {
-                placeholder.style.display = 'block';
-                return;
-            }
-
-            placeholder.style.display = 'none';
-
-            // 3. 排序和渲染（按创建时间降序，最新的在前）
-            rulesToRender.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-            rulesToRender.forEach(rule => {
-                const li = document.createElement('li');
-                li.className = 'list-item renderer-rule-item';
-                li.dataset.id = rule.id;
-
-                // iOS风格：简洁的列表项设计
-                li.innerHTML = `
-                    <div class="renderer-rule-content">
-                        <div class="renderer-rule-title">${DOMPurify.sanitize(rule.name)}</div>
-                        <div class="renderer-rule-regex">${DOMPurify.sanitize(rule.regex)}</div>
-                    </div>
-                `;
-                ruleList.appendChild(li);
-            });
-        }
-
-
-        function setupRendererApp() {
-            let currentRendererCategoryId = 'all'; // 在函数作用域内跟踪当前分类
-
-            // --- DOM元素缓存 ---
-            const categoryTabs = document.getElementById('renderer-category-tabs');
-            const ruleList = document.getElementById('renderer-rule-list');
-            const noRulesPlaceholder = document.getElementById('no-renderer-rules-placeholder');
-
-            // 初始化事件监听器
-            if (!categoryTabs || !ruleList) {
-                console.warn('Renderer: Required DOM elements not found');
-                return;
-            }
-
-            // --- 事件监听器 ---
-            // 添加分类按钮
-            const addCategoryBtn = document.getElementById('add-renderer-category-btn');
-            if (addCategoryBtn) {
-                addCategoryBtn.addEventListener('click', () => {
-                    document.getElementById('renderer-category-form').reset();
-                    document.getElementById('renderer-category-modal').classList.add('visible');
-                });
-            }
-
-            // 添加规则按钮
-            const addRuleBtn = document.getElementById('add-renderer-rule-btn');
-            if (addRuleBtn) {
-                addRuleBtn.addEventListener('click', () => {
-                    openEditRendererRuleModal();
-                });
-            }
-
-            // 分类表单提交
-            const categoryForm = document.getElementById('renderer-category-form');
-            if (categoryForm) {
-                categoryForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const categoryName = document.getElementById('renderer-category-name').value.trim();
-                    if (!categoryName) {
-                        showToast('请输入分类名称');
-                        return;
-                    }
-
-                    // 检查分类名称是否已存在
-                    if (db.rendererCategories && db.rendererCategories.some(cat => cat.name === categoryName)) {
-                        showToast('该分类名称已存在');
-                        return;
-                    }
-
-                    // 创建新分类
-                    const newCategory = {
-                        id: `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                        name: categoryName
-                    };
-
-                    // 保存到数据库
-                    if (!db.rendererCategories) {
-                        db.rendererCategories = [];
-                    }
-                    db.rendererCategories.push(newCategory);
-                    await saveData();
-
-                    // 刷新分类列表
-                    renderRendererCategories(currentRendererCategoryId);
-
-                    // 关闭弹窗并清空表单
-                    document.getElementById('renderer-category-modal').classList.remove('visible');
-                    categoryForm.reset();
-                    showToast(`分类"${categoryName}"创建成功！`);
-                });
-            }
-
-            // 规则表单提交
-            const ruleForm = document.getElementById('edit-renderer-rule-form');
-            if (ruleForm) {
-                ruleForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    // 获取表单数据
-                    const ruleId = document.getElementById('renderer-rule-id').value;
-                    const ruleName = document.getElementById('renderer-rule-name').value.trim();
-                    const ruleRegex = document.getElementById('renderer-rule-regex').value.trim();
-                    const ruleHtml = document.getElementById('renderer-rule-html').value.trim();
-
-                    // 验证必填字段
-                    if (!ruleName) {
-                        showToast('请输入规则名称');
-                        return;
-                    }
-                    if (!ruleRegex) {
-                        showToast('请输入正则表达式');
-                        return;
-                    }
-
-                    // 验证正则表达式是否有效
-                    try {
-                        new RegExp(ruleRegex);
-                    } catch (error) {
-                        showToast('正则表达式格式错误：' + error.message);
-                        return;
-                    }
-
-                    // 获取绑定的角色ID
-                    const boundCharIds = Array.from(
-                        document.querySelectorAll('#renderer-char-binding-list input[type="checkbox"]:checked')
-                    ).map(checkbox => checkbox.value);
-
-                    // 获取当前选中的分类ID（如果是在分类下创建）
-                    const categoryId = currentRendererCategoryId !== 'all' ? currentRendererCategoryId : null;
-
-                    // 判断是新建还是编辑
-                    const isEdit = ruleId && ruleId !== '';
-                    let rule;
-
-                    if (isEdit) {
-                        // 编辑模式：更新现有规则
-                        rule = db.renderers.find(r => r.id === ruleId);
-                        if (!rule) {
-                            showToast('未找到要编辑的规则');
-                            return;
-                        }
-                        // 更新规则数据
-                        rule.name = ruleName;
-                        rule.regex = ruleRegex;
-                        rule.html = ruleHtml;
-                        rule.boundCharIds = boundCharIds;
-                        if (categoryId) {
-                            rule.categoryId = categoryId;
-                        }
-                        rule.updatedAt = Date.now();
-                        // 编辑模式下不需要 push，直接更新对象即可
-                    } else {
-                        // 新建模式：创建新规则
-                        rule = {
-                            id: `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                            name: ruleName,
-                            regex: ruleRegex,
-                            html: ruleHtml,
-                            boundCharIds: boundCharIds,
-                            categoryId: categoryId,
-                            priority: 50, // 默认优先级
-                            createdAt: Date.now()
-                        };
-                        if (!db.renderers) {
-                            db.renderers = [];
-                        }
-                        db.renderers.push(rule);
-                    }
-
-                    // 保存到数据库
-                    await saveData();
-
-                    // 刷新规则列表
-                    renderRendererRules(currentRendererCategoryId);
-
-                    // 关闭弹窗并清空表单
-                    document.getElementById('edit-renderer-rule-modal').classList.remove('visible');
-                    ruleForm.reset();
-                    showToast(isEdit ? '规则已更新！' : '规则创建成功！');
-                });
-            }
-
-            // 规则列表点击和长按事件
-            let longPressTimer = null;
-            let isLongPress = false;
-
-            ruleList.addEventListener('mousedown', (e) => {
-                const ruleItem = e.target.closest('.renderer-rule-item');
-                if (!ruleItem) return;
-
-                isLongPress = false;
-                const ruleId = ruleItem.dataset.id;
-
-                longPressTimer = setTimeout(() => {
-                    isLongPress = true;
-                    // 长按触发删除
-                    const rule = db.renderers.find(r => r.id === ruleId);
-                    if (rule) {
-                        handleDeleteRule(ruleId, rule.name);
-                    }
-                }, 500); // 500ms 长按时间
-            });
-
-            ruleList.addEventListener('mouseup', (e) => {
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-            });
-
-            ruleList.addEventListener('mouseleave', () => {
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-            });
-
-            // 触摸设备支持
-            ruleList.addEventListener('touchstart', (e) => {
-                const ruleItem = e.target.closest('.renderer-rule-item');
-                if (!ruleItem) return;
-
-                isLongPress = false;
-                const ruleId = ruleItem.dataset.id;
-
-                longPressTimer = setTimeout(() => {
-                    isLongPress = true;
-                    // 长按触发删除
-                    const rule = db.renderers.find(r => r.id === ruleId);
-                    if (rule) {
-                        e.preventDefault(); // 防止触发点击事件
-                        handleDeleteRule(ruleId, rule.name);
-                    }
-                }, 500); // 500ms 长按时间
-            }, { passive: false });
-
-            ruleList.addEventListener('touchend', (e) => {
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-
-                // 如果不是长按，则触发点击（编辑）
-                if (!isLongPress) {
-                    const ruleItem = e.target.closest('.renderer-rule-item');
-                    if (ruleItem) {
-                        const ruleId = ruleItem.dataset.id;
-                        const rule = db.renderers.find(r => r.id === ruleId);
-                        if (rule) {
-                            openEditRendererRuleModal(rule);
-                        } else {
-                            showToast('未找到该规则');
-                        }
-                    }
-                }
-                isLongPress = false;
-            });
-
-            ruleList.addEventListener('touchcancel', () => {
-                if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                }
-                isLongPress = false;
-            });
-
-            // 点击事件（非触摸设备）
-            ruleList.addEventListener('click', (e) => {
-                // 如果是长按触发的，不执行点击
-                if (isLongPress) {
-                    e.preventDefault();
-                    return;
-                }
-
-                const ruleItem = e.target.closest('.renderer-rule-item');
-                if (ruleItem) {
-                    const ruleId = ruleItem.dataset.id;
-                    const rule = db.renderers.find(r => r.id === ruleId);
-                    if (rule) {
-                        openEditRendererRuleModal(rule);
-                    } else {
-                        showToast('未找到该规则');
-                    }
-                }
-            });
-
-            // 删除规则的处理函数
-            async function handleDeleteRule(ruleId, ruleName) {
-                if (confirm(`确定要删除规则"${ruleName}"吗？\n此操作不可恢复。`)) {
-                    // 从数据库中删除
-                    db.renderers = db.renderers.filter(r => r.id !== ruleId);
-                    await saveData();
-
-                    // 刷新规则列表
-                    renderRendererRules(currentRendererCategoryId);
-                    showToast('规则已删除');
-                }
-            }
-
-            // *** 分类标签栏点击和长按事件 ***
-            let categoryLongPressTimer = null;
-            let isCategoryLongPress = false;
-
-            categoryTabs.addEventListener('mousedown', (e) => {
-                const categoryItem = e.target.closest('.tab-item');
-                if (!categoryItem) return;
-                if (categoryItem.dataset.id === 'all') return; // "全部"标签不能删除
-
-                isCategoryLongPress = false;
-                const categoryId = categoryItem.dataset.id;
-
-                categoryLongPressTimer = setTimeout(() => {
-                    isCategoryLongPress = true;
-                    // 长按触发删除
-                    const category = db.rendererCategories.find(c => c.id === categoryId);
-                    if (category) {
-                        handleDeleteCategory(categoryId, category.name);
-                    }
-                }, 500); // 500ms 长按时间
-            });
-
-            categoryTabs.addEventListener('mouseup', () => {
-                if (categoryLongPressTimer) {
-                    clearTimeout(categoryLongPressTimer);
-                    categoryLongPressTimer = null;
-                }
-            });
-
-            categoryTabs.addEventListener('mouseleave', () => {
-                if (categoryLongPressTimer) {
-                    clearTimeout(categoryLongPressTimer);
-                    categoryLongPressTimer = null;
-                }
-            });
-
-            // 触摸设备支持
-            categoryTabs.addEventListener('touchstart', (e) => {
-                const categoryItem = e.target.closest('.tab-item');
-                if (!categoryItem) return;
-                if (categoryItem.dataset.id === 'all') return; // "全部"标签不能删除
-
-                isCategoryLongPress = false;
-                const categoryId = categoryItem.dataset.id;
-
-                categoryLongPressTimer = setTimeout(() => {
-                    isCategoryLongPress = true;
-                    // 长按触发删除
-                    const category = db.rendererCategories.find(c => c.id === categoryId);
-                    if (category) {
-                        e.preventDefault();
-                        handleDeleteCategory(categoryId, category.name);
-                    }
-                }, 500); // 500ms 长按时间
-            }, { passive: false });
-
-            categoryTabs.addEventListener('touchend', (e) => {
-                if (categoryLongPressTimer) {
-                    clearTimeout(categoryLongPressTimer);
-                    categoryLongPressTimer = null;
-                }
-
-                // 如果不是长按，则触发点击（切换分类）
-                if (!isCategoryLongPress) {
-                    const categoryItem = e.target.closest('.tab-item');
-                if (categoryItem) {
-                    const categoryId = categoryItem.dataset.id;
-                    if (categoryId !== currentRendererCategoryId) {
-                        currentRendererCategoryId = categoryId;
-                            renderRendererCategories(currentRendererCategoryId);
-                            renderRendererRules(currentRendererCategoryId);
-                        }
-                    }
-                }
-                isCategoryLongPress = false;
-            });
-
-            categoryTabs.addEventListener('touchcancel', () => {
-                if (categoryLongPressTimer) {
-                    clearTimeout(categoryLongPressTimer);
-                    categoryLongPressTimer = null;
-                }
-                isCategoryLongPress = false;
-            });
-
-            // 点击事件（非触摸设备）
-            categoryTabs.addEventListener('click', (e) => {
-                // 如果是长按触发的，不执行点击
-                if (isCategoryLongPress) {
-                    e.preventDefault();
-                    return;
-                }
-
-                const categoryItem = e.target.closest('.tab-item');
-                if (categoryItem) {
-                    const categoryId = categoryItem.dataset.id;
-                    if (categoryId !== currentRendererCategoryId) {
-                        currentRendererCategoryId = categoryId;
-                        // 重新渲染分类标签栏 (更新 active 状态)
-                        renderRendererCategories(currentRendererCategoryId);
-                        // 重新渲染规则列表 (根据新分类)
-                        renderRendererRules(currentRendererCategoryId);
-                    }
-                }
-            });
-
-            // 删除分类的处理函数
-            async function handleDeleteCategory(categoryId, categoryName) {
-                if (confirm(`确定要删除分类"${categoryName}"吗？\n该分类下的规则将被移动到"全部"分类。\n此操作不可恢复。`)) {
-                    // 1. 从分类列表删除
-                    db.rendererCategories = db.rendererCategories.filter(c => c.id !== categoryId);
-
-                    // 2. 将该分类下的规则移动到"全部"（清除分类ID）
-                    db.renderers.forEach(rule => {
-                        if (rule.categoryId === categoryId) {
-                            rule.categoryId = null;
-                        }
-                    });
-
-                    // 3. 如果删除的是当前选中的分类，切换到"全部"
-                    if (currentRendererCategoryId === categoryId) {
-                        currentRendererCategoryId = 'all';
-                    }
-
-                    // 4. 保存数据
-                    await saveData();
-
-                    // 5. 刷新分类列表和规则列表
-                    renderRendererCategories(currentRendererCategoryId);
-                    renderRendererRules(currentRendererCategoryId);
-                    showToast(`分类"${categoryName}"已删除`);
-                }
-            }
-
-            // 关闭模态框
-            document.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal-overlay')) {
-                    e.target.classList.remove('visible');
-                }
-            });
-
-            // *** 核心修复：在 `init()` 调用此函数时，立即渲染列表 ***
-            renderRendererCategories(currentRendererCategoryId);
-            renderRendererRules(currentRendererCategoryId);
-
-            console.log('Renderer app initialized (V2.1 - Rendering implemented)');
-        }
-
-        function openEditRendererRuleModal(ruleData = null) {
-            const form = document.getElementById('edit-renderer-rule-form');
-            const modal = document.getElementById('edit-renderer-rule-modal');
-            if (!form || !modal) return;
-
-            form.reset(); // 清空表单
-
-            if (ruleData) {
-                // 编辑模式：加载规则数据到表单
-                document.getElementById('renderer-rule-id').value = ruleData.id || '';
-                document.getElementById('renderer-rule-name').value = ruleData.name || '';
-                document.getElementById('renderer-rule-regex').value = ruleData.regex || '';
-                document.getElementById('renderer-rule-html').value = ruleData.html || '';
-                modal.querySelector('h3').textContent = '编辑渲染规则';
-            } else {
-                // 新建模式：清空所有字段
-                document.getElementById('renderer-rule-id').value = '';
-                document.getElementById('renderer-rule-name').value = '';
-                document.getElementById('renderer-rule-regex').value = '';
-                document.getElementById('renderer-rule-html').value = '';
-                modal.querySelector('h3').textContent = '创建渲染规则';
-            }
-
-            // ▼▼▼ 填充绑定角色列表 ▼▼▼
-            const charBindingList = document.getElementById('renderer-char-binding-list');
-            if (charBindingList) {
-                charBindingList.innerHTML = ''; // 清空列表
-
-                // 获取当前规则绑定的角色ID数组（如果存在）
-                const boundCharIds = ruleData?.boundCharIds || ruleData?.charIds || [];
-
-                if (db.characters && db.characters.length > 0) {
-                    db.characters.forEach(char => {
-                        const isChecked = boundCharIds.includes(char.id);
-                        const item = document.createElement('div');
-                        item.className = 'char-binding-item';
-                        item.innerHTML = `
-                            <input type="checkbox" id="renderer-char-bind-${char.id}" value="${char.id}" ${isChecked ? 'checked' : ''}>
-                            <label for="renderer-char-bind-${char.id}">${char.remarkName || char.realName || '未命名角色'}</label>
-                        `;
-                        charBindingList.appendChild(item);
-                    });
-                } else {
-                    // 如果没有角色，显示提示信息
-                    const emptyMsg = document.createElement('div');
-                    emptyMsg.style.padding = '10px';
-                    emptyMsg.style.color = '#888';
-                    emptyMsg.style.textAlign = 'center';
-                    emptyMsg.textContent = '暂无角色，请先在"聊天"应用中创建角色';
-                    charBindingList.appendChild(emptyMsg);
-                }
-            }
-            // ▲▲▲ 填充结束 ▲▲▲
-
-            // ▼▼▼ 实现测试预览功能 ▼▼▼
-            const testInput = document.getElementById('renderer-rule-test-input');
-            const previewOutput = document.getElementById('renderer-rule-preview-output');
-            
-            // 清空测试输入和预览
-            if (testInput) testInput.value = '';
-            if (previewOutput) previewOutput.innerHTML = '';
-
-            // 监听测试输入变化，实时预览
-            if (testInput && previewOutput) {
-                const updatePreview = () => {
-                    const testText = testInput.value;
-                    const regexText = document.getElementById('renderer-rule-regex').value;
-                    const htmlText = document.getElementById('renderer-rule-html').value;
-
-                    if (!testText || !regexText) {
-                        previewOutput.innerHTML = '';
-                        return;
-                    }
-
-                    try {
-                        const regex = new RegExp(regexText, 'g');
-                        const result = testText.replace(regex, htmlText);
-                        previewOutput.innerHTML = DOMPurify.sanitize(result);
-                    } catch (error) {
-                        previewOutput.innerHTML = `<span style="color: #ff3b30;">错误：${error.message}</span>`;
-                    }
-                };
-
-                // 移除旧的事件监听器（如果存在）
-                testInput.removeEventListener('input', updatePreview);
-                document.getElementById('renderer-rule-regex').removeEventListener('input', updatePreview);
-                document.getElementById('renderer-rule-html').removeEventListener('input', updatePreview);
-
-                // 添加新的事件监听器
-                testInput.addEventListener('input', updatePreview);
-                document.getElementById('renderer-rule-regex').addEventListener('input', updatePreview);
-                document.getElementById('renderer-rule-html').addEventListener('input', updatePreview);
-            }
-            // ▲▲▲ 测试预览结束 ▲▲▲
-
-            modal.classList.add('visible');
-        }
-
-        // END: 渲染器应用核心逻辑
 
         function setupTutorialApp() {
             const tutorialContentArea = document.getElementById('tutorial-content-area');
@@ -7060,8 +6334,7 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                     <div class="transfer-content">
                         <p class="transfer-title">${titleText}</p>
                         <p class="transfer-amount">¥${amount}</p>
-                        <p class="transfer-remark">${remarkText}</p>
-                        <p class="transfer-status">${statusText}</p>
+                        <p class="transfer-remark">${remarkText}</p> <p class="transfer-status">${statusText}</p>
                     </div>
                 `;
             } else if (imageRecogMatch || urlRegex.test(content)) {
@@ -7270,74 +6543,6 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
             }
         }
 
-    // ===============================================================
-    // START: 安全的消息添加与保存调度 (V3.0)
-    // (移植自 zyj章鱼机.html)
-    // ===============================================================
-
-    const MAX_HISTORY_PER_CHAT = 500; // 每400条消息自动修剪
-
-    /**
-     * [V3.0 | 最终修复方案] 将消息添加到聊天历史，并使用同步+异步双重保险机制确保数据不丢失。
-     * @param {object} chat - 聊天对象 (角色或群组)。
-     * @param {...object} messages - 要添加的一个或多个消息对象。
-     */
-    window.addMessageToChat = function(chat, ...messages) {
-        try {
-            if (!chat || messages.length === 0) return;
-            if (!Array.isArray(chat.history)) chat.history = [];
-
-            // 1. 将新消息添加到内存中的历史记录
-            chat.history.push(...messages);
-
-            // --- 核心修复①：同步"救生艇"机制 ---
-            // 立即、同步地将新消息写入 localStorage 作为紧急备份。
-            try {
-                const chatType = chat.members || chat.isGroup ? 'group' : 'private';
-                const bufferKey = `pendingMessages_${chatType}_${chat.id}`;
-                // 读取旧的备份，然后追加新消息
-                const existingBuffer = JSON.parse(localStorage.getItem(bufferKey) || '[]');
-                existingBuffer.push(...messages);
-                localStorage.setItem(bufferKey, JSON.stringify(existingBuffer));
-                console.log(`同步备份了 ${messages.length} 条消息到 localStorage`);
-            } catch (e) {
-                console.error("同步备份到 localStorage 失败:", e);
-            }
-            // --- 修复结束 ---
-
-            // 2. 正常触发异步"货轮"保存（这个逻辑不变，但现在它多了一个清理"救生艇"的任务）
-            if (window.dataStorage && typeof window.dataStorage.saveChatMessages === 'function') {
-                const historyToSave = [...chat.history]; // 复制一份当前历史
-                const chatType = chat.members || chat.isGroup ? 'group' : 'private';
-
-                // (这个函数现在是异步的，但我们不 await 它，让它在后台运行)
-                dataStorage.saveChatMessages(chat.id, chatType, historyToSave)
-                    .then(() => {
-                        console.log(`异步主存储成功: ${chat.name || chat.remarkName}`);
-                    })
-                    .catch(err => {
-                        console.error(`异步主存储失败: ${err}`);
-                    });
-            }
-
-            // 3. 修剪内存中的历史记录（不变）
-            if (chat.history.length > MAX_HISTORY_PER_CHAT) {
-                chat.history = chat.history.slice(chat.history.length - MAX_HISTORY_PER_CHAT);
-            }
-
-            // 4. 触发全局延时保存（不变）
-            if (typeof window.scheduleSaveData === 'function') {
-                window.scheduleSaveData();
-            }
-
-        } catch (e) {
-            console.error('addMessageToChat error:', e);
-        }
-    };
-    // ===============================================================
-    // END: 安全的消息添加与保存调度
-    // ===============================================================
-
         async function sendMessage() {
             // ▼▼▼ 新增：NAI 生图命令拦截 ▼▼▼
             const textInput = document.getElementById('message-input');
@@ -7535,15 +6740,14 @@ const message = {
 if (currentChatType === 'group') {
     message.senderId = 'user_me';
 }
-
-// 使用新的消息添加函数，替代原来的直接push和await saveData
-addMessageToChat(chat, message);
+chat.history.push(message);
 addMessageBubble(message, currentChatId, currentChatType);
 
 if (chat.history.length > 0 && chat.history.length % 100 === 0) {
     promptForBackupIfNeeded('history_milestone');
 }
 
+await saveData();
 renderChatList();
 
     // 新增：发送后清空引用状态
@@ -8615,7 +7819,7 @@ ${loadedModules.map(m => `
 
                 let messages = messageParts.map(part => {
                     const content = part.trim();
-
+                    
                     // 1. 检查是否是 NAI JSON (Constraint 4) - 保持 'text' 类型
                     if ((content.startsWith('{') && content.endsWith('}')) || (content.startsWith('[') && content.endsWith(']'))) {
                         try {
@@ -8630,13 +7834,13 @@ ${loadedModules.map(m => `
 
                     // 2. 检查是否是HTML (例如Bilibili卡片)
                     // 简单的HTML检查：以'<'开头并以'>'结尾，并且包含'</'（防止误判）
-                    if (content.startsWith('<') && content.endsWith('>') && content.includes('</')) {
+                    if (content.startsWith('<') && content.endsWith('>') && content.includes('</')) { 
                         // 尝试提取 char 属性，如果存在的话 (用于旧版卡片)
                         const charMatch = content.match(/<[a-z][a-z0-9]*\s+char="([^"]*)"/i);
                         const char = charMatch ? charMatch[1] : null;
                         return { type: 'html', content: content, char: char };
                     }
-
+                    
                     // 3. 否则，全部是 'text'
                     return { type: 'text', content: content, char: null };
                 });
@@ -11379,102 +10583,6 @@ function renderStickerGrid() {
         }
         // ▲▲▲ 新增结束 ▲▲▲
         }
-
-    // ===============================================================
-    // START: 可靠的保存调度 (V3.0 - 修复页面关闭数据丢失)
-    // (移植自 zyj章鱼机.html)
-    // ===============================================================
-    (function(){
-      // 防止脚本被重复执行
-      if (window.robustSaveInitialized) return;
-      window.robustSaveInitialized = true;
-
-      console.log('正在初始化可靠的数据保存模块...');
-
-      // 全局状态变量
-      const SAVE_DEBOUNCE_MS = 800; // 稍微延长延迟，减少频繁写入
-      let saveTimer = null;
-      let isSaving = false;
-
-      /**
-       * 调度一个延迟的保存操作。
-       * 这是常规的、对性能友好的保存方式。
-       */
-      window.scheduleSaveData = function() {
-        if (isSaving) return; // 如果正在保存，则忽略本次调度
-        if (saveTimer) clearTimeout(saveTimer);
-
-        saveTimer = setTimeout(async () => {
-          await flushSaveData();
-        }, SAVE_DEBOUNCE_MS);
-      };
-
-      /**
-       * 立即执行一次完整的保存操作。
-       * 这是用于页面关闭或切换后台时的紧急保存。
-       */
-      window.flushSaveData = async function() {
-        // 清除任何待处理的延迟保存
-        if (saveTimer) {
-          clearTimeout(saveTimer);
-          saveTimer = null;
-        }
-
-        if (isSaving) {
-          console.warn('保存操作正在进行中，本次强制保存已跳过。');
-          return;
-        }
-
-        isSaving = true;
-        console.log('开始执行数据保存...');
-
-        try {
-          if (typeof window.saveData === 'function') {
-            await window.saveData(); // 调用您文件中已有的全局保存函数
-            console.log('数据已成功保存！');
-          } else {
-            console.error('错误：找不到核心的 saveData() 函数。');
-          }
-        } catch (e) {
-          console.error('在执行 flushSaveData 期间发生错误:', e);
-        } finally {
-          isSaving = false;
-        }
-      };
-
-      /**
-       * 【核心修复】监听页面的可见性变化。
-       * 当用户切换标签页或将浏览器最小化时，'visibilitychange' 事件会触发。
-       * 此时页面状态变为 'hidden'，浏览器会提供一个短暂但可靠的时间窗口来完成操作。
-       */
-      document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'hidden') {
-          console.log('页面已切换到后台，触发紧急保存...');
-          // 此时不使用 await，因为我们只是想启动这个任务，不阻塞事件本身
-          flushSaveData();
-        }
-      });
-
-      /**
-       * 【最后防线】监听页面关闭或刷新事件。
-       * 这是一个尽力而为的尝试，虽然不可靠，但聊胜于无。
-       */
-      window.addEventListener('beforeunload', function(e) {
-        // 如果有待处理的延迟保存，立即执行它
-        if (saveTimer) {
-            console.log('页面即将卸载，强制执行最后的保存...');
-            // 在这个事件中，异步操作可能不会完成，但我们仍然尝试启动它
-            flushSaveData();
-        }
-      });
-
-      console.log('可靠的数据保存模块已成功加载并运行。');
-
-    })();
-    // ===============================================================
-    // END: 可靠的保存调度
-    // ===============================================================
-
        function setupPresetFeatures() {
            // API Presets
            const saveBtn = document.getElementById('api-save-preset');
@@ -11619,7 +10727,23 @@ function renderStickerGrid() {
            });
        }
 
-        
+        function setupWallpaperApp() {
+            const e = document.getElementById('wallpaper-upload'), t = document.getElementById('wallpaper-preview');
+            t.style.backgroundImage = `url(${db.wallpaper})`, t.textContent = '', e.addEventListener('change', async (a) => {
+                const n = a.target.files[0];
+                if (n) {
+                    try {
+                        const r = await compressImage(n, {quality: 0.85, maxWidth: 1080, maxHeight: 1920});
+                        db.wallpaper = r, applyWallpaper(r), t.style.backgroundImage = `url(${r})`;
+                        await saveData();
+                        showToast('壁纸更换成功！');
+                    } catch (s) {
+                        showToast('壁纸压缩失败，请重试');
+                    }
+                }
+            });
+        }
+
         // --- GROUP CHAT FUNCTIONS ---
         function setupGroupChatSystem() {
             createGroupBtn.addEventListener('click', () => {
@@ -12120,9 +11244,7 @@ function renderStickerGrid() {
                     dexieDB.groups.clear(),
                     dexieDB.worldBooks.clear(),
                     dexieDB.myStickers.clear(),
-                    dexieDB.globalSettings.clear(),
-                    dexieDB.renderers.clear(), // 新增
-                    dexieDB.rendererCategories.clear() // 新增
+                    dexieDB.globalSettings.clear()
                 ]);
                 showToast('正在清空旧数据...');
 
@@ -12191,9 +11313,6 @@ function renderStickerGrid() {
                 if (!db.naiPromptModules) db.naiPromptModules = [];
                 if (!db.naiGlobalPromptPresets) db.naiGlobalPromptPresets = [];
                 // ▲▲▲ 新增结束 ▲▲▲
-                // 新增渲染器数据初始化
-                if (!db.renderers) db.renderers = [];
-                if (!db.rendererCategories) db.rendererCategories = [];
 
 
                 // 4. Call the new saveData function which handles the new DB schema
@@ -14375,6 +13494,36 @@ function renderForumPosts(posts) {
             return block;
         }
 
+        function renderTutorialContent() {
+            const tutorialContentArea = document.getElementById('tutorial-content-area');
+            if (!tutorialContentArea) return;
+
+            const tutorials = [
+                {title: '写在前面', imageUrls: ['https://i.postimg.cc/7PgyMG9S/image.jpg']},
+                {
+                    title: '软件介绍',
+                    imageUrls: ['https://i.postimg.cc/VvsJRh6q/IMG-20250713-162647.jpg', 'https://i.postimg.cc/8P5FfxxD/IMG-20250713-162702.jpg', 'https://i.postimg.cc/3r94R3Sn/IMG-20250713-162712.jpg']
+                },
+                {
+                    title: '404',
+                    imageUrls: ['https://i.postimg.cc/x8scFPJW/IMG-20250713-162756.jpg', 'https://i.postimg.cc/pX6mfqtj/IMG-20250713-162809.jpg', 'https://i.postimg.cc/YScjV00q/IMG-20250713-162819.jpg', 'https://i.postimg.cc/13VfJw9j/IMG-20250713-162828.jpg']
+                },
+                {title: '404-群聊', imageUrls: ['https://i.postimg.cc/X7LSmRTJ/404.jpg']}
+            ];
+
+            const existingItems = tutorialContentArea.querySelectorAll('.tutorial-item');
+            existingItems.forEach(item => item.remove());
+
+            tutorials.forEach(tutorial => {
+                const item = document.createElement('div');
+                item.className = 'tutorial-item';
+                const imagesHtml = tutorial.imageUrls.map(url => `<img src="${url}" alt="${tutorial.title}教程图片" loading="lazy">`).join('');
+                item.innerHTML = `<div class="tutorial-header">${tutorial.title}</div><div class="tutorial-content">${imagesHtml}</div>`;
+                tutorialContentArea.appendChild(item);
+            });
+
+            renderUpdateLog();
+        }
 
         async function exportWorldBooks() {
             try {
@@ -14485,34 +13634,4 @@ function renderForumPosts(posts) {
         }
 
     });
-
-    // ===============================================================
-    // START: 修复聊天输入框弹出密码填充 (移植自 zyj章鱼机.html)
-    // ===============================================================
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- 修复聊天输入框弹出密码填充的最终方案 ---
-        const chatInputs = [
-            document.getElementById('message-input'),
-            document.getElementById('wechat-message-input')
-        ];
-
-        chatInputs.forEach(input => {
-            if (input) {
-                // 用户开始输入时
-                input.addEventListener('focus', () => {
-                    // 临时改为 search 类型，可以有效避免大多数浏览器的密码填充
-                    input.setAttribute('type', 'search');
-                });
-
-                // 用户离开输入框时
-                input.addEventListener('blur', () => {
-                    // 恢复为 text 类型，以防止浏览器应用奇怪的搜索框样式
-                    input.setAttribute('type', 'text');
-                });
-            }
-        });
-    });
-    // ===============================================================
-    // END: 修复密码填充
-    // ===============================================================
 
