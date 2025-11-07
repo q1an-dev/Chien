@@ -5011,161 +5011,6 @@
         }
         let loadingBtn = false
 
-        function renderTutorialContent() {
-            const tutorials = [
-                {title: '写在前面', imageUrls: ['https://i.postimg.cc/7PgyMG9S/image.jpg']},
-                {
-                    title: '软件介绍',
-                    imageUrls: ['https://i.postimg.cc/VvsJRh6q/IMG-20250713-162647.jpg', 'https://i.postimg.cc/8P5FfxxD/IMG-20250713-162702.jpg', 'https://i.postimg.cc/3r94R3Sn/IMG-20250713-162712.jpg']
-                },
-                {
-                    title: '404',
-                    imageUrls: ['https://i.postimg.cc/x8scFPJW/IMG-20250713-162756.jpg', 'https://i.postimg.cc/pX6mfqtj/IMG-20250713-162809.jpg', 'https://i.postimg.cc/YScjV00q/IMG-20250713-162819.jpg', 'https://i.postimg.cc/13VfJw9j/IMG-20250713-162828.jpg']
-                },
-                {title: '404-群聊', imageUrls: ['https://i.postimg.cc/X7LSmRTJ/404.jpg']}
-            ];
-            tutorialContentArea.innerHTML = '';
-            renderUpdateLog();
-            tutorials.forEach(tutorial => {
-                const item = document.createElement('div');
-                item.className = 'tutorial-item';
-                const imagesHtml = tutorial.imageUrls.map(url => `<img src="${url}" alt="${tutorial.title}教程图片">`).join('');
-                item.innerHTML = `<div class="tutorial-header">${tutorial.title}</div><div class="tutorial-content">${imagesHtml}</div>`;
-                tutorialContentArea.appendChild(item);
-            });
-
-            const backupDataBtn = document.createElement('button');
-            backupDataBtn.className = 'btn btn-primary';
-            backupDataBtn.style.fontFamily = 'var(--font-family)';
-            backupDataBtn.textContent = '备份数据';
-            backupDataBtn.disabled = loadingBtn
-
-            backupDataBtn.addEventListener('click', async () => {
-                if(loadingBtn){
-                    return
-                }
-                loadingBtn = true
-                try {
-                    showToast('正在准备导出数据...');
-
-                    // 创建完整的数据备份对象
-                    const fullBackupData = await createFullBackupData();
-
-                    const jsonString = JSON.stringify(fullBackupData);
-                    const dataBlob = new Blob([jsonString]);
-
-                    // Compress the data using Gzip
-                    const compressionStream = new CompressionStream('gzip');
-                    const compressedStream = dataBlob.stream().pipeThrough(compressionStream);
-                    const compressedBlob = await new Response(compressedStream, { headers: { 'Content-Type': 'application/octet-stream' } }).blob();
-
-                    const url = URL.createObjectURL(compressedBlob);
-                    const a = document.createElement('a');
-                    const now = new Date();
-                    const date = now.toISOString().slice(0, 10);
-                    const time = now.toTimeString().slice(0, 8).replace(/:/g, '');
-                    a.href = url;
-                    a.download = `章鱼喷墨_备份数据_${date}_${time}.ee`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    loadingBtn = false
-                    showToast('聊天记录导出成功');
-                }catch (e){
-                    loadingBtn = false
-                    showToast(`导出失败, 发生错误: ${e.message}`);
-                    console.error('导出错误详情:', e);
-                }
-            });
-            const importDataBtn = document.createElement('label');
-            importDataBtn.className = 'btn btn-neutral';
-            importDataBtn.style.fontFamily = 'var(--font-family)';
-            importDataBtn.textContent = '导入数据';
-            importDataBtn.style.marginTop = '0' // 按钮行间距由flex gap控制
-            importDataBtn.style.display = 'block'
-            importDataBtn.disabled = loadingBtn;
-            importDataBtn.setAttribute('for', 'import-data-input')
-            document.querySelector('#import-data-input').addEventListener('change', async (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                if(confirm('此操作将覆盖当前所有聊天记录和设置。此操作不可撤销。确定要继续吗？')){
-                    try {
-                        showToast('正在导入数据，请稍候...');
-
-                        // Decompress the file stream
-                        const decompressionStream = new DecompressionStream('gzip');
-                        const decompressedStream = file.stream().pipeThrough(decompressionStream);
-                        const jsonString = await new Response(decompressedStream).text();
-
-                        let data = JSON.parse(jsonString);
-
-                        // 检测数据格式并进行兼容性处理
-                        const importResult = await importBackupData(data);
-
-                        if (importResult.success) {
-                            showToast(`数据导入成功！${importResult.message} 应用即将刷新。`);
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            showToast(`导入失败: ${importResult.error}`);
-                        }
-                    } catch (error) {
-                        console.error("导入失败:", error);
-                        showToast(`解压或解析文件时发生错误: ${error.message}`);
-                    } finally {
-                        event.target.value = null;
-                    }
-                }else {
-                    event.target.value = null;
-                }
-
-            })
-
-            // --- 新增：创建第一行按钮容器 ---
-            const buttonRow1 = document.createElement('div');
-            buttonRow1.style.display = 'flex';
-            buttonRow1.style.gap = '15px'; // 按钮之间的间距
-            buttonRow1.style.width = '100%';
-
-            // --- 新增：让按钮在flex布局中平分宽度 ---
-            backupDataBtn.style.flex = '1';
-            backupDataBtn.style.minWidth = '0'; // 允许按钮缩放
-            importDataBtn.style.flex = '1';
-            importDataBtn.style.minWidth = '0';
-            
-            // 将 [备份] 和 [导入] 按钮添加到第一行容器中
-            buttonRow1.appendChild(backupDataBtn);
-            buttonRow1.appendChild(importDataBtn);
-
-            // 将第一行容器添加到教程区域
-            tutorialContentArea.appendChild(buttonRow1);
-
-            // --- 新增：清除缓存并刷新按钮 ---
-            const clearCacheBtn = document.createElement('button');
-            clearCacheBtn.className = 'btn btn-secondary'; // 使用 btn-secondary (蓝色)
-            clearCacheBtn.style.fontFamily = 'var(--font-family)';
-            clearCacheBtn.textContent = '清除缓存并刷新';
-            clearCacheBtn.style.marginTop = '15px'; // 与导入/备份按钮保持一致的间距
-            clearCacheBtn.disabled = loadingBtn; // 与导入/备份按钮共享加载状态
-
-            clearCacheBtn.addEventListener('click', () => {
-                if(loadingBtn) {
-                    return;
-                }
-                // 询问用户以防止误触
-                if (confirm('这将强制清除本地缓存并刷新页面，以获取最新版本。确定要继续吗？')) {
-                    showToast('正在清除缓存并刷新...');
-                    // location.reload(true) 是强制刷新页面的关键
-                    location.reload(true);
-                }
-            });
-            tutorialContentArea.appendChild(clearCacheBtn);
-            // --- 新增结束 ---
-        }
-
         // --- Chat List & Chat Room ---
         function setupChatListScreen() {
             renderChatList();
@@ -13514,6 +13359,10 @@ function renderForumPosts(posts) {
             const existingItems = tutorialContentArea.querySelectorAll('.tutorial-item');
             existingItems.forEach(item => item.remove());
 
+            // 清理旧的按钮（如果存在）
+            const existingButtons = tutorialContentArea.querySelectorAll('.btn, [class*="buttonRow"]');
+            existingButtons.forEach(btn => btn.remove());
+
             tutorials.forEach(tutorial => {
                 const item = document.createElement('div');
                 item.className = 'tutorial-item';
@@ -13523,6 +13372,145 @@ function renderForumPosts(posts) {
             });
 
             renderUpdateLog();
+
+            // --- 新增：备份数据按钮 ---
+            const backupDataBtn = document.createElement('button');
+            backupDataBtn.className = 'btn btn-primary';
+            backupDataBtn.style.fontFamily = 'var(--font-family)';
+            backupDataBtn.textContent = '备份数据';
+            backupDataBtn.disabled = loadingBtn;
+
+            backupDataBtn.addEventListener('click', async () => {
+                if(loadingBtn){
+                    return
+                }
+                loadingBtn = true
+                try {
+                    showToast('正在准备导出数据...');
+
+                    // 创建完整的数据备份对象
+                    const fullBackupData = await createFullBackupData();
+
+                    const jsonString = JSON.stringify(fullBackupData);
+                    const dataBlob = new Blob([jsonString]);
+
+                    // Compress the data using Gzip
+                    const compressionStream = new CompressionStream('gzip');
+                    const compressedStream = dataBlob.stream().pipeThrough(compressionStream);
+                    const compressedBlob = await new Response(compressedStream, { headers: { 'Content-Type': 'application/octet-stream' } }).blob();
+
+                    const url = URL.createObjectURL(compressedBlob);
+                    const a = document.createElement('a');
+                    const now = new Date();
+                    const date = now.toISOString().slice(0, 10);
+                    const time = now.toTimeString().slice(0, 8).replace(/:/g, '');
+                    a.href = url;
+                    a.download = `章鱼喷墨_备份数据_${date}_${time}.ee`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    loadingBtn = false
+                    showToast('聊天记录导出成功');
+                }catch (e){
+                    loadingBtn = false
+                    showToast(`导出失败, 发生错误: ${e.message}`);
+                    console.error('导出错误详情:', e);
+                }
+            });
+
+            // --- 新增：导入数据按钮 ---
+            const importDataBtn = document.createElement('label');
+            importDataBtn.className = 'btn btn-neutral';
+            importDataBtn.style.fontFamily = 'var(--font-family)';
+            importDataBtn.textContent = '导入数据';
+            importDataBtn.style.marginTop = '0'; // 按钮行间距由flex gap控制
+            importDataBtn.style.display = 'block';
+            importDataBtn.disabled = loadingBtn;
+            importDataBtn.setAttribute('for', 'import-data-input');
+            
+            // 移除旧的事件监听器（如果存在），避免重复绑定
+            const importInput = document.querySelector('#import-data-input');
+            const newImportInput = importInput.cloneNode(true);
+            importInput.parentNode.replaceChild(newImportInput, importInput);
+            
+            newImportInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if(confirm('此操作将覆盖当前所有聊天记录和设置。此操作不可撤销。确定要继续吗？')){
+                    try {
+                        showToast('正在导入数据，请稍候...');
+
+                        // Decompress the file stream
+                        const decompressionStream = new DecompressionStream('gzip');
+                        const decompressedStream = file.stream().pipeThrough(decompressionStream);
+                        const jsonString = await new Response(decompressedStream).text();
+
+                        let data = JSON.parse(jsonString);
+
+                        // 检测数据格式并进行兼容性处理
+                        const importResult = await importBackupData(data);
+
+                        if (importResult.success) {
+                            showToast(`数据导入成功！${importResult.message} 应用即将刷新。`);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast(`导入失败: ${importResult.error}`);
+                        }
+                    } catch (error) {
+                        console.error("导入失败:", error);
+                        showToast(`解压或解析文件时发生错误: ${error.message}`);
+                    } finally {
+                        event.target.value = null;
+                    }
+                }else {
+                    event.target.value = null;
+                }
+            });
+
+            // --- 新增：创建第一行按钮容器 ---
+            const buttonRow1 = document.createElement('div');
+            buttonRow1.style.display = 'flex';
+            buttonRow1.style.gap = '15px'; // 按钮之间的间距
+            buttonRow1.style.width = '100%';
+
+            // --- 新增：让按钮在flex布局中平分宽度 ---
+            backupDataBtn.style.flex = '1';
+            backupDataBtn.style.minWidth = '0'; // 允许按钮缩放
+            importDataBtn.style.flex = '1';
+            importDataBtn.style.minWidth = '0';
+            
+            // 将 [备份] 和 [导入] 按钮添加到第一行容器中
+            buttonRow1.appendChild(backupDataBtn);
+            buttonRow1.appendChild(importDataBtn);
+
+            // 将第一行容器添加到教程区域
+            tutorialContentArea.appendChild(buttonRow1);
+
+            // --- 新增：清除缓存并刷新按钮 ---
+            const clearCacheBtn = document.createElement('button');
+            clearCacheBtn.className = 'btn btn-secondary'; // 使用 btn-secondary (蓝色)
+            clearCacheBtn.style.fontFamily = 'var(--font-family)';
+            clearCacheBtn.textContent = '清除缓存并刷新';
+            clearCacheBtn.style.marginTop = '15px'; // 与导入/备份按钮保持一致的间距
+            clearCacheBtn.disabled = loadingBtn; // 与导入/备份按钮共享加载状态
+
+            clearCacheBtn.addEventListener('click', () => {
+                if(loadingBtn) {
+                    return;
+                }
+                // 询问用户以防止误触
+                if (confirm('这将强制清除本地缓存并刷新页面，以获取最新版本。确定要继续吗？')) {
+                    showToast('正在清除缓存并刷新...');
+                    // location.reload(true) 是强制刷新页面的关键
+                    location.reload(true);
+                }
+            });
+            tutorialContentArea.appendChild(clearCacheBtn);
+            // --- 新增结束 ---
         }
 
         async function exportWorldBooks() {
