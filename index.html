@@ -28,12 +28,29 @@
       <path d="M0.5,1 C0.1,0.8,0,0.45,0.5,0.2 C1,0.45,0.9,0.8,0.5,1 Z" />
     </clipPath>
   </defs>
+  
+  <symbol id="wallet-icon" viewBox="0 0 24 24">
+    <path d="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.3 1-0.92 1-1.62v-6.2c0-.7-.41-1.32-1-1.62zM19 19H5V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2zm-4-4h-2v-2h2v2zm4-4v6h-8v-6h8z"></path>
+  </symbol>
 </svg>
 <div class="phone-screen">
-    <div id="home-screen" class="screen active"></div>
+    <div id="home-container" class="screen active">
+        <div class="home-page-wrapper">
+            <div id="home-screen" class="home-page active">
+            </div>
+            <div id="home-screen-2" class="home-page">
+            </div>
+        </div>
+        <div class="home-page-indicator">
+            <span class="dot active" data-index="0"></span>
+            <span class="dot" data-index="1"></span>
+        </div>
+        <div class="dock">
+        </div>
+    </div>
     <div id="chat-list-screen" class="screen">
         <header class="app-header">
-            <button class="back-btn" data-target="home-screen">‹</button>
+            <button class="back-btn" data-target="home-container">‹</button>
             <div class="title-container">
                 <h1 class="title">聊天</h1>
             </div>
@@ -199,7 +216,7 @@
   
     <div id="world-book-screen" class="screen">
         <header class="app-header" id="world-book-header-normal">
-            <button class="back-btn" data-target="home-screen">‹</button>
+            <button class="back-btn" data-target="home-container">‹</button>
             <div class="title-container">
                 <h1 class="title">世界书</h1>
             </div>
@@ -294,10 +311,91 @@
         </main>
     </div>
     <div id="api-settings-screen" class="screen"></div>
-    <div id="wallpaper-screen" class="screen"></div>
-    <div id="font-settings-screen" class="screen"></div>
+      <div id="font-settings-screen" class="screen"></div>
     <div id="customize-screen" class="screen"></div>
     <div id="tutorial-screen" class="screen"></div>
+    <div id="wallpaper-screen" class="screen"></div>
+    <div id="renderer-screen" class="screen">
+        <header class="app-header">
+            <button class="back-btn" data-target="home-container">‹</button>
+            <div class="title-container">
+                <h1 class="title">渲染器</h1>
+            </div>
+            <div class="action-btn-group">
+                <button class="action-btn" id="add-renderer-category-btn" title="添加分类">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                </button>
+                <button class="action-btn" id="add-renderer-rule-btn" title="添加规则">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+        <main class="content" style="padding: 0; display: flex; flex-direction: column;">
+            <div id="renderer-category-tabs" class="sticker-category-tabs">
+            </div>
+
+            <div class="renderer-rule-list-container">
+                <ul class="list-container" id="renderer-rule-list">
+                </ul>
+                <div class="placeholder-text" id="no-renderer-rules-placeholder" style="display: none;">
+                    <p>该分类下没有规则</p>
+                    <p>点击右上角的"+"创建一条吧！</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="edit-renderer-rule-modal" class="modal-overlay">
+        <div class="modal-window" style="max-width: 95%;">
+            <h3>创建/编辑渲染规则</h3>
+            <form id="edit-renderer-rule-form">
+                <input type="hidden" id="renderer-rule-id">
+                <div class="form-group">
+                    <label for="renderer-rule-name">规则名称</label>
+                    <input type="text" id="renderer-rule-name" placeholder="为你的规则起个名字" required>
+                </div>
+                <div class="form-group">
+                    <label>查找正则表达式 (Regex)</label>
+                    <textarea id="renderer-rule-regex" rows="3" placeholder="例如：<L>([^<]+)<\/L>" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="renderer-rule-html">HTML 替换代码 (使用 $1, $2 引用捕获组)</label>
+                    <textarea id="renderer-rule-html" rows="5" placeholder="例如：<div style='color:blue;'>$1</div>"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>绑定角色 (规则仅对选中的角色生效)</label>
+                    <div id="renderer-char-binding-list" class="char-binding-list"></div>
+                </div>
+                <hr style="border:none; border-top:1px solid #f0f0f0; margin: 20px 0;">
+                <div class="form-group">
+                    <label for="renderer-rule-test-input">测试预览</label>
+                    <textarea id="renderer-rule-test-input" rows="3" placeholder="在此输入要测试的内容，例如：<L>你好</L>"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>预览效果</label>
+                    <div id="renderer-rule-preview-output" style="border: 1px solid #eee; padding: 15px; border-radius: 8px; min-height: 50px; background: #f9f9f9; line-height: 1.6; word-wrap: break-word;"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">保存规则</button>
+            </form>
+        </div>
+    </div>
+    <div id="renderer-category-modal" class="modal-overlay">
+        <div class="modal-window">
+            <h3>创建新分类</h3>
+            <form id="renderer-category-form">
+                <div class="form-group">
+                    <label for="renderer-category-name">分类名称</label>
+                    <input type="text" id="renderer-category-name" placeholder="例如：通用效果、角色专属" required>
+                </div>
+                <button type="submit" class="btn btn-primary">创建</button>
+            </form>
+        </div>
+    </div>
     <div id="toast-notification" class="toast">
         <img class="toast-avatar" src="" alt="avatar">
         <div class="toast-content">
@@ -858,7 +956,7 @@
 
    <div id="forum-screen" class="screen">
     <header class="app-header">
-        <button class="back-btn" data-target="home-screen">←</button>
+        <button class="back-btn" data-target="home-container">←</button>
         <div class="title-container">
             <h1 class="title">论坛</h1>
         </div>
@@ -894,7 +992,7 @@
 
 <div id="storage-analysis-screen" class="screen">
     <header class="app-header">
-        <button class="back-btn" data-target="home-screen">‹</button>
+        <button class="back-btn" data-target="home-container">‹</button>
         <div class="title-container">
             <h1 class="title">存储分析</h1>
         </div>
@@ -1039,7 +1137,7 @@
     </div>
 <div id="pomodoro-screen" class="screen">
     <header class="app-header">
-        <button class="back-btn" data-target="home-screen">‹</button>
+        <button class="back-btn" data-target="home-container">‹</button>
         <div class="title-container">
             <h1 class="title">专注任务</h1>
         </div>
@@ -1350,6 +1448,7 @@
 <div id="global-css-presets-modal" class="modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;z-index:9999;"><div class="modal-window" style="max-width:520px;background:var(--panel-bg,#fff);padding:14px;border-radius:10px;box-shadow:0 12px 36px rgba(10,10,20,0.12);"><h3 style="margin:0 0 10px 0;font-size:16px;">管理全局CSS预设</h3><div id="global-css-presets-list" style="max-height:340px; overflow:auto; margin-bottom:12px;"></div><div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;"><button type="button" id="global-css-close-modal" class="btn btn-primary" style="padding:8px 12px;border-radius:8px;">关闭</button></div></div></div>
 <input type="file" id="import-data-input" accept=".ee" style="display: none;">
 <input type="file" id="import-global-css-input" accept=".css" style="display: none;">
+<input type="file" id="renderer-import-input" accept=".json" style="display: none;" multiple>
 <div id="storage-screen" class="screen"></div>
 <input type="file" id="character-card-input" accept="image/png,application/json" style="display: none;">
 <input type="file" id="import-world-books-file-input" accept=".json" style="display: none;">
@@ -1384,6 +1483,8 @@
         </div>
     </div>
     <style>
+        /* (renderer-options-grid 已删除) */
+
         /* --- Update Log Modal Styles --- */
         #update-log-modal .modal-window {
             max-width: 380px;
