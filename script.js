@@ -14487,33 +14487,30 @@ function renderForumPosts(posts) {
     });
 
     // ===============================================================
-    // START: 修复聊天输入框弹出密码填充 (V2 - Readonly 方案)
+    // START: 修复聊天输入框弹出密码填充 (移植自 zyj章鱼机.html)
     // ===============================================================
     document.addEventListener('DOMContentLoaded', () => {
         // --- 修复聊天输入框弹出密码填充的最终方案 ---
-        // 这是一个更强效的技巧，用于对抗如 Via 浏览器等基于 WebView 的激进自动填充。
-        // 原理：密码管理器会忽略 readonly 属性的输入框。
-        // 我们在用户点击(focus)时才移除 readonly，此时自动填充已被跳过。
-        
-        const chatInput = document.getElementById('message-input');
-        
-        if (chatInput) {
-            // 1. 页面加载时，立即将其设为只读
-            // 注意：我们不再需要 type="search" 的技巧了
-            chatInput.setAttribute('readonly', 'readonly');
+        const chatInputs = [
+            document.getElementById('message-input'),
+            document.getElementById('wechat-message-input')
+        ];
 
-            // 2. 当用户点击输入框时
-            chatInput.addEventListener('focus', () => {
-                // 立即移除只读属性，让用户可以输入
-                chatInput.removeAttribute('readonly');
-            });
+        chatInputs.forEach(input => {
+            if (input) {
+                // 用户开始输入时
+                input.addEventListener('focus', () => {
+                    // 临时改为 search 类型，可以有效避免大多数浏览器的密码填充
+                    input.setAttribute('type', 'search');
+                });
 
-            // 3. (可选但推荐) 当用户点击其他地方(blur)时，再次设为只读
-            // 这可以防止用户在页面上点击其他地方后，密码栏又弹出来
-            chatInput.addEventListener('blur', () => {
-                chatInput.setAttribute('readonly', 'readonly');
-            });
-        }
+                // 用户离开输入框时
+                input.addEventListener('blur', () => {
+                    // 恢复为 text 类型，以防止浏览器应用奇怪的搜索框样式
+                    input.setAttribute('type', 'text');
+                });
+            }
+        });
     });
     // ===============================================================
     // END: 修复密码填充
