@@ -5808,7 +5808,7 @@
             importDataBtn.className = 'btn btn-neutral';
             importDataBtn.style.fontFamily = 'var(--font-family)';
             importDataBtn.textContent = '导入数据';
-            importDataBtn.style.marginTop = '15px'
+            importDataBtn.style.marginTop = '0' // 按钮行间距由flex gap控制
             importDataBtn.style.display = 'block'
             importDataBtn.disabled = loadingBtn;
             importDataBtn.setAttribute('for', 'import-data-input')
@@ -5850,8 +5850,46 @@
 
             })
 
-            tutorialContentArea.appendChild(backupDataBtn);
-            tutorialContentArea.appendChild(importDataBtn);
+            // --- 新增：创建第一行按钮容器 ---
+            const buttonRow1 = document.createElement('div');
+            buttonRow1.style.display = 'flex';
+            buttonRow1.style.gap = '15px'; // 按钮之间的间距
+            buttonRow1.style.width = '100%';
+
+            // --- 新增：让按钮在flex布局中平分宽度 ---
+            backupDataBtn.style.flex = '1';
+            backupDataBtn.style.minWidth = '0'; // 允许按钮缩放
+            importDataBtn.style.flex = '1';
+            importDataBtn.style.minWidth = '0';
+            
+            // 将 [备份] 和 [导入] 按钮添加到第一行容器中
+            buttonRow1.appendChild(backupDataBtn);
+            buttonRow1.appendChild(importDataBtn);
+
+            // 将第一行容器添加到教程区域
+            tutorialContentArea.appendChild(buttonRow1);
+
+            // --- 新增：清除缓存并刷新按钮 ---
+            const clearCacheBtn = document.createElement('button');
+            clearCacheBtn.className = 'btn btn-secondary'; // 使用 btn-secondary (蓝色)
+            clearCacheBtn.style.fontFamily = 'var(--font-family)';
+            clearCacheBtn.textContent = '清除缓存并刷新';
+            clearCacheBtn.style.marginTop = '15px'; // 与导入/备份按钮保持一致的间距
+            clearCacheBtn.disabled = loadingBtn; // 与导入/备份按钮共享加载状态
+
+            clearCacheBtn.addEventListener('click', () => {
+                if(loadingBtn) {
+                    return;
+                }
+                // 询问用户以防止误触
+                if (confirm('这将强制清除本地缓存并刷新页面，以获取最新版本。确定要继续吗？')) {
+                    showToast('正在清除缓存并刷新...');
+                    // location.reload(true) 是强制刷新页面的关键
+                    location.reload(true);
+                }
+            });
+            tutorialContentArea.appendChild(clearCacheBtn);
+            // --- 新增结束 ---
         }
 
         // --- Chat List & Chat Room ---
