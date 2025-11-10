@@ -6352,3 +6352,24 @@ border-top: none;
 #world-book-screen.multi-select-active .content {
     padding-bottom: 70px; /* (与聊天多选栏高度一致) */
 }
+
+/* --- NEW: Peek Character Select Screen --- */
+#peek-character-select-screen .content {
+    padding: 10px 0 0 0;
+}
+
+/* 简化版列表项，只显示头像和名称 */
+#peek-select-list-container .list-item {
+    padding: 12px 20px; /* 增加垂直内边距 */
+}
+
+#peek-select-list-container .item-details {
+    /* 移除 item-preview 相关的空间 */
+    display: flex;
+    align-items: center; /* 垂直居中名称 */
+    height: 50px; /* 与头像高度匹配 */
+}
+
+#peek-select-list-container .item-name {
+    font-size: 17px; /* 稍大字体 */
+}

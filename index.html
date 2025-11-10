@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.0.1">
     <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/BQ2HxQtJ/Chien.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://i.postimg.cc/BQ2HxQtJ/Chien.png">
     <link rel="shortcut icon" href="https://i.postimg.cc/BQ2HxQtJ/Chien.png">
@@ -75,9 +75,6 @@
                 </div>
             </div>
             <div class="action-btn-group">
-                <button class="action-btn" id="peek-btn">
-                    <img src="https://i.postimg.cc/m2DRpk7v/chan-39.png" alt="偷看" style="width: 28px; height: 28px;">
-                </button>
                 <button class="action-btn" id="chat-settings-btn"><img src="https://i.postimg.cc/nhwP4pQy/chan-73.png"
                                                                        alt="设置"></button>
             </div>
@@ -298,7 +295,6 @@
         </main>
     </div>
     <div id="api-settings-screen" class="screen"></div>
-    <div id="wallpaper-screen" class="screen"></div>
     <div id="font-settings-screen" class="screen"></div>
     <div id="customize-screen" class="screen"></div>
     <div id="tutorial-screen" class="screen"></div>
@@ -807,6 +803,24 @@
         </main>
     </div>
 
+    <div id="peek-character-select-screen" class="screen">
+        <header class="app-header">
+            <button class="back-btn" data-target="home-screen">‹</button>
+            <div class="title-container">
+                <h1 class="title">选择查看对象</h1>
+            </div>
+            <div class="placeholder"></div>
+        </header>
+        <main class="content">
+            <ul class="list-container" id="peek-select-list-container">
+                </ul>
+            <div class="placeholder-text" id="no-peek-characters-placeholder" style="display: none;">
+                <p>还没有可以查看的角色...</p>
+                <p>请先创建一个私聊角色吧！</p>
+            </div>
+        </main>
+    </div>
+
     <!-- Peek Steps App Screen -->
     <div id="peek-steps-screen" class="screen">
         <header class="app-header">
@@ -849,7 +863,7 @@
 
     <div id="peek-screen" class="screen">
         <header class="app-header">
-            <button class="back-btn" data-target="chat-room-screen">‹</button>
+            <button class="back-btn" data-target="home-screen">‹</button>
             <div class="title-container">
                 <h1 class="title">Ta的手机</h1>
             </div>
@@ -1853,7 +1867,7 @@
 
 <div id="font-presets-modal" class="modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;z-index:9999;"><div class="modal-window" style="max-width:520px;background:var(--panel-bg,#fff);padding:14px;border-radius:10px;box-shadow:0 12px 36px rgba(10,10,20,0.12);"><h3 style="margin:0 0 10px 0;font-size:16px;">管理字体预设</h3><div id="font-presets-list" style="max-height:340px; overflow:auto; margin-bottom:12px;"></div><div style="display:flex;gap:8px;justify-content:flex-end;"><button type="button" id="font-close-modal" class="btn btn-primary" style="padding:8px 12px;border-radius:8px;">关闭</button></div></div></div>
 
-    <script src="script.js" defer></script>
+    <script src="script.js?v=1.0.1" defer></script>
 </body>
 
 </html>

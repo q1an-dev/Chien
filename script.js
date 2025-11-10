@@ -222,8 +222,7 @@
     </div>
 </div>
 <button type="submit" class="btn btn-primary" id="save-btn"><span class="btn-text">保 存</span><div class="spinner"></div></button></form></main>`;
-        document.getElementById('wallpaper-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">更换壁纸</h1></div><div class="placeholder"></div></header><main class="content"><div class="wallpaper-preview" id="wallpaper-preview"><span>当前壁纸预览</span></div><input type="file" id="wallpaper-upload" accept="image/*" style="display: none;"><label for="wallpaper-upload" class="btn btn-primary">从相册选择新壁纸</label></main>`;
-        document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-preset-select">字体预设</label><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><select id="font-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;"><option value="">— 选择预设 —</option></select><button type="button" id="font-save-preset" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button><button type="button" id="font-manage-presets" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button></div></div><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">保存并应用</button><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 0;">恢复默认字体</button></form></main>`;
+             document.getElementById('font-settings-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">字体设置</h1></div><div class="placeholder"></div></header><main class="content"><form id="font-settings-form"><div class="form-group"><label for="font-preset-select">字体预设</label><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><select id="font-preset-select" style="flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid #fce4ec;background-color:#fff;"><option value="">— 选择预设 —</option></select><button type="button" id="font-save-preset" class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">另存</button><button type="button" id="font-manage-presets" class="btn btn-neutral" style="flex-shrink:0;white-space:nowrap;min-width:auto;width:auto;margin:0;">管理</button></div></div><div class="form-group"><label for="font-url">字体链接 (ttf, woff, woff2)</label><input type="url" id="font-url" placeholder="https://.../font.ttf" required></div><button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">保存并应用</button><button type="button" class="btn btn-neutral" id="restore-default-font-btn" style="margin-top: 0;">恢复默认字体</button></form></main>`;
         document.getElementById('customize-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">主屏幕自定义</h1></div><div class="placeholder"></div></header><main class="content"><form id="customize-form"></form></main>`;
         document.getElementById('tutorial-screen').innerHTML = `<header class="app-header"><button class="back-btn" data-target="home-screen">‹</button><div class="title-container"><h1 class="title">教程</h1></div><div class="placeholder"></div></header><main class="content" id="tutorial-content-area"></main>`;
 
@@ -295,8 +294,8 @@
                const defaultIcons = {
             'chat-list-screen': {name: '404', url: 'https://i.postimg.cc/VvQB8dQT/chan-143.png'},
             'api-settings-screen': {name: 'api', url: 'https://i.postimg.cc/50FqT8GL/chan-125.png'},
-            'wallpaper-screen': {name: '壁纸', url: 'https://i.postimg.cc/3wqFttL3/chan-90.png'},
-            'world-book-screen': {name: '世界书', url: 'https://i.postimg.cc/prCWkrKT/chan-74.png'},
+                        'world-book-screen': {name: '世界书', url: 'https://i.postimg.cc/prCWkrKT/chan-74.png'},
+            'peek-select-btn': {name: '查手机', url: 'https://i.postimg.cc/m2DRpk7v/chan-39.png'}, // <-- NEW
             'customize-screen': {name: '自定义', url: 'https://i.postimg.cc/vZVdC7gt/chan-133.png'},
             'font-settings-screen': {name: '字体', url: 'https://i.postimg.cc/FzVtC0x4/chan-21.png'},
             'tutorial-screen': {name: '教程', url: 'https://i.postimg.cc/6QgNzCFf/chan-118.png'},
@@ -2035,8 +2034,7 @@
             setupChatRoom();
             setupChatSettings();
             setupApiSettingsApp();
-            setupWallpaperApp();
-            await setupStickerSystem();
+                        await setupStickerSystem();
             setupPresetFeatures();
             setupVoiceMessageSystem();
             setupPhotoVideoSystem();
@@ -2064,6 +2062,7 @@
             setupPomodoroGlobalSettings(); // NEW: Setup global settings
             setupInsWidgetAvatarModal();
             setupHeartPhotoModal();
+            setupPeekCharacterSelectScreen(); // <-- 新增
         };
 
         function setupInsWidgetAvatarModal() {
@@ -2747,30 +2746,30 @@
         }
 
         function setupPeekFeature() {
-            const peekBtn = document.getElementById('peek-btn');
-            const peekConfirmModal = document.getElementById('peek-confirm-modal');
-            const peekConfirmYes = document.getElementById('peek-confirm-yes');
-            const peekConfirmNo = document.getElementById('peek-confirm-no');
+            // const peekBtn = document.getElementById('peek-btn'); // <-- 已在 setupChatRoom() 中删除，此处无需操作
+            // const peekConfirmModal = document.getElementById('peek-confirm-modal'); // <-- 删除
+            // const peekConfirmYes = document.getElementById('peek-confirm-yes'); // <-- 删除
+            // const peekConfirmNo = document.getElementById('peek-confirm-no'); // <-- 删除
             const peekSettingsBtn = document.getElementById('peek-settings-btn');
             const peekWallpaperModal = document.getElementById('peek-wallpaper-modal');
             const peekWallpaperForm = document.getElementById('peek-wallpaper-form');
             const peekWallpaperUpload = document.getElementById('peek-wallpaper-upload');
             const peekWallpaperPreview = document.getElementById('peek-wallpaper-preview');
 
-            peekBtn?.addEventListener('click', () => {
-                peekConfirmModal.classList.add('visible');
-            });
+            // peekBtn?.addEventListener('click', () => { // <-- 已在 setupChatRoom() 中删除
+            //     peekConfirmModal.classList.add('visible');
+            // });
 
-            peekConfirmNo?.addEventListener('click', () => {
-                peekConfirmModal.classList.remove('visible');
-            });
+            // peekConfirmNo?.addEventListener('click', () => { // <-- 删除
+            //     peekConfirmModal.classList.remove('visible'); // <-- 删除
+            // }); // <-- 删除
 
-            peekConfirmYes?.addEventListener('click', () => {
-                peekConfirmModal.classList.remove('visible');
-                peekContentCache = {}; // Clear cache for new session
-                renderPeekScreen(); // Render before switching
-                switchScreen('peek-screen');
-            });
+            // peekConfirmYes?.addEventListener('click', () => { // <-- 删除
+            //     peekConfirmModal.classList.remove('visible'); // <-- 删除
+            //     peekContentCache = {}; // Clear cache for new session // <-- 删除
+            //     renderPeekScreen(); // Render before switching // <-- 删除
+            //     switchScreen('peek-screen'); // <-- 删除
+            // }); // <-- 删除
 
             // New simplified settings functionality
             peekSettingsBtn?.addEventListener('click', () => {
@@ -2882,6 +2881,72 @@
                     }
                 });
             }
+        } // setupPeekFeature() 函数的结束括号
+
+        /**
+         * 渲染"选择查看对象"列表
+         * (只显示私聊角色，按名称排序)
+         */
+        function renderPeekCharacterSelectScreen() {
+            const listContainer = document.getElementById('peek-select-list-container');
+            const placeholder = document.getElementById('no-peek-characters-placeholder');
+            if (!listContainer || !placeholder) return;
+
+            listContainer.innerHTML = '';
+
+            // 1. 筛选私聊角色
+            const characters = db.characters.filter(c => c.id.startsWith('char_'));
+
+            // 2. 按名称排序
+            characters.sort((a, b) => a.remarkName.localeCompare(b.remarkName));
+
+            if (characters.length === 0) {
+                placeholder.style.display = 'block';
+                listContainer.style.display = 'none';
+                return;
+            }
+
+            placeholder.style.display = 'none';
+            listContainer.style.display = 'block';
+
+            // 3. 渲染简化版列表
+            characters.forEach(char => {
+                const li = document.createElement('li');
+                li.className = 'list-item'; // 复用基础列表项样式
+                li.dataset.id = char.id; // 存储角色ID
+
+                li.innerHTML = `
+                    <img src="${char.avatar}" alt="${char.remarkName}" class="chat-avatar">
+                    <div class="item-details">
+                        <div class="item-name">${DOMPurify.sanitize(char.remarkName)}</div>
+                    </div>
+                `;
+                listContainer.appendChild(li);
+            });
+        }
+
+        /**
+         * 为"选择查看对象"列表绑定事件
+         */
+        function setupPeekCharacterSelectScreen() {
+            const listContainer = document.getElementById('peek-select-list-container');
+            if (!listContainer) return;
+
+            listContainer.addEventListener('click', (e) => {
+                const charItem = e.target.closest('.list-item[data-id]');
+                if (charItem) {
+                    const charId = charItem.dataset.id;
+
+                    // 1. 设置当前要查看的角色ID
+                    currentChatId = charId;
+                    currentChatType = 'private'; // 偷看功能只支持私聊
+
+                    // 2. 清空缓存，渲染并跳转
+                    peekContentCache = {}; // Clear cache for new session
+                    renderPeekScreen(); // 渲染偷看主页
+                    switchScreen('peek-screen');
+                }
+            });
         }
 
         function renderPeekAlbum(photos) {
@@ -4320,7 +4385,7 @@
                         </div>
                         <a href="#" class="app-icon" data-target="chat-list-screen"><img src="${getIcon('chat-list-screen')}" alt="404" class="icon-img"><span class="app-name">${defaultIcons['chat-list-screen'].name}</span></a>
                         <a href="#" class="app-icon" data-target="api-settings-screen"><img src="${getIcon('api-settings-screen')}" alt="API" class="icon-img"><span class="app-name">${defaultIcons['api-settings-screen'].name}</span></a>
-                        <a href="#" class="app-icon" data-target="wallpaper-screen"><img src="${getIcon('wallpaper-screen')}" alt="Wallpaper" class="icon-img"><span class="app-name">${defaultIcons['wallpaper-screen'].name}</span></a>
+                        <a href="#" class="app-icon" data-target="peek-character-select-screen"><img src="${getIcon('peek-select-btn')}" alt="查手机" class="icon-img"><span class="app-name">${defaultIcons['peek-select-btn'].name}</span></a>
                         <a href="#" class="app-icon" data-target="world-book-screen"><img src="${getIcon('world-book-screen')}" alt="World Book" class="icon-img"><span class="app-name">${defaultIcons['world-book-screen'].name}</span></a>
                         <a href="#" class="app-icon" data-target="customize-screen"><img src="${getIcon('customize-screen')}" alt="Customize" class="icon-img"><span class="app-name">${defaultIcons['customize-screen'].name}</span></a>
                         <a href="#" class="app-icon" data-target="tutorial-screen"><img src="${getIcon('tutorial-screen')}" alt="Tutorial" class="icon-img"><span class="app-name">${defaultIcons['tutorial-screen'].name}</span></a>
@@ -4386,6 +4451,12 @@
                 e.preventDefault(); // 阻止默认行为
                 renderWorldBookList();
                 switchScreen('world-book-screen'); // 切换屏幕
+            });
+            // NEW: Add listener for peek-character-select-screen
+            document.querySelector('[data-target="peek-character-select-screen"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                renderPeekCharacterSelectScreen(); // 渲染选择列表
+                switchScreen('peek-character-select-screen'); // 切换屏幕
             });
             document.querySelector('[data-target="customize-screen"]').addEventListener('click', (e) => {
                 e.preventDefault(); // 阻止默认行为
@@ -4654,9 +4725,33 @@
                         showToast('小部件已恢复默认');
                     }
                 }
+
+                // --- 新增：处理壁纸上传 ---
+                if (e.target.matches('label[for="wallpaper-upload-customize"]')) {
+                    document.getElementById('wallpaper-upload-customize').click();
+                }
             });
 
          customizeForm.addEventListener('change', async (e) => {
+             // --- 处理壁纸上传 ---
+             if (e.target.matches('#wallpaper-upload-customize')) {
+                 const file = e.target.files[0];
+                 if (file) {
+                     try {
+                         const compressedUrl = await compressImage(file, {quality: 0.85, maxWidth: 1080, maxHeight: 1920});
+                         db.wallpaper = compressedUrl;
+                         applyWallpaper(compressedUrl);
+                         document.getElementById('wallpaper-preview-customize').style.backgroundImage = `url(${compressedUrl})`;
+                         await saveData();
+                         showToast('壁纸更换成功！');
+                     } catch (error) {
+                         showToast('壁纸压缩失败，请重试');
+                     } finally {
+                         e.target.value = null; // Reset file input
+                     }
+                 }
+             }
+
              if (e.target.matches('.widget-upload-input')) {
                  const file = e.target.files[0];
                  if (!file) return;
@@ -4704,10 +4799,26 @@
                 function renderCustomizeForm() {
             customizeForm.innerHTML = ''; // 清空旧内容
 
+            // --- 0. 壁纸设置部分 (新增到顶部) ---
+            const wallpaperSectionHTML = `
+            <div class="collapsible-section open">
+                <div class="collapsible-header">
+                    <h4>页面壁纸</h4>
+                    <span class="collapsible-arrow">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="wallpaper-preview" id="wallpaper-preview-customize"><span>当前壁纸预览</span></div>
+                    <input type="file" id="wallpaper-upload-customize" accept="image/*" style="display: none;">
+                    <label for="wallpaper-upload-customize" class="btn btn-primary">从相册选择新壁纸</label>
+                </div>
+            </div>
+            `;
+            customizeForm.insertAdjacentHTML('beforeend', wallpaperSectionHTML);
+
             // --- 1. 应用图标自定义部分 ---
             const iconOrder = [
-                'chat-list-screen', 'api-settings-screen', 'wallpaper-screen',
-                'world-book-screen', 'customize-screen', 'tutorial-screen',
+                'chat-list-screen', 'api-settings-screen',
+                'world-book-screen', 'peek-select-btn', 'customize-screen', 'tutorial-screen',
                 'font-settings-screen', 'day-mode-btn', 'night-mode-btn', 'forum-screen', 'music-screen', 'diary-screen', 'piggy-bank-screen', 'pomodoro-screen', 'storage-analysis-screen'
             ];
 
@@ -4795,6 +4906,13 @@
 
             // 填充预设下拉框
             populateGlobalCssPresetSelect();
+
+            // 初始化壁纸预览
+            const wallpaperPreviewCustomize = document.getElementById('wallpaper-preview-customize');
+            if (wallpaperPreviewCustomize) {
+                wallpaperPreviewCustomize.style.backgroundImage = `url(${db.wallpaper})`;
+                wallpaperPreviewCustomize.textContent = '';
+            }
 
             // [新增] 辅助函数，用于应用预设到输入框和实时预览
             const applyGlobalCssPreset = (presetName) => {
