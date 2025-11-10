@@ -3700,27 +3700,14 @@
            const preset = presets.find(p => p.name === presetName);
            if (!preset) { (window.showToast && showToast('未找到该预设')) || alert('未找到该预设'); return; }
 
-           let textarea, checkbox, previewBox;
-           let themeSelectId;
-
-           // 修复：根据 currentChatType 精确查找控件ID
-           if (currentChatType === 'private') {
-               textarea = document.getElementById('setting-custom-bubble-css');
-               checkbox = document.getElementById('setting-use-custom-css');
-               previewBox = document.getElementById('private-bubble-css-preview');
-               themeSelectId = 'setting-theme-color';
-           } else if (currentChatType === 'group') {
-               textarea = document.getElementById('setting-group-custom-bubble-css');
-               checkbox = document.getElementById('setting-group-use-custom-css');
-               previewBox = document.getElementById('group-bubble-css-preview');
-               themeSelectId = 'setting-group-theme-color';
-           } else {
-               return; // 未知类型
-           }
+           // [修改] 自动查找私聊或群聊的控件
+           const textarea = document.getElementById('setting-custom-bubble-css') || document.getElementById('setting-group-custom-bubble-css');
+           const checkbox = document.getElementById('setting-use-custom-css') || document.getElementById('setting-group-use-custom-css');
+           const previewBox = document.getElementById('private-bubble-css-preview') || document.getElementById('group-bubble-css-preview');
 
            if (textarea) textarea.value = preset.css;
 
-           // 选中预设时，自动勾选 "自定义气泡样式" 并启用输入框
+           // [新增] 选中预设时，自动勾选 "自定义气泡样式" 并启用输入框
            if (checkbox) {
                checkbox.checked = true;
            }
@@ -3733,9 +3720,14 @@
 
                if (chat && previewBox) {
                    let themeKey = 'white_pink'; // 默认值
-                   const themeSelect = document.getElementById(themeSelectId);
-                   if (themeSelect) {
-                       themeKey = themeSelect.value;
+
+                   // [BUG 修复] 必须根据 currentChatType 来安全地获取 themeKey
+                   if (currentChatType === 'private') {
+                       const themeSelect = document.getElementById('setting-theme-color');
+                       if (themeSelect) themeKey = themeSelect.value;
+                   } else if (currentChatType === 'group') {
+                       const groupThemeSelect = document.getElementById('setting-group-theme-color');
+                       if (groupThemeSelect) themeKey = groupThemeSelect.value;
                    }
 
                    const theme = colorThemes[themeKey] || colorThemes['white_pink'];
@@ -3743,6 +3735,8 @@
                    // 更新预览
                    updateBubbleCssPreview(previewBox, preset.css, false, theme);
                }
+
+               // [已删除] await saveData();
 
                (window.showToast && showToast(`已预览 "${presetName}"，请保存设置`)) || console.log('预设已预览');
            } catch(e){
@@ -5623,26 +5617,21 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                     // 1. 用户没改 prompt，直接关闭弹窗
                     if (modal) modal.classList.remove('visible');
                     activeMessageTimestamp = null;
-                    editingMessageId = null; // <-- 新增这一行
                     return;
                 }
 
-                // 2. 用户改了 prompt，立即关闭弹窗并清空状态
-                if (modal) modal.classList.remove('visible');
-                activeMessageTimestamp = null;
-                editingMessageId = null;
-
+                // 2. 用户改了 prompt，触发"重新生成"
+                console.log('NAI Prompt 已修改，开始重新生成...');
+                
                 // 3. 在聊天气泡里显示"加载中"
                 if (bubbleElement) {
                     bubbleElement.innerHTML = `<div style="padding: 20px; text-align: center; color: #666;">🎨 正在重新生成...</div>`;
                 }
 
-                // 4. 将生图和保存逻辑放入一个立即执行的异步函数，使其在后台运行
-                (async () => {
-                    try {
-                        // 5. 调用核心生图函数 (await is fine here)
-                        const chatId = currentChatId;
-                        const result = await generateNaiImageFromPrompt(newContent, chatId); // 使用新 prompt
+                try {
+                    // 4. 调用核心生图函数
+                    const chatId = currentChatId;
+                    const result = await generateNaiImageFromPrompt(newContent, chatId); // 使用新 prompt
 
                     // 5. 更新数据库中的消息
                     message.prompt = newContent; // 保存新 prompt
@@ -5680,11 +5669,6 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                             </div>`;
                     }
                     
-                    // 8. ★★★ 关键：在这里单独保存 NAI 消息的更改 ★★★
-                    await saveData(); 
-                    // 9. 刷新列表（可选，但最好有）
-                    renderChatList();
-
                     showToast("图片已根据新提示词重新生成！");
                 } catch (error) {
                     console.error('NAI 重新生成失败:', error);
@@ -5693,11 +5677,7 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                     }
                     showToast(`无法重新生成图片: ${error.message}`);
                 }
-            })(); // <-- 立即执行
-
-            // 10. ★★★ 关键：阻止后续的通用保存和关闭逻辑执行 ★★★
-            return; 
-
+                
             } else {
                 // --- 原始：普通文本消息的保存逻辑 ---
                 const oldContent = message.content;
@@ -7043,6 +7023,144 @@ return `${seconds}秒`;
             });
         }
 
+        function getMixedContent(responseData) {
+            const results = [];
+            let i = 0;
+
+            // 辅助函数：检查文本是否为 NAI JSON 指令
+            const checkAndPushNaiJson = (text) => {
+                if (!text) return false;
+                const trimmedText = text.trim();
+                if ((trimmedText.startsWith('{') && trimmedText.endsWith('}')) || (trimmedText.startsWith('[') && trimmedText.endsWith(']'))) {
+                    try {
+                        const jsonData = JSON.parse(trimmedText);
+                        const commands = Array.isArray(jsonData) ? jsonData : [jsonData];
+                        if (commands.some(item => item && item.type === 'naiimag' && item.prompt)) {
+                            // 是 NAI JSON，直接推送原文
+                            results.push({ type: 'text', content: trimmedText });
+                            return true;
+                        }
+                    } catch (e) {
+                        // 不是有效的 JSON，将由后续逻辑处理
+                        return false;
+                    }
+                }
+                return false;
+            };
+
+            while (i < responseData.length) {
+                const nextTagStart = responseData.indexOf('<', i);
+                const nextBracketStart = responseData.indexOf('[', i);
+
+                // Find the start of the next special block
+                let firstSpecialIndex = -1;
+                if (nextTagStart !== -1 && nextBracketStart !== -1) {
+                    firstSpecialIndex = Math.min(nextTagStart, nextBracketStart);
+                } else {
+                    firstSpecialIndex = Math.max(nextTagStart, nextBracketStart);
+                }
+
+                // If no special blocks left, the rest is plain text
+                if (firstSpecialIndex === -1) {
+                    const text = responseData.substring(i).trim();
+                    // ▼▼▼ BUGFIX ▼▼▼
+                    if (text && !checkAndPushNaiJson(text)) {
+                        // 不是 NAI JSON，作为普通文本包装
+                        results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                    }
+                    // ▲▲▲ BUGFIX END ▲▲▲
+                    break;
+                }
+
+                // If there's plain text before the special block, add it
+                if (firstSpecialIndex > i) {
+                    const text = responseData.substring(i, firstSpecialIndex).trim();
+                    // ▼▼▼ BUGFIX ▼▼▼
+                    if (text && !checkAndPushNaiJson(text)) {
+                        results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                    }
+                    // ▲▲▲ BUGFIX END ▲▲▲
+                }
+
+                i = firstSpecialIndex;
+
+                // Process the block
+                if (responseData[i] === '<') {
+                    // Potential HTML block
+                    const tagMatch = responseData.substring(i).match(/^<([a-zA-Z0-9]+)/);
+                    if (tagMatch) {
+                        const tagName = tagMatch[1];
+                        let openCount = 0;
+                        let searchIndex = i;
+                        let blockEnd = -1;
+
+                        // Find the end of the outermost tag
+                        while (searchIndex < responseData.length) {
+                            const openTagPos = responseData.indexOf('<' + tagName, searchIndex);
+                            const closeTagPos = responseData.indexOf('</' + tagName, searchIndex);
+
+                            if (openTagPos !== -1 && (closeTagPos === -1 || openTagPos < closeTagPos)) {
+                                openCount++;
+                                searchIndex = openTagPos + 1;
+                            } else if (closeTagPos !== -1) {
+                                openCount--;
+                                searchIndex = closeTagPos + 1;
+                                if (openCount === 0) {
+                                    blockEnd = closeTagPos + `</${tagName}>`.length;
+                                    break;
+                                }
+                            } else {
+                                break; // Malformed, no closing tag
+                            }
+                        }
+
+                        if (blockEnd !== -1) {
+                            const htmlBlock = responseData.substring(i, blockEnd);
+                            const charMatch = htmlBlock.match(/<[a-z][a-z0-9]*\s+char="([^"]*)"/i);
+                            const char = charMatch ? charMatch[1] : null;
+                            results.push({ type: 'html', char: char, content: htmlBlock });
+                            i = blockEnd;
+                            continue;
+                        }
+                    }
+                }
+                
+                if (responseData[i] === '[') {
+                    // Potential [...] block
+                    const endBracket = responseData.indexOf(']', i);
+                    if (endBracket !== -1) {
+                        const text = responseData.substring(i, endBracket + 1);
+                        results.push({ type: 'text', content: text });
+                        i = endBracket + 1;
+                        continue;
+                    }
+                }
+
+                // If we got here, it was a false alarm (e.g., a lone '<' or '[').
+                // Treat it as plain text and move on.
+                const nextSpecial1 = responseData.indexOf('<', i + 1);
+                const nextSpecial2 = responseData.indexOf('[', i + 1);
+                let endOfText = -1;
+                if (nextSpecial1 !== -1 && nextSpecial2 !== -1) {
+                    endOfText = Math.min(nextSpecial1, nextSpecial2);
+                } else {
+                    endOfText = Math.max(nextSpecial1, nextSpecial2);
+                }
+                if (endOfText === -1) {
+                    endOfText = responseData.length;
+                }
+                const text = responseData.substring(i, endOfText).trim();
+                
+                // ▼▼▼ BUGFIX ▼▼▼
+                if (text && !checkAndPushNaiJson(text)) {
+                    results.push({ type: 'text', content: `[unknown的消息：${text}]` });
+                }
+                // ▲▲▲ BUGFIX END ▲▲▲
+                
+                i = endOfText;
+            }
+            return results;
+
         // ==================================================================================================================
         // ========================================== 错误处理翻译官 (Error Translator) ==========================================
         // ==================================================================================================================
@@ -7110,6 +7228,7 @@ return `${seconds}秒`;
         // ==================================================================================================================
         // ========================================== END Error Translator ==================================================
         // ==================================================================================================================
+        }
 
         // --- AI Interaction & Prompts ---
         function generatePrivateSystemPrompt(character, worldBooksBefore = '', worldBooksAfter = '') {
@@ -7158,10 +7277,8 @@ return `${seconds}秒`;
 7. ✨重要✨ 你也可以主动给我转账或送礼物。转账格式必须为：[${character.realName}的转账：xxx元；备注：xxx]。送礼物格式必须为：[${character.realName}送来的礼物：xxx]。
 8. ✨重要✨ 你需要在对话中**积极地**改变你的状态。比如，聊到一半你可能会说“我先去洗个澡”，然后更新你的状态，以反映你当前的行为或心情。这会让互动更真实。格式为：[${character.realName}更新状态为：xxx]。例如：[${character.realName}更新状态为：正在看电影...]。这条指令不会显示为聊天消息，只会更新你在我界面上的状态。
 9. ✨重要✨ 你可以像真人一样撤回你刚刚发送的消息。当你觉得说错了话、感到尴尬、或者只是改变了主意时，都可以这样做。这是一个体现你角色性格的机会。格式为：[${character.realName}撤回了上一条消息：{被撤回消息的原文}]。
-10. ✨重要✨ 你可以选择我的单独一条消息引用，当你想要针对某句话做出单独回应时，格式为：[${character.realName}引用"{我的某条消息内容}"并回复：{回复内容}]。
-11. **[格式天条]** 你的回复必须同时遵守以下两条规则：
-    * **A. (封装规则):** 你的所有回复都必须被封装在第13条定义的**完整格式**中。**绝对禁止**在这些格式之外回复任何"裸露"的文本。
-    * **B. (内容规则):** 在消息内容中，**绝对禁止**包含任何如 \`[心理活动]\`、\`(动作)\`、\`*环境描写*\` 等多余的叙述性文本。
+10. ✨重要✨ 你可以选择我的单独一条消息引用，当你想要针对某句话做出单独回应时，格式为：[${character.realName}引用“{我的某条消息内容}”并回复：{回复内容}]。
+11. 你的所有回复都必须直接是聊天内容，绝对不允许包含任何如[心理活动]、(动作)、*环境描写*等多余的、在括号或星号里的叙述性文本。
 `;
             prompt += `12. 你拥有发送表情包的能力。这是一个可选功能，你可以根据对话氛围和内容，自行判断是否需要发送表情包来辅助表达。你不必在每次回复中都包含表情包。格式为：[${character.realName}发送的表情包：图片URL]。\n`;
             
@@ -7331,11 +7448,8 @@ ${loadedModules.map(m => `
             prompt += `6. **行为准则**:\n`;
             prompt += `   - **对公开事件的反应 (重要)**: 当我（用户）向群内 **某一个** 成员转账或送礼时，这是一个 **全群可见** 的事件。除了当事成员可以表示感谢外，**其他未参与的AI成员也应该注意到**，并根据各自的人设做出反应。例如，他们可能会表示羡慕、祝贺、好奇、开玩笑或者起哄。这会让群聊的氛围更真实、更热闹。\n`;
             prompt += `   - 严格扮演每个角色的人设，不同角色之间应有明显的性格和语气差异。\n`;
-            prompt += `   - **【格式天条】** 你的回复必须同时遵守以下两条规则：
-     * **A. (封装规则):** 你的所有回复都必须被封装在第4点定义的**完整格式**中 (例如 \`[xxx的消息：...]\` 或 \`{"type":...}\`)。**绝对禁止**在这些格式之外回复任何"裸露"的文本（例如，在 \`[...消息：]\` 之前回复 \`好的。\`）。
-     * **B. (内容规则):** 在 \`[xxx的消息：...]\` 的**内容**中，**绝对禁止**包含任何如 \`[场景描述]\`、\`(心理活动)\`、\`*动作*\` 或任何格式之外的叙述性文本。
-
-   - 保持对话的持续性，不要主动结束对话。\n\n`;
+            prompt += `   - 你的回复中只能包含第4点列出的合法格式的消息。绝对不能包含任何其他内容，如 \`[场景描述]\`, \`(心理活动)\`, \`*动作*\` 或任何格式之外的解释性文字。\n`;
+            prompt += `   - 保持对话的持续性，不要主动结束对话。\n\n`;
             prompt += `现在，请根据以上设定，开始扮演群聊中的所有角色。`;
 
             return prompt;
@@ -7535,55 +7649,48 @@ ${loadedModules.map(m => `
                     return;
                 }
             }
-            // 2. [NEW V4] Smart Parsing & Wrapping Logic (Replaces getMixedContent)
             if (fullResponse) {
+                // ▼▼▼▼▼ 修复AI消息截断Bug (V2 - 最终方案) ▼▼▼▼▼
+                // 不再使用 simple .split('\n')，因为它会错误地分割列表 (1.\n2.)。
+                // 我们使用正则表达式，只在消息头（如 [xxx的消息： 或 {...）之前分割。
                 const trimmedResponse = fullResponse.trim();
-                
-                // V4 "Total Scan" Regex:
-                // This regex finds all valid message blocks OR naked text fragments in between them.
-                // Group 1: Valid Message Block (NAI JSON, HTML, or [xxx:...] text)
-                // Group 2: Naked Text Fragment (Anything else)
-                const messageRegex = /({\s*"type":\s*"naiimag"[\s\S]*?}|<div[\s\S]*?<\/div>|\[(?:[^\]]+?的消息：|[^\]]+?的表情包：|[^\]]+?的语音：|[^\]]+?发来的照片\/视频：|[^\]]+?的转账：|[^\]]+?送来的礼物：|[^\]]+?撤回了上一条消息：|[^\]]+?引用"[\s\S]*?"并回复：|[^\]]+?更新状态为：|[^\]]+?已接收礼物|[^\]]+?接收.*?的转账|[^\]]+?退回.*?的转账)[\s\S]*?\])|([\s\S]+?)/g;
-                
-                const messages = [];
-                let match;
-                let lastValidSenderName = 'unknown'; // Fallback sender name
-                if (currentChatType === 'private') {
-                    lastValidSenderName = chat.realName || chat.name;
-                } else {
-                    const firstAiMember = chat.members[0];
-                    lastValidSenderName = firstAiMember ? (firstAiMember.realName || firstAiMember.groupNickname) : '群成员';
-                }
 
-                while ((match = messageRegex.exec(trimmedResponse)) !== null) {
-                    if (match[1]) {
-                        // --- Matched a VALID BLOCK (Group 1) ---
-                        const validBlock = match[1].trim();
-                        let type = 'text';
-                        let char = null;
-                        if (validBlock.startsWith('<')) {
-                            type = 'html';
-                            const charMatch = validBlock.match(/<[a-z][a-z0-9]*\s+char="([^"]*)"/i);
-                            char = charMatch ? charMatch[1] : null;
-                        }
-                        messages.push({ type: type, content: validBlock, char: char, isNaked: false, originalNakedText: null });
+                // 这个Regex会查找 [xxx： 或 {..."type": 开头的地方，并在它们前面分割。
+                // (split on a positive lookahead for [anything_with_colon:] or {anything_with_"type":)
+                // 修复：增加了对 <...char="..."> (HTML) 和 NAI JSON 的更精确匹配
+                const messageParts = trimmedResponse.split(
+                    /(?=\[(?:.*?的消息：|.*?发送的表情包：|.*?的语音：|.*?发来的照片\/视频：|.*?的转账：|.*?送来的礼物：|.*?撤回了上一条消息：)|<[a-z][a-z0-9]*\s+char="|{\s*"type":\s*"naiimag")/
+                ).filter(part => part.trim() !== ''); // 分割并移除空字符串
 
-                        // Update lastValidSenderName
-                        const nameMatch = validBlock.match(/\[(.*?)(?:的消息：|发送的表情包：|的语音：|发来的照片\/视频：|的转账：|送来的礼物：|撤回了上一条消息：|引用")/);
-                        if (nameMatch) {
-                            lastValidSenderName = nameMatch[1];
-                        }
-
-                    } else if (match[2]) {
-                        // --- Matched NAKED TEXT (Group 2) ---
-                        const nakedText = match[2].trim();
-                        if (nakedText) {
-                            // Don't just push it, WRAP it immediately using the last known sender
-                            const wrappedContent = `[${lastValidSenderName}的消息：${nakedText}]`;
-                            messages.push({ type: 'text', content: wrappedContent, isNaked: true, originalNakedText: nakedText });
-                        }
+                let messages = messageParts.map(part => {
+                    const content = part.trim();
+                    
+                    // 1. 检查是否是 NAI JSON (Constraint 4) - 保持 'text' 类型
+                    if ((content.startsWith('{') && content.endsWith('}')) || (content.startsWith('[') && content.endsWith(']'))) {
+                        try {
+                            const jsonData = JSON.parse(content);
+                            const commands = Array.isArray(jsonData) ? jsonData : [jsonData];
+                            // 检查是否是 NAI 指令
+                            if (commands.some(item => item && item.type === 'naiimag' && item.prompt)) {
+                                return { type: 'text', content: content, char: null }; // NAI JSON 保持 'text' 类型
+                            }
+                        } catch (e) { /* 不是有效的JSON，继续检查HTML */ }
                     }
-                }
+
+                    // 2. 检查是否是HTML (例如Bilibili卡片)
+                    // 简单的HTML检查：以'<'开头并以'>'结尾，并且包含'</'（防止误判）
+                    if (content.startsWith('<') && content.endsWith('>') && content.includes('</')) { 
+                        // 尝试提取 char 属性，如果存在的话 (用于旧版卡片)
+                        const charMatch = content.match(/<[a-z][a-z0-9]*\s+char="([^"]*)"/i);
+                        const char = charMatch ? charMatch[1] : null;
+                        return { type: 'html', content: content, char: char };
+                    }
+                    
+                    // 3. 否则，全部是 'text'
+                    return { type: 'text', content: content, char: null };
+                });
+                
+                // ▲▲▲▲▲ 修复结束 ▲▲▲▲▲
 
                 let firstMessageProcessed = false; // 用于标记是否是第一条消息
 
@@ -7595,37 +7702,76 @@ ${loadedModules.map(m => `
                     firstMessageProcessed = true;
 
                     let itemContent = item.content.trim();
-                    let naiImageHandled = false;
-                    
-                    // [V4 "NAI Rescue"]
-                    // Check ALL messages (even wrapped naked text) for a hidden NAI command
-                    let naiData = null;
-                    // Search in the original naked text if it exists, otherwise search the full content
-                    const promptToSearch = item.originalNakedText || itemContent; 
-                    
-                    // This regex finds NAI JSON, even if it's dirty (e.g., inside other text, missing brackets)
-                    const naiRescueRegex = /\{[^{}]*"type"\s*:\s*"naiimag"[\s\S]*?\}/;
-                    const naiMatch = promptToSearch.match(naiRescueRegex);
+                    let naiImageHandled = false; // NAI 消息处理标记
 
-                    if (naiMatch && naiMatch[0]) {
+                    // ▼▼▼ 新增：NAI 主动发图拦截（改进版 - 更健壮的检查） ▼▼▼
+                    // 检查item.content是否是一个NAI JSON指令
+                    let naiData = null;
+                    if (item.type === 'text' && itemContent.includes('"type": "naiimag"')) {
                         try {
-                            naiData = JSON.parse(naiMatch[0]); // Parse *only* the matched JSON
-                            if (!naiData || naiData.type !== 'naiimag' || !naiData.prompt) {
-                                naiData = null;
-                            }
+                            // 1. 尝试直接解析裸JSON
+                            naiData = JSON.parse(itemContent);
                         } catch (e) {
-                            console.warn("NAI Rescue: Found JSON-like text but failed to parse:", e, naiMatch[0]);
+                            // 2. 尝试从 [消息：...] 包装中提取JSON
+                            //    这个正则会查找 {...} 或 [...] 块
+                            const jsonMatch = itemContent.match(/:\s*(\{[\s\S]*\}|\[[\s\S]*\])\s*\]?$/);
+                            if (jsonMatch && jsonMatch[1]) {
+                                try {
+                                    naiData = JSON.parse(jsonMatch[1]);
+                                } catch (e2) {
+                                    console.warn("NAI：在消息包装中找到JSON，但解析失败。", e2, itemContent);
+                                    naiData = null;
+                                }
+                            } else {
+                                // 3. 备用方案：查找字符串中任何位置的JSON (兼容旧的错误格式)
+                                const fallbackMatch = itemContent.match(/\{[^{}]*"type"\s*:\s*"naiimag"[^{}]*\}/);
+                                if (fallbackMatch) {
+                                    try {
+                                        naiData = JSON.parse(fallbackMatch[0]);
+                                    } catch (e3) {
+                                        console.warn("NAI：在字符串中找到JSON，但解析失败。", e3, itemContent);
+                                        naiData = null;
+                                    }
+                                }
+                            }
+                        }
+
+                        // 确保解析出的是合法的 NAI 指令 (单个对象或数组中的第一个)
+                        if (Array.isArray(naiData) && naiData.length > 0) {
+                            naiData = naiData[0];
+                        }
+                        if (!naiData || naiData.type !== 'naiimag' || !naiData.prompt) {
                             naiData = null;
                         }
                     }
-                    
-                    // [Bug 5 Fix] Check for `[xxx发来的照片/视频：{json}]`
-                    // This is a special case of "naked text" wrapping.
-                    if (item.isNaked && naiData) {
-                         // This was naked text (like `[照片/视频：{json}]`)
-                         // We already found the naiData. We must *not* display the wrapped text.
-                         // We just let the NAI logic below handle it.
-                         itemContent = naiData; // Pass the JSON object itself
+
+                    // 如果上述方法都失败，回退到原有的检查方式（兼容旧代码）
+                    if (!naiData && localStorage.getItem('novelai-enabled') === 'true') {
+                        // 检查对象格式：{"type": "naiimag", ...}
+                        if (itemContent.startsWith('{') && itemContent.endsWith('}')) {
+                            try {
+                                const parsed = JSON.parse(itemContent);
+                                if (parsed.type === 'naiimag' && parsed.prompt) {
+                                    naiData = parsed;
+                                }
+                            } catch (e) {
+                                // JSON 解析失败，naiData 保持 null
+                            }
+                        }
+                        // 检查数组格式：[{"type": "naiimag", ...}]
+                        else if (itemContent.startsWith('[') && itemContent.endsWith(']')) {
+                            try {
+                                const parsed = JSON.parse(itemContent);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    const firstItem = parsed[0];
+                                    if (firstItem && firstItem.type === 'naiimag' && firstItem.prompt) {
+                                        naiData = firstItem;
+                                    }
+                                }
+                            } catch (e) {
+                                // JSON 解析失败，naiData 保持 null
+                            }
+                        }
                     }
 
                     if (naiData && naiData.type === 'naiimag' && naiData.prompt) {
@@ -7732,9 +7878,9 @@ ${loadedModules.map(m => `
                         continue;
                     }
 
-                    // Handle AI Withdraw
+                    // 新增：处理AI撤回指令
                     const aiWithdrawRegex = /\[(.*?)撤回了上一条消息：([\s\S]*?)\]/;
-                    const withdrawMatch = itemContent.match(aiWithdrawRegex);
+                    const withdrawMatch = item.content.match(aiWithdrawRegex);
 
                     if (withdrawMatch) {
                         const characterName = withdrawMatch[1];
@@ -7768,8 +7914,8 @@ ${loadedModules.map(m => `
                         const myName = character.myName;
 
                         // 新增：AI引用回复的正则表达式
-                        const aiQuoteRegex = new RegExp(`\\[${character.realName}引用"(.*?)"并回复：([\\s\\S]*?)\\]`);
-                        const aiQuoteMatch = itemContent.match(aiQuoteRegex);
+                        const aiQuoteRegex = new RegExp(`\\[${character.realName}引用“(.*?)”并回复：([\\s\\S]*?)\\]`);
+                        const aiQuoteMatch = item.content.match(aiQuoteRegex);
 
                         if (aiQuoteMatch) {
                             const quotedText = aiQuoteMatch[1];
@@ -7820,8 +7966,8 @@ ${loadedModules.map(m => `
                             const message = {
                                 id: `msg_${Date.now()}_${Math.random()}`,
                                 role: 'assistant',
-                                content: itemContent,
-                                parts: [{type: item.type, text: itemContent}], // Use item.type
+                                content: item.content.trim(),
+                                parts: [{type: item.type, text: item.content.trim()}],
                                 timestamp: Date.now(),
                             };
 
@@ -7835,47 +7981,27 @@ ${loadedModules.map(m => `
                             addMessageBubble(message, targetChatId, targetChatType);
                         }
 
-                    // Handle Group Chat Messages
                     } else if (targetChatType === 'group') {
+                        // 群聊逻辑保持不变
                         const group = chat;
-                        // Regex to find sender name in standard formats
                         const r = /\[(.*?)((?:的消息|的语音|发送的表情包|发来的照片\/视频))：/;
-                        const nameMatch = itemContent.match(r);
-                        
-                        let senderName = item.char; // Check HTML char attribute first
-                        if (!senderName && nameMatch) {
-                            senderName = nameMatch[1]; // Get from [xxx的消息：...]
-                        }
-                        
-                        if (senderName) {
+                        const nameMatch = item.content.match(r);
+                        if (nameMatch || item.char) {
+                            const senderName = item.char || (nameMatch[1]);
                             const sender = group.members.find(m => (m.realName === senderName || m.groupNickname === senderName));
+                            console.log(sender)
                             if (sender) {
                                 const message = {
                                     id: `msg_${Date.now()}_${Math.random()}`,
                                     role: 'assistant',
-                                    content: itemContent,
-                                    parts: [{type: item.type, text: itemContent}], // Use item.type
-                                    timestamp: Date.now(), senderId: sender.id
-                                };
-                                group.history.push(message);
-                                addMessageBubble(message, targetChatId, targetChatType);
-                            } else {
-                                // Sender name in [ ] doesn't match any known member
-                                // This is a "wrapped naked text" from an unknown sender, just display it
-                                const message = {
-                                    id: `msg_${Date.now()}_${Math.random()}`,
-                                    role: 'assistant',
-                                    content: itemContent,
-                                    parts: [{type: 'text', text: itemContent}],
-                                    timestamp: Date.now(), senderId: 'unknown'
+                                    content: item.content.trim(),
+                                    parts: [{type: item.type, text: item.content.trim()}],
+                                    timestamp: Date.now(),
+                                    senderId: sender.id
                                 };
                                 group.history.push(message);
                                 addMessageBubble(message, targetChatId, targetChatType);
                             }
-                        } else {
-                            // This should only happen if `item.isNaked` was true but wrapping failed
-                            // Or if it's an unknown format. Log an error.
-                            console.warn("Could not determine sender for group message:", itemContent);
                         }
                     }
                 }
@@ -9041,7 +9167,6 @@ function renderStickerGrid() {
   
         function setupWorldBookApp() {
             const worldBookListContainer = document.getElementById('world-book-list-container');
-            const worldBookScreen = document.getElementById('world-book-screen'); // <-- 新增
             const noWorldBooksPlaceholder = document.getElementById('no-world-books-placeholder');
             const addWorldBookBtn = document.getElementById('add-world-book-btn');
             const editWorldBookForm = document.getElementById('edit-world-book-form');
@@ -9293,7 +9418,6 @@ function renderStickerGrid() {
                 
                 // 显示底部多选栏
                 if (worldBookMultiSelectBar) worldBookMultiSelectBar.style.display = 'flex';
-                if (worldBookScreen) worldBookScreen.classList.add('multi-select-active'); // <-- 新增
                 
                 // 给所有条目和分类添加多选样式
                 worldBookListContainer.querySelectorAll('.world-book-item').forEach(item => {
@@ -9325,7 +9449,6 @@ function renderStickerGrid() {
                 
                 // 隐藏底部多选栏
                 if (worldBookMultiSelectBar) worldBookMultiSelectBar.style.display = 'none';
-                if (worldBookScreen) worldBookScreen.classList.remove('multi-select-active'); // <-- 新增
                 
                 // 移除所有多选样式
                 worldBookListContainer.querySelectorAll('.world-book-item').forEach(item => {
@@ -9854,7 +9977,7 @@ function renderStickerGrid() {
                                     <label for="${idPrefix}-${book.id}">${DOMPurify.sanitize(book.name)}</label>
                                     
                                     <div class="btn-group">
-                                        <button type="button" class="btn-action btn-action-edit" data-action="edit" data-book-id="${book.id}">重命名</button>
+                                        <button type="button" class="btn-action btn-action-edit" data-action="edit" data-book-id="${book.id}">编辑</button>
                                         <button type="button" class="btn-action btn-action-delete" data-action="delete" data-book-id="${book.id}">删除</button>
                                     </div>
                                 </li>
@@ -9872,35 +9995,27 @@ function renderStickerGrid() {
                     const editBtn = e.target.closest('.btn-action-edit');
                     const deleteBtn = e.target.closest('.btn-action-delete');
 
-                    // --- 处理 "重命名" 按钮 ---
+                    // --- 处理 "编辑" 按钮 ---
                     if (editBtn) {
-                        e.stopPropagation(); // 关键：阻止事件穿透，修复弹窗Bug
+                        e.stopPropagation(); // 阻止触发li上的其他事件
                         const bookId = editBtn.dataset.bookId;
                         const book = db.worldBooks.find(wb => wb.id === bookId);
                         
                         if (book) {
-                            const newName = prompt(`请输入 "${book.name}" 的新名称：`, book.name);
-
-                            if (newName && newName.trim() !== "" && newName.trim() !== book.name) {
-                                // 1. 更新数据库中的名字
-                                book.name = newName.trim();
-                                await saveData();
-
-                                // 2. 重新渲染当前弹窗的列表（保持选中状态）
-                                const currentSelectedIds = Array.from(container.querySelectorAll('.item-checkbox:checked')).map(cb => cb.value);
-                                renderCategorizedWorldBookList(container, db.worldBooks, currentSelectedIds, idPrefix);
-
-                                // 3. 重新渲染主界面的世界书列表
-                                if (typeof renderWorldBookList === 'function') {
-                                    renderWorldBookList();
-                                }
-                                showToast('重命名成功！');
-                            } else if (newName === null) {
-                                // 用户点击了 "取消"
-                            } else {
-                                // 用户点击了 "确定"，但名字是空的或没变
-                                showToast('名称未更改。');
-                            }
+                            currentEditingWorldBookId = book.id;
+                            worldBookIdInput.value = book.id;
+                            worldBookNameInput.value = book.name;
+                            worldBookContentInput.value = book.content;
+                            document.getElementById('world-book-category').value = book.category || '';
+                            const positionRadio = document.querySelector(`input[name="world-book-position"][value="${book.position}"]`);
+                            if (positionRadio) positionRadio.checked = true;
+                            
+                            // 关闭当前的世界书选择弹窗
+                            const modal = container.closest('.modal-overlay');
+                            if (modal) modal.classList.remove('visible');
+                            
+                            // 跳转到编辑界面
+                            switchScreen('edit-world-book-screen');
                         }
                     }
 
@@ -9999,19 +10114,11 @@ function renderStickerGrid() {
 
             chatSettingsBtn.addEventListener('click', () => {
                 if (currentChatType === 'private') {
-                    // 1. 立即开始动画
+                    loadSettingsToSidebar();
                     settingsSidebar.classList.add('open');
-                    // 2. 异步加载内容
-                    setTimeout(() => {
-                        loadSettingsToSidebar();
-                    }, 0); // 0ms 延迟，推到下一个事件循环
                 } else if (currentChatType === 'group') {
-                    // 1. 立即开始动画
+                    loadGroupSettingsToSidebar();
                     groupSettingsSidebar.classList.add('open');
-                    // 2. 异步加载内容
-                    setTimeout(() => {
-                        loadGroupSettingsToSidebar();
-                    }, 0); // 0ms 延迟，推到下一个事件循环
                 }
             });
             document.querySelector('.phone-screen').addEventListener('click', e => {
