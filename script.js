@@ -3700,14 +3700,27 @@
            const preset = presets.find(p => p.name === presetName);
            if (!preset) { (window.showToast && showToast('未找到该预设')) || alert('未找到该预设'); return; }
 
-           // [修改] 自动查找私聊或群聊的控件
-           const textarea = document.getElementById('setting-custom-bubble-css') || document.getElementById('setting-group-custom-bubble-css');
-           const checkbox = document.getElementById('setting-use-custom-css') || document.getElementById('setting-group-use-custom-css');
-           const previewBox = document.getElementById('private-bubble-css-preview') || document.getElementById('group-bubble-css-preview');
+           let textarea, checkbox, previewBox;
+           let themeSelectId;
+
+           // 修复：根据 currentChatType 精确查找控件ID
+           if (currentChatType === 'private') {
+               textarea = document.getElementById('setting-custom-bubble-css');
+               checkbox = document.getElementById('setting-use-custom-css');
+               previewBox = document.getElementById('private-bubble-css-preview');
+               themeSelectId = 'setting-theme-color';
+           } else if (currentChatType === 'group') {
+               textarea = document.getElementById('setting-group-custom-bubble-css');
+               checkbox = document.getElementById('setting-group-use-custom-css');
+               previewBox = document.getElementById('group-bubble-css-preview');
+               themeSelectId = 'setting-group-theme-color';
+           } else {
+               return; // 未知类型
+           }
 
            if (textarea) textarea.value = preset.css;
 
-           // [新增] 选中预设时，自动勾选 "自定义气泡样式" 并启用输入框
+           // 选中预设时，自动勾选 "自定义气泡样式" 并启用输入框
            if (checkbox) {
                checkbox.checked = true;
            }
@@ -3720,14 +3733,9 @@
 
                if (chat && previewBox) {
                    let themeKey = 'white_pink'; // 默认值
-
-                   // [BUG 修复] 必须根据 currentChatType 来安全地获取 themeKey
-                   if (currentChatType === 'private') {
-                       const themeSelect = document.getElementById('setting-theme-color');
-                       if (themeSelect) themeKey = themeSelect.value;
-                   } else if (currentChatType === 'group') {
-                       const groupThemeSelect = document.getElementById('setting-group-theme-color');
-                       if (groupThemeSelect) themeKey = groupThemeSelect.value;
+                   const themeSelect = document.getElementById(themeSelectId);
+                   if (themeSelect) {
+                       themeKey = themeSelect.value;
                    }
 
                    const theme = colorThemes[themeKey] || colorThemes['white_pink'];
@@ -3735,8 +3743,6 @@
                    // 更新预览
                    updateBubbleCssPreview(previewBox, preset.css, false, theme);
                }
-
-               // [已删除] await saveData();
 
                (window.showToast && showToast(`已预览 "${presetName}"，请保存设置`)) || console.log('预设已预览');
            } catch(e){
@@ -5617,20 +5623,25 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                     // 1. 用户没改 prompt，直接关闭弹窗
                     if (modal) modal.classList.remove('visible');
                     activeMessageTimestamp = null;
+                    editingMessageId = null; // <-- 新增这一行
                     return;
                 }
 
-                // 2. 用户改了 prompt，触发"重新生成"
-                console.log('NAI Prompt 已修改，开始重新生成...');
-                
+                // 2. 用户改了 prompt，立即关闭弹窗并清空状态
+                if (modal) modal.classList.remove('visible');
+                activeMessageTimestamp = null;
+                editingMessageId = null;
+
                 // 3. 在聊天气泡里显示"加载中"
                 if (bubbleElement) {
                     bubbleElement.innerHTML = `<div style="padding: 20px; text-align: center; color: #666;">🎨 正在重新生成...</div>`;
                 }
 
-                try {
-                    // 4. 调用核心生图函数
-                    const chatId = currentChatId;
+                // 4. 将生图和保存逻辑放入一个立即执行的异步函数，使其在后台运行
+                (async () => {
+                    try {
+                        // 5. 调用核心生图函数 (await is fine here)
+                        const chatId = currentChatId;
                     const result = await generateNaiImageFromPrompt(newContent, chatId); // 使用新 prompt
 
                     // 5. 更新数据库中的消息
@@ -5668,7 +5679,12 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                                 </button>
                             </div>`;
                     }
-                    
+
+                    // 8. ★★★ 关键：在这里单独保存 NAI 消息的更改 ★★★
+                    await saveData();
+                    // 9. 刷新列表（可选，但最好有）
+                    renderChatList();
+
                     showToast("图片已根据新提示词重新生成！");
                 } catch (error) {
                     console.error('NAI 重新生成失败:', error);
@@ -5677,7 +5693,11 @@ ${unreadBadgeHTML}`; /* <-- 将红点元素移动到这里 */
                     }
                     showToast(`无法重新生成图片: ${error.message}`);
                 }
-                
+            })(); // <-- 立即执行
+
+            // 10. ★★★ 关键：阻止后续的通用保存和关闭逻辑执行 ★★★
+            return;
+
             } else {
                 // --- 原始：普通文本消息的保存逻辑 ---
                 const oldContent = message.content;
@@ -9167,6 +9187,7 @@ function renderStickerGrid() {
   
         function setupWorldBookApp() {
             const worldBookListContainer = document.getElementById('world-book-list-container');
+            const worldBookScreen = document.getElementById('world-book-screen'); // <-- 新增
             const noWorldBooksPlaceholder = document.getElementById('no-world-books-placeholder');
             const addWorldBookBtn = document.getElementById('add-world-book-btn');
             const editWorldBookForm = document.getElementById('edit-world-book-form');
@@ -9418,6 +9439,7 @@ function renderStickerGrid() {
                 
                 // 显示底部多选栏
                 if (worldBookMultiSelectBar) worldBookMultiSelectBar.style.display = 'flex';
+                if (worldBookScreen) worldBookScreen.classList.add('multi-select-active'); // <-- 新增
                 
                 // 给所有条目和分类添加多选样式
                 worldBookListContainer.querySelectorAll('.world-book-item').forEach(item => {
@@ -9449,6 +9471,7 @@ function renderStickerGrid() {
                 
                 // 隐藏底部多选栏
                 if (worldBookMultiSelectBar) worldBookMultiSelectBar.style.display = 'none';
+                if (worldBookScreen) worldBookScreen.classList.remove('multi-select-active'); // <-- 新增
                 
                 // 移除所有多选样式
                 worldBookListContainer.querySelectorAll('.world-book-item').forEach(item => {
@@ -9724,6 +9747,7 @@ function renderStickerGrid() {
                 // 非多选模式下的原有逻辑
                 // 先检查是否是分类标题的点击（展开/折叠）
                 if (e.target.closest('.collapsible-header')) {
+                    e.stopPropagation(); // <-- ★★★ 修复"幽灵弹窗"BUG (泄露点A) ★★★
                     const section = e.target.closest('.collapsible-section');
                     if (section) {
                         section.classList.toggle('open');
@@ -9734,6 +9758,7 @@ function renderStickerGrid() {
                 // 再检查是否是条目的点击（编辑）
                 const worldBookItem = e.target.closest('.world-book-item');
                 if (worldBookItem && !e.target.closest('.action-btn')) {
+                    e.stopPropagation(); // <-- ★★★ 修复"幽灵弹窗"BUG (泄露点B) ★★★
                     const bookId = worldBookItem.dataset.id;
                     const book = db.worldBooks.find(wb => wb.id === bookId);
                     if (book) {
@@ -9977,7 +10002,7 @@ function renderStickerGrid() {
                                     <label for="${idPrefix}-${book.id}">${DOMPurify.sanitize(book.name)}</label>
                                     
                                     <div class="btn-group">
-                                        <button type="button" class="btn-action btn-action-edit" data-action="edit" data-book-id="${book.id}">编辑</button>
+                                        <button type="button" class="btn-action btn-action-edit" data-action="edit" data-book-id="${book.id}">重命名</button>
                                         <button type="button" class="btn-action btn-action-delete" data-action="delete" data-book-id="${book.id}">删除</button>
                                     </div>
                                 </li>
@@ -9995,27 +10020,35 @@ function renderStickerGrid() {
                     const editBtn = e.target.closest('.btn-action-edit');
                     const deleteBtn = e.target.closest('.btn-action-delete');
 
-                    // --- 处理 "编辑" 按钮 ---
+                    // --- 处理 "重命名" 按钮 ---
                     if (editBtn) {
-                        e.stopPropagation(); // 阻止触发li上的其他事件
+                        e.stopPropagation(); // 关键：阻止事件穿透，修复弹窗Bug
                         const bookId = editBtn.dataset.bookId;
                         const book = db.worldBooks.find(wb => wb.id === bookId);
-                        
+
                         if (book) {
-                            currentEditingWorldBookId = book.id;
-                            worldBookIdInput.value = book.id;
-                            worldBookNameInput.value = book.name;
-                            worldBookContentInput.value = book.content;
-                            document.getElementById('world-book-category').value = book.category || '';
-                            const positionRadio = document.querySelector(`input[name="world-book-position"][value="${book.position}"]`);
-                            if (positionRadio) positionRadio.checked = true;
-                            
-                            // 关闭当前的世界书选择弹窗
-                            const modal = container.closest('.modal-overlay');
-                            if (modal) modal.classList.remove('visible');
-                            
-                            // 跳转到编辑界面
-                            switchScreen('edit-world-book-screen');
+                            const newName = prompt(`请输入 "${book.name}" 的新名称：`, book.name);
+
+                            if (newName && newName.trim() !== "" && newName.trim() !== book.name) {
+                                // 1. 更新数据库中的名字
+                                book.name = newName.trim();
+                                await saveData();
+
+                                // 2. 重新渲染当前弹窗的列表（保持选中状态）
+                                const currentSelectedIds = Array.from(container.querySelectorAll('.item-checkbox:checked')).map(cb => cb.value);
+                                renderCategorizedWorldBookList(container, db.worldBooks, currentSelectedIds, idPrefix);
+
+                                // 3. 重新渲染主界面的世界书列表
+                                if (typeof renderWorldBookList === 'function') {
+                                    renderWorldBookList();
+                                }
+                                showToast('重命名成功！');
+                            } else if (newName === null) {
+                                // 用户点击了 "取消"
+                            } else {
+                                // 用户点击了 "确定"，但名字是空的或没变
+                                showToast('名称未更改。');
+                            }
                         }
                     }
 
@@ -10114,11 +10147,19 @@ function renderStickerGrid() {
 
             chatSettingsBtn.addEventListener('click', () => {
                 if (currentChatType === 'private') {
-                    loadSettingsToSidebar();
+                    // 1. 立即开始动画
                     settingsSidebar.classList.add('open');
+                    // 2. 异步加载内容
+                    setTimeout(() => {
+                        loadSettingsToSidebar();
+                    }, 0); // 0ms 延迟，推到下一个事件循环
                 } else if (currentChatType === 'group') {
-                    loadGroupSettingsToSidebar();
+                    // 1. 立即开始动画
                     groupSettingsSidebar.classList.add('open');
+                    // 2. 异步加载内容
+                    setTimeout(() => {
+                        loadGroupSettingsToSidebar();
+                    }, 0); // 0ms 延迟，推到下一个事件循环
                 }
             });
             document.querySelector('.phone-screen').addEventListener('click', e => {
