@@ -1132,7 +1132,7 @@
             margin: 0 8px;
             overflow: hidden;
             position: relative;
-            
+
             /* 玻璃质感边框和阴影 */
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1157,8 +1157,8 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .transfer-icon-bg svg {
-            width: 22px;
-            height: 22px;
+            width: 22px; /* 恢复原始尺寸 */
+            height: 22px; /* 恢复原始尺寸 */
         }
 
         /* 3. 右侧文字内容 */
@@ -1189,9 +1189,15 @@
             line-height: 1.2;
         }
 
-        /* 备注 (remark) 已被移除 */
+        /* 备注 (remark) - ★★★ 修复：重新显示备注 ★★★ */
         .transfer-remark {
-           display: none;
+           display: block; /* 改为 block 以显示备注 */
+           font-size: 13px;
+           margin-top: 4px; /* 增加一点间距 */
+           white-space: nowrap;
+           overflow: hidden;
+           text-overflow: ellipsis;
+           /* 颜色将在下面的规则中定义 */
         }
 
         .transfer-status {
@@ -1203,12 +1209,12 @@
             text-overflow: ellipsis;
         }
 
-        /* 5. 【您发送的】卡片样式 (半透明粉色玻璃) */
+        /* 5. 【您发送的】卡片样式 (AI发送样式，更深的粉色) */
         .transfer-card.sent-transfer {
-            background: rgba(255, 128, 171, 0.85); /* 半透明粉色 */
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-color: rgba(255, 255, 255, 0.2); /* 浅边框 */
+            background: var(--primary-color); /* 使用主色调粉色，类似AI发送消息 */
+            backdrop-filter: none; /* 移除模糊效果，更像AI消息 */
+            -webkit-backdrop-filter: none;
+            border-color: var(--primary-color); /* 边框与背景同色 */
         }
         .transfer-card.sent-transfer .transfer-icon-bg {
             background-color: transparent; /* 图标背景透明 */
@@ -1218,7 +1224,8 @@
             fill: var(--white-color);
         }
         .transfer-card.sent-transfer .transfer-title,
-        .transfer-card.sent-transfer .transfer-status {
+        .transfer-card.sent-transfer .transfer-status,
+        .transfer-card.sent-transfer .transfer-remark { /* ★★★ 修复：备注颜色 ★★★ */
             color: rgba(255, 255, 255, 0.85);
         }
         .transfer-card.sent-transfer .transfer-amount {
@@ -1226,54 +1233,79 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* 6. 【您收到的】卡片样式 (半透明白色玻璃) */
+        /* 6. 【您收到的】卡片样式 (粉色玻璃，与发送统一样式) */
         .transfer-card.received-transfer {
-            background: rgba(255, 255, 255, 0.85); /* 半透明白色 */
+            background: rgba(255, 128, 171, 0.85); /* 半透明粉色，与发送统一 */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.2); /* 浅边框，与发送统一 */
             cursor: pointer;
         }
         .transfer-card.received-transfer .transfer-icon-bg {
-            background-color: var(--primary-color); /* 粉色图标背景 */
+            background-color: transparent; /* 图标背景透明，与发送统一 */
+            box-shadow: none;
         }
         .transfer-card.received-transfer .transfer-icon-bg svg {
             fill: var(--white-color); /* 白色图标 */
         }
         .transfer-card.received-transfer .transfer-title,
-        .transfer-card.received-transfer .transfer-status {
-            color: #555; /* 优化对比度 */
+        .transfer-card.received-transfer .transfer-status,
+        .transfer-card.received-transfer .transfer-remark { /* 与发送统一 */
+            color: rgba(255, 255, 255, 0.85);
         }
         .transfer-card.received-transfer .transfer-amount {
-            color: #333;
+            color: var(--white-color); /* 白色金额，与发送统一 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* 7. 【已完成】状态 (已收款 / 已退回) (!! 不透明浅灰色 !!) */
-        .transfer-card.received,
-        .transfer-card.returned {
-            background: var(--inactive-bg); /* 不透明浅灰 */
-            backdrop-filter: none; /* !! 移除模糊 !! */
+        /* ★★★ 修复：规则 7 拆分为 "已收款" (灰粉) 和 "已退回" (灰) ★★★ */
+
+        /* 7a. 【已收款】状态 (!! 灰粉色 !!) */
+        .transfer-card.received {
+            background: #fff0f5; /* 不透明的浅粉色 (灰粉) */
+            backdrop-filter: none;
             -webkit-backdrop-filter: none;
-            opacity: 0.9;
+            opacity: 1;
             cursor: default;
-            border-color: var(--inactive-border);
+            border-color: #fce4ec; /* 粉色边框 */
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .transfer-card.received .transfer-icon-bg,
-        .transfer-card.returned .transfer-icon-bg {
-            background-color: var(--inactive-text); /* 图标背景变灰 */
+        .transfer-card.received .transfer-icon-bg {
+            background-color: var(--primary-color); /* 粉色图标背景 */
         }
-        .transfer-card.received .transfer-icon-bg svg,
+        .transfer-card.received .transfer-icon-bg svg {
+            fill: var(--white-color); /* 白色图标 */
+        }
+        .transfer-card.received .transfer-title,
+        .transfer-card.received .transfer-status,
+        .transfer-card.received .transfer-remark {
+             color: var(--secondary-color); /* 粉色文字 */
+        }
+        .transfer-card.received .transfer-amount {
+             color: var(--primary-color); /* 深粉色金额 */
+        }
+
+        /* 7b. 【已退回】状态 (!! 不透明浅灰色 !!) */
+        .transfer-card.returned {
+            background: var(--inactive-bg, #f0f0f0); /* 不透明浅灰 */
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            opacity: 1;
+            cursor: default;
+            border-color: var(--inactive-border, #ddd);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .transfer-card.returned .transfer-icon-bg {
+            background-color: var(--inactive-text, #aaa); /* 图标背景变灰 */
+        }
         .transfer-card.returned .transfer-icon-bg svg {
             fill: var(--white-color);
         }
-        .transfer-card.received .transfer-title,
         .transfer-card.returned .transfer-title,
-        .transfer-card.received .transfer-amount,
         .transfer-card.returned .transfer-amount,
-        .transfer-card.received .transfer-status,
+        .transfer-card.returned .transfer-remark,
         .transfer-card.returned .transfer-status {
-             color: var(--inactive-text); /* 所有文字变灰 */
+             color: var(--inactive-text, #aaa); /* 所有文字变灰 */
         }
         /* --- 粘贴结束 --- */
 
@@ -3501,12 +3533,13 @@
 }
 
 .forum-post-card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
+    background-color: #ffffff !important;
+    border-radius: 12px !important;
+    padding: 18px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    cursor: pointer !important;
+    position: relative !important;
 }
 
 .forum-post-card:hover {
@@ -3515,18 +3548,18 @@
 }
 
 .forum-post-card .post-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 8px 0;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    margin: 0 0 8px 0 !important;
 }
 
 .forum-post-card .post-summary {
-    font-size: 14px;
-    color: #888;
-    margin: 0 0 12px 0;
-    border-left: 3px solid var(--primary-color, #ff80ab);
-    padding-left: 10px;
+    font-size: 14px !important;
+    color: #888 !important;
+    margin: 0 0 12px 0 !important;
+    border-left: 3px solid var(--primary-color, #ff80ab) !important;
+    padding-left: 10px !important;
 }
 
 .forum-post-card .post-content {
@@ -3547,61 +3580,77 @@
 
 /* --- Forum Post Detail Screen --- */
 #forum-post-detail-screen {
-    background-color: #f9f9f9;
+    background-color: #f0f2f5; /* 类似贴吧和社交媒体的浅灰色背景 */
 }
 
 #forum-post-detail-screen .content {
-    padding: 0;
+    padding: 10px; /* 页面边距 */
 }
 
-.post-detail-card {
-    background-color: #fff;
-    margin: 15px;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+.post-detail-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.post-detail-main {
+    padding: 15px;
 }
 
 .post-author-info {
     display: flex;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
-.post-author-avatar {
-    width: 44px;
-    height: 44px;
+.author-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    margin-right: 12px;
     background-color: var(--primary-color);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
+    margin-right: 12px;
     flex-shrink: 0;
 }
 
-.post-author-name {
-    font-size: 16px;
+.author-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.author-name {
+    font-size: 15px;
     font-weight: 600;
     color: #333;
 }
 
-.post-detail-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0 0 20px 0;
-    line-height: 1.4;
+.post-meta-data {
+    font-size: 12px;
+    color: #999;
 }
 
-.post-detail-content {
-    font-size: 17px;
-    line-height: 1.8;
-    color: #444;
+.post-detail-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    line-height: 1.4;
+    color: #1a1a1a;
+}
+
+.post-detail-content-body {
+    font-size: 16px;
+    line-height: 1.75;
+    color: #333;
     white-space: pre-wrap;
-    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .post-actions {
@@ -3625,22 +3674,34 @@
     fill: #888;
 }
 
-/* --- 论坛详情页新样式 --- */
-#forum-post-detail-screen {
-    background-color: #f0f2f5; /* 类似贴吧和社交媒体的浅灰色背景 */
+.post-detail-actions {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 10px;
 }
 
-#forum-post-detail-screen .content {
-    padding: 10px; /* 页面边距 */
+.post-detail-actions .action-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
 }
 
-.post-detail-container {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    margin-bottom: 10px;
-    overflow: hidden;
+.post-detail-actions .action-item:hover {
+    background-color: #f5f5f5;
 }
+
+.post-detail-actions .action-item svg {
+    width: 20px;
+    height: 20px;
+    fill: #888;
+}
+
 
 /* --- 评论区样式 --- */
 .comments-section {
