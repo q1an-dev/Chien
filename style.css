@@ -6224,3 +6224,8 @@ border-top: none;
     min-height: 80px;  /* (可选) 给一个合适的最小高度 */
 }
 
+/* (V4 修复) 世界书多选模式下为列表添加底部内边距，防止被操作栏遮挡 */
+#world-book-screen.multi-select-active .content {
+    padding-bottom: 70px; /* (与聊天多选栏高度一致) */
+}
+
