@@ -3771,10 +3771,13 @@
     border: 1px solid rgba(255, 192, 203, 0.3); /* 和输入框一样的淡粉色边框 */
     transition: all 0.2s ease;
     cursor: pointer;
+} /* <--- 修复 2: 括号移到这里，结束 .action-btn 规则 */
 
-/* 图标颜色 */
+/* 图标颜色和大小 */
 .forum-search-bar .action-btn svg {
     fill: var(--primary-color, #ff80ab);
+    width: 22px;  /* <--- 修复 1: 新增，限制图标大小 */
+    height: 22px; /* <--- 修复 1: 新增，限制图标大小 */
 }
 
 /* 鼠标悬停和点击时的效果 */
@@ -3787,9 +3790,6 @@
 .forum-search-bar .action-btn:active {
     transform: translateY(0); /* 点击时按下去 */
     box-shadow: 0 1px 6px rgba(200, 150, 160, 0.12);
-}
-
-
 }
 /* --- 新增：折叠面板样式 --- */
 .collapsible-section {
