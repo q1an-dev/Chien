@@ -6373,3 +6373,40 @@ border-top: none;
 #peek-select-list-container .item-name {
     font-size: 17px; /* 稍大字体 */
 }
+
+/* --- AI空间 钱包App样式 (修正) --- */
+
+/* 1. 为钱包App的内容区域添加浅灰色背景和内边距 */
+#ai-space-wallet-transactions-screen .content {
+    background-color: #f5f5f5; /* 浅灰色背景，修复粉色透明问题 */
+    padding: 10px;
+}
+
+/* 2. 确保列表容器是白色背景，并有圆角 */
+#ai-space-wallet-transactions-screen .list-container {
+    background-color: var(--white-color);
+    border-radius: 10px;
+    overflow: hidden; /* 确保圆角生效 */
+}
+
+/* 3. 占位符在灰色背景下显示时，增加一点外边距 */
+#no-wallet-placeholder {
+    padding-top: 50px;
+}
+
+/* 4. 账单列表项样式 (从 zyj.html 移植) */
+.ai-transaction-item .item-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.ai-transaction-amount {
+    font-weight: bold;
+}
+.ai-transaction-amount.expense {
+    color: #d32f2f; /* 支出 - 红色 */
+}
+.ai-transaction-amount.income {
+    color: #388e3c; /* 收入 - 绿色 */
+}

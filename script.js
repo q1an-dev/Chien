@@ -319,6 +319,7 @@
             'drafts': { name: '草稿箱', url: 'https://i.postimg.cc/ZKqC9D2R/export202509181827225860.png' },
             'album': { name: '相册', url: 'https://i.postimg.cc/qBcdpqNc/export202509221549335970.png' },
             'steps': { name: '步数', url: 'https://i.postimg.cc/5NndFrq6/export202509181824532800.png' },
+            'wallet': { name: '钱包', url: 'https://i.postimg.cc/mkZ1hN3r/wallet.png' },
             'unlock': { name: 'unlock！', url: 'https://i.postimg.cc/28zNyYWs/export202509221542593320.png' }
         };
 
@@ -2049,6 +2050,7 @@
             setupTutorialApp();
             checkForUpdates();
             setupPeekFeature();
+            setupAiWalletApp(); // <-- 添加这一行
             setupChatExpansionPanel();
             setupMemoryJournalScreen(); // 新增：初始化回忆日记功能
             setupDeleteHistoryChunk();
@@ -3429,6 +3431,106 @@
                 generateAndRenderPeekContent('drafts', { forceRefresh: true });
             });
        }
+
+// --- 粘贴开始 ---
+
+/**
+ * (移植自 zyj.html) 渲染AI钱包的交易列表
+  */
+function renderAiWalletTransactions(transactions) {
+const list = document.getElementById('ai-wallet-transactions-list');
+const placeholder = document.getElementById('no-wallet-placeholder');
+if (!list || !placeholder) return;
+
+list.innerHTML = ''; // 始终清空列表
+
+if (!transactions || transactions.length === 0) {
+// 如果没有数据：显示占位符，隐藏列表
+placeholder.innerHTML = '<p class="placeholder-text">暂无账单记录</p>';
+placeholder.style.display = 'block';
+list.style.display = 'none';
+return;
+}
+
+// 如果有数据：隐藏占位符，显示列表
+placeholder.style.display = 'none';
+list.style.display = 'block';
+
+transactions.forEach((tx, index) => {
+const li = document.createElement('li');
+li.className = 'list-item ai-transaction-item';
+li.dataset.index = index;
+const amountSign = tx.type === 'expense' ? '-' : '+';
+li.innerHTML = `
+<div class="item-details">
+<div>
+<div class="item-name">${tx.description}</div>
+<div class="item-preview">${tx.time}</div>
+</div>
+<span class="ai-transaction-amount ${tx.type}">${amountSign}${tx.amount.toFixed(2)}</span>
+</div>
+`;
+list.appendChild(li);
+});
+}
+
+/**
+ * (移植自 zyj.html) 设置AI钱包App的内部交互
+  */
+function setupAiWalletApp() {
+const screen = document.getElementById('ai-space-wallet-transactions-screen');
+const list = document.getElementById('ai-wallet-transactions-list');
+const detailModal = document.getElementById('ai-space-wallet-detail-modal');
+const closeDetailBtn = document.getElementById('close-ai-wallet-detail-btn');
+const refreshBtn = document.getElementById('refresh-wallet-transactions-btn');
+
+// 刷新按钮
+if (refreshBtn) {
+refreshBtn.addEventListener('click', () => {
+// 修复：在强制刷新时，也应该先显示"正在生成"的提示
+const list = document.getElementById('ai-wallet-transactions-list');
+const placeholder = document.getElementById('no-wallet-placeholder');
+if (list) list.style.display = 'none';
+if (placeholder) {
+placeholder.innerHTML = '<p class="placeholder-text">正在生成账单...</p>';
+placeholder.style.display = 'block';
+}
+// 启动生成
+generateAndRenderPeekContent('wallet', { forceRefresh: true });
+});
+}
+
+// 点击列表项
+if (list) {
+list.addEventListener('click', (e) => {
+const item = e.target.closest('.list-item');
+if (item && item.dataset.index) {
+const index = parseInt(item.dataset.index, 10);
+const tx = peekContentCache['wallet']?.transactions?.[index];
+
+            if (tx) {
+                document.getElementById('ai-wallet-detail-description').textContent = tx.description;
+                const amountEl = document.getElementById('ai-wallet-detail-amount');
+                amountEl.textContent = `${tx.type === 'expense' ? '-' : '+'}${tx.amount.toFixed(2)}`;
+                amountEl.className = `ai-transaction-amount ${tx.type}`;
+                document.getElementById('ai-wallet-detail-status').textContent = tx.status;
+                document.getElementById('ai-wallet-detail-time').textContent = tx.time;
+                document.getElementById('ai-wallet-detail-peer').textContent = tx.peer;
+                detailModal.classList.add('visible');
+            }
+        }
+    });
+
+}
+
+// 关闭详情弹窗
+if (closeDetailBtn) {
+closeDetailBtn.addEventListener('click', () => {
+detailModal.classList.remove('visible');
+});
+}
+}
+// --- 粘贴结束 ---
 
       // ==================================================================================================================
       // ========================================== 1. API 预设管理 (API PRESET MANAGEMENT) ==========================================
@@ -12070,6 +12172,9 @@ function renderForumPosts(posts) {
                     }
                     请为 ${char.realName} 生成今天的步数信息。你只需要生成Ta的当前步数(currentSteps)，Ta的6条运动轨迹(trajectory)（禁止照搬示例）以及批注(annotation)。内容需要与Ta的人设和我们的聊天上下文高度相关。`;
                     break;
+                case 'wallet':
+prompt += `  { "transactions": [ {"type": "expense", "amount": 89.00, "description": "购买书籍", "peer": "线上书店", "status": "交易成功", "time": "今天 10:05"}, {"type": "income", "amount": 500.00, "description": "稿费收入", "peer": "XX出版社", "status": "已到账", "time": "昨天 15:20"}, {"type": "expense", "amount": 128.00, "description": "给${char.myName}挑选的生日礼物", "peer": "精品店", "status": "交易成功", "time": "三天前"} ] } 请为 ${char.realName} 生成一个包含5-8条的钱包账单列表 (transactions)。记录要符合Ta的人设和我们的聊天上下文。至少有一笔支出是关于我（${char.myName}）的。 `;
+break;
                 case 'album':
                     prompt += `
                     {
@@ -12194,6 +12299,14 @@ function renderForumPosts(posts) {
                       renderPeekSteps(cachedData);
                       switchScreen('peek-steps-screen');
                       break;
+                case 'wallet':
+// 缓存逻辑：隐藏占位符，显示列表
+document.getElementById('ai-wallet-transactions-title').textContent = `${peekContentCache[appType].charName || 'Ta'}的钱包`; // <-- 复制这一行
+document.getElementById('no-wallet-placeholder').style.display = 'none';
+document.getElementById('ai-wallet-transactions-list').style.display = 'block';
+renderAiWalletTransactions(cachedData.transactions);
+switchScreen('ai-space-wallet-transactions-screen');
+break;
                    case 'unlock':
                        renderPeekUnlock(cachedData);
                        switchScreen('peek-unlock-screen');
@@ -12249,6 +12362,15 @@ function renderForumPosts(posts) {
                     switchScreen('peek-steps-screen');
                     renderPeekSteps(null); // Render empty state
                     break;
+                case 'wallet':
+document.getElementById('ai-wallet-transactions-title').textContent = `${char.remarkName}的钱包`; // <-- 复制这一行
+switchScreen('ai-space-wallet-transactions-screen');
+// 加载状态：隐藏列表，显示占位符
+document.getElementById('ai-wallet-transactions-list').style.display = 'none';
+const walletPlaceholder = document.getElementById('no-wallet-placeholder');
+walletPlaceholder.innerHTML = '<p class="placeholder-text">正在生成账单...</p>';
+walletPlaceholder.style.display = 'block';
+break;
                case 'unlock':
                    switchScreen('peek-unlock-screen');
                    renderPeekUnlock(null); // Render empty/loading state
@@ -12299,6 +12421,7 @@ function renderForumPosts(posts) {
                     case 'browser': isValid = generatedData && Array.isArray(generatedData.history); break;
                     case 'drafts': isValid = generatedData && generatedData.draft; break;
                     case 'steps': isValid = generatedData && generatedData.currentSteps !== undefined; break;
+                case 'wallet': isValid = generatedData && Array.isArray(generatedData.transactions); break;
                     case 'unlock': isValid = generatedData && generatedData.nickname && Array.isArray(generatedData.posts); break;
                     default: isValid = false;
                 }
@@ -12310,6 +12433,7 @@ function renderForumPosts(posts) {
 
                 // Store in cache
                 peekContentCache[appType] = generatedData;
+                peekContentCache[appType].charName = char.remarkName; // <-- 复制这一行
 
                 // Render content based on app type
                 if (appType === 'messages') {
@@ -12328,6 +12452,8 @@ function renderForumPosts(posts) {
                     renderPeekDrafts(generatedData.draft);
                 } else if (appType === 'steps') {
                     renderPeekSteps(generatedData);
+} else if (appType === 'wallet') {
+renderAiWalletTransactions(generatedData.transactions);
                 } else if (appType === 'unlock') {
                     renderPeekUnlock(generatedData);
                 }
