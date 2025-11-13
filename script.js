@@ -741,6 +741,74 @@
         processToastQueue(); // 尝试处理队列
     };
 
+    // ==================================================================================================================
+    // ========================================== 错误处理翻译官 (Error Translator) ==========================================
+    // ==================================================================================================================
+
+    /**
+     * 我们的"错误词典"，负责将技术性错误翻译成用户友好的提示。
+     * @param {Error} error - 捕获到的错误对象。
+     * @returns {string} - 返回一句通俗易懂的错误提示。
+     */
+    function getFriendlyErrorMessage(error) {
+        // 检查 fetch 的 AbortError，这通常用于实现请求超时
+        if (error.name === 'AbortError') {
+            return '请求超时了，请检查您的网络或稍后再试。';
+        }
+
+        // 检查 JSON 解析错误，这对应您说的"返回格式错误"
+        if (error instanceof SyntaxError) {
+            return '服务器返回的数据格式不对，建议您点击"重回"按钮再试一次。';
+        }
+
+        // 检查服务器有响应、但HTTP状态码是失败的情况 (如 429, 504)
+        if (error.response) {
+            const status = error.response.status;
+            switch (status) {
+                case 429:
+                    return '您点的太快啦，请稍等一下再试。';
+                case 504:
+                    return '服务器有点忙，响应不过来了，请稍后再试。';
+                case 500:
+                    return '服务器内部出错了，他们应该正在修复。';
+                case 401:
+                    return 'API密钥好像不对或者过期了，请检查一下设置。';
+                case 404:
+                    return '请求的API地址找不到了，请检查一下设置。';
+                default:
+                    // 对于其他未预设的HTTP错误，给一个通用提示
+                    return `服务器返回了一个错误 (代码: ${status})，请稍后再试。`;
+            }
+        }
+
+        // 检查通用的网络错误 (例如，断网了，fetch自己就会报TypeError)
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+            return '网络连接好像出问题了，请检查一下网络。';
+        }
+
+        // 对于所有其他未知错误，显示原始信息，方便排查
+        return `发生了一个未知错误：${error.message}`;
+    }
+
+    /**
+     * 统一的API错误显示函数。
+     * @param {Error} error - 捕获到的错误对象。
+     */
+    function showApiError(error) {
+        // 在控制台打印详细错误，方便您自己调试
+        console.error("API Error Detected:", error);
+
+        // 获取翻译后的友好提示
+        const friendlyMessage = getFriendlyErrorMessage(error);
+
+        // 使用您项目中已有的 showToast 函数来显示提示
+        showToast(friendlyMessage);
+    }
+
+    // ==================================================================================================================
+    // ========================================== END Error Translator ==================================================
+    // ==================================================================================================================
+
 
 
         const switchScreen = (targetId) => {
@@ -2679,7 +2747,14 @@
                 
                 // 使用为日记绑定的世界书
                 const journalWorldBooks = (chat.journalWorldBookIds || []).map(id => db.worldBooks.find(wb => wb.id === id)).filter(Boolean);
-                const worldBooksContent = journalWorldBooks.map(wb => wb.content).join('\n\n');
+                const worldBooksContent = journalWorldBooks.map(book => {
+                    if (Array.isArray(book.content)) {
+                        // (This handles the new format)
+                        return book.content.map(entry => entry.content || '').join('\n');
+                    }
+                    // (This handles old string-based content for compatibility)
+                    return book.content || '';
+                }).join('\n\n');
 
                 let summaryPrompt = `你是一个日记整理助手。请以角色 "${chat.remarkName || chat.name}" 的第一人称视角，总结以下聊天记录。请专注于重要的情绪、事件和细节。\n\n`;
                 summaryPrompt += "为了更好地理解角色和背景，请参考以下信息：\n";
@@ -2694,7 +2769,7 @@
                 summaryPrompt += "=====\n";
                 summaryPrompt += `请基于以上所有背景信息，总结以下聊天记录。你的输出必须是一个JSON对象，包含 'title' (一个简洁的标题) 和 'content' (完整的日记正文) 两个字段。聊天记录如下：\n\n---\n${messagesToSummarize.map(m => m.content).join('\n')}\n---`;
 
-                const { url, key, model, provider } = db.apiSettings;
+                const { url, key, model } = db.apiSettings;
                 if (!url || !key || !model) {
                     throw new Error("API设置不完整。");
                 }
@@ -4828,11 +4903,7 @@ detailModal.classList.remove('visible');
                     }
                 }
 
-                // --- 新增：处理壁纸上传 ---
-                if (e.target.matches('label[for="wallpaper-upload-customize"]')) {
-                    document.getElementById('wallpaper-upload-customize').click();
-                }
-            });
+              });
 
          customizeForm.addEventListener('change', async (e) => {
              // --- 处理壁纸上传 ---
@@ -11832,7 +11903,7 @@ function getForumGenerationContext() {
 }
 
 async function handleForumRefresh() {
-    const { url, key, model } = db.apiSettings;
+    const { url, key, model, provider } = db.apiSettings;
     if (!url || !key || !model) {
         showToast('请先在API设置中配置好接口信息');
         switchScreen('api-settings-screen');
@@ -11895,8 +11966,12 @@ ${context}
             model: model,
             messages: [{ role: "user", content: systemPrompt }],
             temperature: 0.8,
-            response_format: { type: "json_object" },
         };
+
+        // (!!!) Only add response_format if NOT Gemini
+        if (provider !== 'gemini') {
+            requestBody.response_format = { type: "json_object" };
+        }
 
         const endpoint = `${url}/v1/chat/completions`;
         const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` };
