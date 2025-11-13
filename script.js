@@ -11966,12 +11966,10 @@ ${context}
             model: model,
             messages: [{ role: "user", content: systemPrompt }],
             temperature: 0.8,
+            response_format: { type: "json_object" }, // 修复：无条件发送，确保API返回JSON
         };
 
-        // (!!!) Only add response_format if NOT Gemini
-        if (provider !== 'gemini') {
-            requestBody.response_format = { type: "json_object" };
-        }
+        // (!!!) 移除了 (provider !== 'gemini') 的条件判断
 
         const endpoint = `${url}/v1/chat/completions`;
         const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` };
