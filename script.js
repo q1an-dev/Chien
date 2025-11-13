@@ -11987,9 +11987,38 @@ ${context}
         }
 
         const result = await response.json();
-        const contentStr = result.choices[0].message.content;
 
-        const jsonData = JSON.parse(contentStr);
+        // --- 修复：同时处理 "TypeError" 和 "SyntaxError" ---
+
+        // 1. [修复TypeError] 检查 AI 是否返回了有效的内容
+        if (!result.choices || result.choices.length === 0 || !result.choices[0].message || !result.choices[0].message.content) {
+            console.error("API Error: AI返回了空内容或错误结构", result);
+            // 尝试从 result.error 中提取更详细的API错误信息
+            const apiErrorMsg = result.error ? result.error.message : 'AI未返回有效内容';
+            throw new Error(`API 返回无效: ${apiErrorMsg}`);
+        }
+
+        // 2. [修复SyntaxError] 提取并清理AI返回的原始文本
+        let contentStr = result.choices[0].message.content;
+
+        // 2a. 尝试查找 ```json ... ``` 标记
+        const jsonMatch = contentStr.match(/```json([\s\S]*?)```/);
+
+        if (jsonMatch && jsonMatch[1]) {
+            // 2b. 如果找到了，就只用标记里的内容
+            contentStr = jsonMatch[1].trim();
+        } else {
+            // 2c. 如果没找到(备用方案)，尝试粗暴地查找第一个 { 和最后一个 }
+            //    这可以处理AI在JSON前后添加了 "好的：" 或 "当然：" 之类的污染词
+            const firstBrace = contentStr.indexOf('{');
+            const lastBrace = contentStr.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace > firstBrace) {
+                contentStr = contentStr.substring(firstBrace, lastBrace + 1).trim();
+            }
+        }
+        // --- 修复结束 ---
+
+        const jsonData = JSON.parse(contentStr); // 3. 现在，我们解析的是被检查和清理过的 contentStr
         if (jsonData && Array.isArray(jsonData.posts)) {
             const enhancedPosts = jsonData.posts.map(post => ({
               ...post,
