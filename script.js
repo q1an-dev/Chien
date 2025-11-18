@@ -331,8 +331,15 @@
             'globalCssPresets', 'homeSignature', 'forumPosts', 'forumBindings', 'pomodoroTasks', 'pomodoroSettings', 'insWidgetSettings', 'homeWidgetSettings',
             'naiGlobalPromptPresets', 'fontPresets' // ▼▼▼ 新增 ▼▼▼
         ];
-        const appVersion = "1.2.0"; // Current app version
+        const appVersion = "1.2.1"; // Current app version
         const updateLog = [
+            {
+                version: "1.2.1",
+                date: "2025-11-18",
+                notes: [
+                    "修复：NAI测试窗口图片三击下载功能，解决了图片生成后立即销毁Blob URL导致无法下载的问题",
+                ]
+            },
             {
                 version: "1.2.0",
                 date: "2025-10-15",
@@ -12982,6 +12989,13 @@ renderAiWalletTransactions(generatedData.transactions);
          * 调用 NovelAI API 生成图像 (用于测试弹窗)
          */
         async function generateNovelAIImage() {
+            // --- 新增：清理上一张图片的内存 ---
+            const resultImage = document.getElementById('nai-result-image');
+            if (resultImage.src && resultImage.src.startsWith('blob:')) {
+                URL.revokeObjectURL(resultImage.src);
+            }
+            // --- 新增结束 ---
+
             // 从 localStorage 或 DOM 获取基础设置
             const apiKey = localStorage.getItem('novelai-api-key') || '';
             const model = localStorage.getItem('novelai-model') || 'nai-diffusion-4-5-full';
@@ -13008,7 +13022,7 @@ renderAiWalletTransactions(generatedData.transactions);
             const resultDiv = document.getElementById('nai-test-result');
             const errorDiv = document.getElementById('nai-test-error');
             const generateBtn = document.getElementById('nai-generate-btn');
-            const resultImage = document.getElementById('nai-result-image');
+            // const resultImage = document.getElementById('nai-result-image'); // <--- 这一行已被注释掉，避免重复声明
 
             // 更新 UI 状态：显示加载中
             statusDiv.textContent = '正在请求 NovelAI API...';
@@ -13257,7 +13271,7 @@ renderAiWalletTransactions(generatedData.transactions);
                 // --- 显示图片 ---
                 if (imageBlob) {
                     const imageUrl = URL.createObjectURL(imageBlob);
-                    resultImage.onload = () => URL.revokeObjectURL(imageUrl); // 释放内存
+                    // resultImage.onload = () => URL.revokeObjectURL(imageUrl); // <--- 这一行必须删除或注释掉！
                     // 确保图片有 naiimag-image 类，以便三击下载功能识别
                     resultImage.classList.add('naiimag-image');
                     resultImage.src = imageUrl;
